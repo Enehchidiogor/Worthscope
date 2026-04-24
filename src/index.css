@@ -2,104 +2,117 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
-*/
+/* WorthScope Koko Dashboard — Light Mode Design System
+   Single accent: #3498DB. Streak: #FB923C. Success: #22C55E.
+   All colors HSL. */
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    /* Surfaces */
+    --background: 220 25% 98%;          /* page bg, near-white with cool tint */
+    --bg-card: 0 0% 100%;                /* card bg */
+    --bg-elevated: 220 30% 96%;          /* elevated/hover surface */
 
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    /* Text */
+    --foreground: 222 30% 14%;           /* primary text */
+    --text2: 220 12% 42%;                /* secondary text */
+    --text3: 220 12% 65%;                /* muted/placeholder */
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    /* Borders (blue-tinted) */
+    --border: 204 70% 53% / 0.14;        /* subtle */
+    --border-bright: 204 70% 53% / 0.32; /* active/hover */
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    /* Accent — #3498DB */
+    --accent: 204 70% 53%;
+    --accent-foreground: 0 0% 100%;
+    --accent-dark: 204 65% 44%;          /* #2980B9 */
+    --accent-light: 204 70% 53% / 0.10;
+    --accent-glow: 204 70% 53% / 0.25;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    /* Status */
+    --success: 142 71% 45%;
+    --streak: 24 95% 58%;                /* #FB923C */
+    --locked: 220 18% 88%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    /* shadcn aliases (kept so UI primitives still work) */
+    --card: var(--bg-card);
+    --card-foreground: var(--foreground);
+    --popover: var(--bg-card);
+    --popover-foreground: var(--foreground);
+    --primary: var(--accent);
+    --primary-foreground: var(--accent-foreground);
+    --secondary: var(--bg-elevated);
+    --secondary-foreground: var(--foreground);
+    --muted: var(--bg-elevated);
+    --muted-foreground: var(--text2);
+    --input: 220 16% 90%;
+    --ring: var(--accent);
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --radius: 0.875rem;     /* 14px */
+    --radius-lg: 1.25rem;   /* 20px */
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    /* Gradients & shadows */
+    --gradient-accent: linear-gradient(135deg, hsl(var(--accent)), hsl(var(--accent-dark)));
+    --gradient-progress: linear-gradient(90deg, hsl(var(--accent)), hsl(204 90% 70%));
+    --gradient-journey: linear-gradient(90deg, hsl(var(--accent)), hsl(var(--accent) / 0.2), hsl(var(--accent) / 0.05));
+    --gradient-current-phase: linear-gradient(135deg, hsl(var(--accent) / 0.10), hsl(var(--accent-dark) / 0.05));
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
-
-    --radius: 0.5rem;
-
-    --sidebar-background: 0 0% 98%;
-
-    --sidebar-foreground: 240 5.3% 26.1%;
-
-    --sidebar-primary: 240 5.9% 10%;
-
-    --sidebar-primary-foreground: 0 0% 98%;
-
-    --sidebar-accent: 240 4.8% 95.9%;
-
-    --sidebar-accent-foreground: 240 5.9% 10%;
-
-    --sidebar-border: 220 13% 91%;
-
-    --sidebar-ring: 217.2 91.2% 59.8%;
-  }
-
-  .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
-
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
-
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
-
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --shadow-card: 0 1px 2px hsl(220 30% 20% / 0.04), 0 8px 24px hsl(204 70% 53% / 0.06);
+    --shadow-glow: 0 0 40px hsl(var(--accent) / 0.12);
+    --shadow-accent: 0 0 16px hsl(var(--accent) / 0.35);
   }
 }
 
 @layer base {
   * {
-    @apply border-border;
+    border-color: hsl(var(--border));
+  }
+
+  html, body, #root {
+    height: 100%;
   }
 
   body {
-    @apply bg-background text-foreground;
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
+    font-family: 'Poppins', system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
+}
+
+/* ---------- Animations ---------- */
+@layer utilities {
+  @keyframes ws-fade-up {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes ws-bar-fill {
+    from { width: 0%; }
+  }
+  @keyframes ws-pulse-glow {
+    0%, 100% { box-shadow: 0 0 16px hsl(var(--accent) / 0.4); }
+    50%      { box-shadow: 0 0 28px hsl(var(--accent) / 0.6); }
+  }
+  @keyframes ws-pulse-ring {
+    0%   { opacity: 0.55; transform: scale(1); }
+    100% { opacity: 0; transform: scale(1.6); }
+  }
+  @keyframes ws-flame {
+    0%, 100% { transform: scale(1); }
+    50%      { transform: scale(1.18); }
+  }
+  @keyframes ws-pulse-orange {
+    0%   { opacity: 0.55; transform: scale(1); }
+    100% { opacity: 0; transform: scale(1.7); }
+  }
+  @keyframes ws-check-pop {
+    0%   { transform: scale(0.8); }
+    50%  { transform: scale(1.2); }
+    100% { transform: scale(1); }
+  }
+
+  .ws-fade-up { animation: ws-fade-up 0.5s ease-out both; }
 }
