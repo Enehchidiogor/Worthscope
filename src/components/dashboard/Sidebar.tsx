@@ -1,5 +1,6 @@
 import { IconHome, IconMap, IconTarget, IconChart, IconSpark, IconSettings } from "./icons";
 import type { ComponentType } from "react";
+import logo from "@/assets/worthscope-logo.png";
 
 type Item = { label: string; Icon: ComponentType<{ className?: string }>; active?: boolean };
 
