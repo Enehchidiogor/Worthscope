@@ -1,5 +1,6 @@
 import { IconHome, IconMap, IconTarget, IconChart, IconSpark, IconSettings } from "./icons";
 import type { ComponentType } from "react";
+import logo from "@/assets/worthscope-logo.png";
 
 type Item = { label: string; Icon: ComponentType<{ className?: string }>; active?: boolean };
 
@@ -15,7 +16,9 @@ const items: Item[] = [
 export const Sidebar = () => {
   return (
     <aside className="hidden md:flex fixed left-0 top-0 z-40 h-screen w-[220px] flex-col border-r border-border bg-card px-4 py-6">
-      <div className="mb-9 px-2 text-[18px] font-bold tracking-tight text-accent">WorthScope</div>
+      <div className="mb-9 px-1">
+        <img src={logo} alt="WorthScope — See Your Worth. Build Your Future." className="h-10 w-auto object-contain" />
+      </div>
 
       <nav className="flex flex-col gap-1">
         {items.map(({ label, Icon, active }) => (
