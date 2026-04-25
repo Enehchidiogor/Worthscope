@@ -3,40 +3,42 @@ import type { RoadmapNode } from "./nodesData";
 
 type Props = {
   node: RoadmapNode;
-  /** index within the visible list; controls left/right zigzag */
+  /** index within full list; controls left/right zigzag (desktop only) */
   zigIndex: number;
   onClick: (node: RoadmapNode) => void;
   delay?: string;
 };
 
 /**
- * One row of the roadmap path. The center column (column 2) holds the node
- * circle so it lines up perfectly with the vertical path line. The card lives
- * on column 1 (left) or column 3 (right) depending on `zigIndex`.
- *
- * On mobile (< md) the layout collapses: line on the far left, node next to
- * it, card stretches to fill the rest.
+ * Renders both a mobile (left-aligned) and a desktop (zigzag) version of the
+ * node row. We use Tailwind's responsive classes to swap which one is visible.
  */
 export const RoadmapNodeRow = ({ node, zigIndex, onClick, delay }: Props) => {
   const onLeft = zigIndex % 2 === 0;
-  const { status } = node;
 
   return (
-    <div
-      className="ws-fade-up relative grid grid-cols-[1fr_auto_1fr] items-center gap-4 md:gap-6"
-      style={{ animationDelay: delay }}
-    >
-      {/* LEFT card slot (desktop) */}
-      <div className={["hidden md:flex justify-end", onLeft ? "" : "invisible"].join(" ")}>
-        {onLeft && <NodeCard node={node} side="left" onClick={onClick} />}
+    <div className="ws-fade-up" style={{ animationDelay: delay }}>
+      {/* MOBILE: node sits on the left line, card to the right */}
+      <div className="md:hidden flex items-center gap-5 pl-0">
+        <div className="relative shrink-0 w-12 grid place-items-center">
+          <NodeCircle node={node} onClick={onClick} />
+        </div>
+        <div className="flex-1 min-w-0">
+          <NodeCard node={node} side="right" onClick={onClick} />
+        </div>
       </div>
 
-      {/* CENTER node circle */}
-      <NodeCircle node={node} onClick={onClick} />
-
-      {/* RIGHT card slot — this is also where the mobile card lives */}
-      <div className={["flex justify-start", onLeft ? "md:invisible" : ""].join(" ")}>
-        <NodeCard node={node} side="right" onClick={onClick} mobile={onLeft} />
+      {/* DESKTOP: zigzag with center node */}
+      <div className="hidden md:grid grid-cols-[1fr_auto_1fr] items-center gap-6">
+        <div className={["flex justify-end", onLeft ? "" : "invisible"].join(" ")}>
+          {onLeft && <NodeCard node={node} side="left" onClick={onClick} />}
+        </div>
+        <div className="grid place-items-center">
+          <NodeCircle node={node} onClick={onClick} />
+        </div>
+        <div className={["flex justify-start", onLeft ? "invisible" : ""].join(" ")}>
+          {!onLeft && <NodeCard node={node} side="right" onClick={onClick} />}
+        </div>
       </div>
     </div>
   );
@@ -51,7 +53,7 @@ const NodeCircle = ({ node, onClick }: { node: RoadmapNode; onClick: (n: Roadmap
     return (
       <div className="relative flex flex-col items-center">
         <div
-          className="absolute -top-7 animate-[ws-float_2s_ease-in-out_infinite] whitespace-nowrap rounded-full bg-accent/12 px-2.5 py-[3px] text-[10px] font-semibold uppercase tracking-[1px] text-accent"
+          className="absolute -top-7 animate-[ws-float_2s_ease-in-out_infinite] whitespace-nowrap rounded-full px-2.5 py-[3px] text-[10px] font-semibold uppercase tracking-[1px] text-accent"
           style={{ background: "hsl(var(--accent) / 0.12)" }}
         >
           You are here
@@ -102,12 +104,10 @@ const NodeCard = ({
   node,
   side,
   onClick,
-  mobile,
 }: {
   node: RoadmapNode;
   side: "left" | "right";
   onClick: (n: RoadmapNode) => void;
-  mobile?: boolean;
 }) => {
   const { status, num, title, sub } = node;
   const isLocked = status === "locked";
@@ -115,8 +115,8 @@ const NodeCard = ({
   const isCompleted = status === "completed";
 
   return (
-    <div className="relative">
-      {/* connector line from card to node (desktop only) */}
+    <div className="relative w-full md:w-[240px]">
+      {/* horizontal connector — desktop only */}
       <span
         aria-hidden
         className={[
@@ -129,14 +129,13 @@ const NodeCard = ({
       <button
         onClick={() => onClick(node)}
         className={[
-          "block w-full text-left rounded-2xl border p-[18px] transition-all duration-200 md:w-[240px]",
+          "block w-full text-left rounded-2xl border p-[18px] transition-all duration-200",
           "hover:-translate-y-0.5",
           isCurrent
             ? "border-accent/35 shadow-[0_8px_32px_hsl(var(--accent)/0.12)]"
             : "border-border bg-card hover:border-accent/25 hover:shadow-[0_8px_28px_hsl(var(--accent)/0.12)]",
-          isCompleted ? "opacity-75" : "",
+          isCompleted ? "opacity-80" : "",
           isLocked ? "opacity-60 cursor-not-allowed hover:translate-y-0 hover:shadow-none" : "",
-          mobile ? "" : "",
         ].join(" ")}
         style={
           isCurrent
@@ -179,9 +178,7 @@ const NodeCard = ({
         )}
 
         {isCurrent && (
-          <div
-            className="mt-3 grid w-full place-items-center rounded-[10px] bg-accent px-4 py-2.5 text-[13px] font-semibold text-accent-foreground transition-all hover:bg-accent-dark hover:shadow-[0_4px_16px_hsl(var(--accent)/0.4)]"
-          >
+          <div className="mt-3 grid w-full place-items-center rounded-[10px] bg-accent px-4 py-2.5 text-[13px] font-semibold text-accent-foreground transition-all hover:bg-accent-dark hover:shadow-[0_4px_16px_hsl(var(--accent)/0.4)]">
             Start Mission →
           </div>
         )}
