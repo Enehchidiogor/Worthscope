@@ -92,6 +92,82 @@ export const IconBulb = ({ className }: IconProps) => (
   </svg>
 );
 
+export const IconBook = ({ className }: IconProps) => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+    <path d="M4 4.5A2.5 2.5 0 0 1 6.5 2H20v18H6.5A2.5 2.5 0 0 0 4 22.5V4.5z" />
+    <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
+  </svg>
+);
+
+export const IconLayers = ({ className }: IconProps) => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+    <path d="m12 2 10 6-10 6L2 8z" />
+    <path d="m2 14 10 6 10-6" />
+    <path d="m2 11 10 6 10-6" />
+  </svg>
+);
+
+export const IconBranch = ({ className }: IconProps) => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+    <circle cx="6" cy="4" r="2" />
+    <circle cx="6" cy="20" r="2" />
+    <circle cx="18" cy="8" r="2" />
+    <path d="M6 6v12M18 10c0 6-8 4-12 8" />
+  </svg>
+);
+
+export const IconEye = ({ className }: IconProps) => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+    <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z" />
+    <circle cx="12" cy="12" r="3" />
+  </svg>
+);
+
+export const IconPencil = ({ className }: IconProps) => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+    <path d="M3 21h4l11-11-4-4L3 17z" />
+    <path d="m14 6 4 4" />
+  </svg>
+);
+
+export const IconBriefcase = ({ className }: IconProps) => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+    <rect x="3" y="7" width="18" height="13" rx="2" />
+    <path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2" />
+  </svg>
+);
+
+export const IconChat = ({ className }: IconProps) => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+    <path d="M21 11.5a8.38 8.38 0 0 1-8.5 8.5 8.5 8.5 0 0 1-3.8-.9L3 21l1.9-5.7a8.5 8.5 0 0 1 16.1-3.8z" />
+  </svg>
+);
+
+export const IconStar = ({ className }: IconProps) => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+    <path d="m12 2 2.9 6.1 6.6.9-4.8 4.7 1.2 6.6L12 17l-5.9 3.3 1.2-6.6L2.5 9l6.6-.9z" />
+  </svg>
+);
+
+export const IconClose = ({ className }: IconProps) => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+    <path d="M6 6l12 12M18 6 6 18" />
+  </svg>
+);
+
+export const IconUpload = ({ className }: IconProps) => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+    <path d="m17 8-5-5-5 5M12 3v12" />
+  </svg>
+);
+
+export const IconPlay = ({ className }: IconProps) => (
+  <svg viewBox="0 0 24 24" fill="currentColor" className={className}>
+    <path d="M8 5v14l11-7z" />
+  </svg>
+);
+
 export const Wrap = ({ children, className }: { children: ReactNode; className?: string }) => (
   <span className={className}>{children}</span>
 );
