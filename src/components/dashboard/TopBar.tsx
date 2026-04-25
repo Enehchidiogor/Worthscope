@@ -1,15 +1,26 @@
 import { IconBell } from "./icons";
 
-export const TopBar = () => (
+type Props = {
+  title?: string;
+  /** When provided, shows a "% Complete" pill instead of the streak badge. */
+  progress?: number;
+};
+
+export const TopBar = ({ title = "Dashboard", progress }: Props) => (
   <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-border bg-background/85 px-4 backdrop-blur-xl md:px-8">
-    <h1 className="text-[18px] font-semibold text-foreground">Dashboard</h1>
+    <h1 className="text-[18px] font-semibold text-foreground">{title}</h1>
 
     <div className="flex items-center gap-4">
-      {/* Streak badge */}
-      <div className="flex items-center gap-1.5 rounded-full border border-streak/25 bg-streak/10 px-3 py-[5px]">
-        <span className="inline-block animate-ws-flame text-[14px] leading-none">🔥</span>
-        <span className="text-[12px] font-semibold text-streak">5 Day Streak</span>
-      </div>
+      {typeof progress === "number" ? (
+        <div className="flex items-center gap-2 rounded-full border border-accent/20 bg-accent/10 px-3.5 py-1.5">
+          <span className="text-[13px] font-semibold text-accent">{progress}% Complete</span>
+        </div>
+      ) : (
+        <div className="flex items-center gap-1.5 rounded-full border border-streak/25 bg-streak/10 px-3 py-[5px]">
+          <span className="inline-block animate-ws-flame text-[14px] leading-none">🔥</span>
+          <span className="text-[12px] font-semibold text-streak">5 Day Streak</span>
+        </div>
+      )}
 
       {/* Notification */}
       <button className="relative text-text2 transition-colors hover:text-foreground" aria-label="Notifications">
