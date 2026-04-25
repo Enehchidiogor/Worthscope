@@ -81,12 +81,12 @@ const Roadmap = () => {
                     desktop, on the left edge on mobile. */}
                 <div
                   aria-hidden
-                  className="absolute top-0 h-full w-[3px] -translate-x-1/2 rounded-full bg-locked left-[24px] md:left-1/2"
+                  className="absolute top-0 h-full w-[3px] -translate-x-1/2 rounded-full bg-locked left-[32px] md:left-1/2"
                 />
                 {/* Completed (accent) line, animates height on load */}
                 <div
                   aria-hidden
-                  className="absolute top-0 w-[3px] origin-top -translate-x-1/2 rounded-full bg-accent left-[24px] md:left-1/2"
+                  className="absolute top-0 w-[3px] origin-top -translate-x-1/2 rounded-full bg-accent left-[32px] md:left-1/2"
                   style={{
                     height: `${visitedFraction * 100}%`,
                     transition: "height 0.8s ease-out",
