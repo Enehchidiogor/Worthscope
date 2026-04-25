@@ -19,8 +19,8 @@ export const RoadmapNodeRow = ({ node, zigIndex, onClick, delay }: Props) => {
   return (
     <div className="ws-fade-up" style={{ animationDelay: delay }}>
       {/* MOBILE: node sits on the left line, card to the right */}
-      <div className="md:hidden flex items-center gap-5 pl-0">
-        <div className="relative shrink-0 w-12 grid place-items-center">
+      <div className="md:hidden flex items-center gap-4 pl-0">
+        <div className="relative shrink-0 w-16 grid place-items-center">
           <NodeCircle node={node} onClick={onClick} />
         </div>
         <div className="flex-1 min-w-0">
