@@ -1,19 +1,20 @@
 import { IconHome, IconMap, IconTarget, IconChart, IconSpark, IconSettings } from "./icons";
 import type { ComponentType } from "react";
+import { Link } from "react-router-dom";
 import logo from "@/assets/worthscope-logo.png";
 
-type Item = { label: string; Icon: ComponentType<{ className?: string }>; active?: boolean };
+type Item = { label: string; Icon: ComponentType<{ className?: string }>; to: string };
 
 const items: Item[] = [
-  { label: "Dashboard", Icon: IconHome, active: true },
-  { label: "My Roadmap", Icon: IconMap },
-  { label: "Missions", Icon: IconTarget },
-  { label: "Skill Progress", Icon: IconChart },
-  { label: "Koko AI", Icon: IconSpark },
-  { label: "Settings", Icon: IconSettings },
+  { label: "Dashboard", Icon: IconHome, to: "/" },
+  { label: "My Roadmap", Icon: IconMap, to: "/roadmap" },
+  { label: "Missions", Icon: IconTarget, to: "/missions" },
+  { label: "Skill Progress", Icon: IconChart, to: "/skills" },
+  { label: "Koko AI", Icon: IconSpark, to: "/koko" },
+  { label: "Settings", Icon: IconSettings, to: "/settings" },
 ];
 
-export const Sidebar = () => {
+export const Sidebar = ({ activePath = "/" }: { activePath?: string }) => {
   return (
     <aside className="hidden md:flex fixed left-0 top-0 z-40 h-screen w-[220px] flex-col border-r border-border bg-card px-4 py-6">
       <div className="mb-9 px-1">
