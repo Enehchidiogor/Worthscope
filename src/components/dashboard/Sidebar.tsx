@@ -22,21 +22,24 @@ export const Sidebar = ({ activePath = "/" }: { activePath?: string }) => {
       </div>
 
       <nav className="flex flex-col gap-1">
-        {items.map(({ label, Icon, active }) => (
-          <a
-            key={label}
-            href="#"
-            className={[
-              "group relative flex items-center gap-3 rounded-[10px] px-4 py-[11px] text-[14px] font-medium transition-colors",
-              active
-                ? "bg-accent/10 text-accent before:absolute before:left-0 before:top-1/2 before:h-5 before:w-[3px] before:-translate-y-1/2 before:rounded-r-full before:bg-accent"
-                : "text-text2 hover:bg-bg-elevated hover:text-foreground",
-            ].join(" ")}
-          >
-            <Icon className="h-[18px] w-[18px]" />
-            <span>{label}</span>
-          </a>
-        ))}
+        {items.map(({ label, Icon, to }) => {
+          const active = activePath === to;
+          return (
+            <Link
+              key={label}
+              to={to}
+              className={[
+                "group relative flex items-center gap-3 rounded-[10px] px-4 py-[11px] text-[14px] font-medium transition-colors",
+                active
+                  ? "bg-accent/10 text-accent before:absolute before:left-0 before:top-1/2 before:h-5 before:w-[3px] before:-translate-y-1/2 before:rounded-r-full before:bg-accent"
+                  : "text-text2 hover:bg-bg-elevated hover:text-foreground",
+              ].join(" ")}
+            >
+              <Icon className="h-[18px] w-[18px]" />
+              <span>{label}</span>
+            </Link>
+          );
+        })}
       </nav>
 
       <div className="mt-auto flex items-center gap-3 rounded-xl border border-border p-3">
