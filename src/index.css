@@ -139,4 +139,40 @@
   }
 
   .ws-fade-up { animation: ws-fade-up 0.5s ease-out both; }
+
+  /* Koko floating button + chat */
+  @keyframes ws-koko-pulse {
+    0%, 100% { box-shadow: 0 8px 24px rgba(52,152,219,0.4); }
+    50%      { box-shadow: 0 8px 32px rgba(52,152,219,0.65); }
+  }
+  @keyframes ws-koko-pulse-soft {
+    0%, 100% { box-shadow: 0 0 12px rgba(52,152,219,0.3); }
+    50%      { box-shadow: 0 0 20px rgba(52,152,219,0.55); }
+  }
+  @keyframes ws-koko-pop {
+    from { transform: scale(0); }
+    to   { transform: scale(1); }
+  }
+  @keyframes ws-koko-fade {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+  }
+  @keyframes ws-koko-slide-in {
+    from { transform: translateX(100%); }
+    to   { transform: translateX(0); }
+  }
+  @keyframes ws-koko-bounce {
+    0%, 60%, 100% { transform: translateY(0); }
+    30%           { transform: translateY(-6px); }
+  }
+
+  /* Notifications dropdown + modals */
+  @keyframes ws-notif-open {
+    from { transform: scale(0.95); opacity: 0; }
+    to   { transform: scale(1); opacity: 1; }
+  }
+  @keyframes ws-modal-in {
+    from { transform: scale(0.95); opacity: 0; }
+    to   { transform: scale(1); opacity: 1; }
+  }
 }
