@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Sidebar } from "@/components/dashboard/Sidebar";
 import { TopBar } from "@/components/dashboard/TopBar";
 import { MobileTabBar } from "@/components/dashboard/MobileTabBar";
@@ -190,9 +190,23 @@ const Settings = () => {
   const [email, setEmail] = useState("udochukwu@email.com");
   const [edu, setEdu] = useState("Secondary School · SS3");
 
-  // Appearance
-  const [dark, setDark] = useState(false);
+  // Appearance — synced with global <html class="dark">
+  const [dark, setDark] = useState<boolean>(() => {
+    if (typeof window === "undefined") return false;
+    return document.documentElement.classList.contains("dark");
+  });
   const [compact, setCompact] = useState(false);
+
+  useEffect(() => {
+    const root = document.documentElement;
+    if (dark) {
+      root.classList.add("dark");
+      localStorage.setItem("worthscope_theme", "dark");
+    } else {
+      root.classList.remove("dark");
+      localStorage.setItem("worthscope_theme", "light");
+    }
+  }, [dark]);
 
   // Notifications
   const [missionRem, setMissionRem] = useState(true);
@@ -207,10 +221,10 @@ const Settings = () => {
   // Password form
   const [showPw, setShowPw] = useState(false);
 
-  // Page-level dark theme inline (only this page, since global tokens are light)
-  const pageBg = dark ? "#0D0D14" : "#F4F9FE";
-  const cardBg = dark ? "#13131F" : "#FFFFFF";
-  const textColor = dark ? "#F0F0FF" : "#111";
+  // Page-level overrides removed — global .dark tokens now drive all surfaces
+  const pageBg = "hsl(var(--background))";
+  const cardBg = "hsl(var(--bg-card))";
+  const textColor = "hsl(var(--foreground))";
 
   return (
     <div className="min-h-screen font-poppins" style={{ background: pageBg, color: textColor, transition: "all 0.3s ease" }}>

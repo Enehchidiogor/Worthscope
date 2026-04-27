@@ -63,6 +63,120 @@
     --shadow-glow: 0 0 40px hsl(var(--accent) / 0.12);
     --shadow-accent: 0 0 16px hsl(var(--accent) / 0.35);
   }
+
+  /* ============ DARK MODE ============
+     Rebalanced — not inverted. Backgrounds layered (no pure black),
+     text hierarchy preserved (no pure white), borders soft. */
+  .dark {
+    --background: 222 47% 11%;           /* #0F172A */
+    --bg-card: 220 39% 11%;              /* #111827 */
+    --bg-elevated: 217 33% 17%;          /* #1F2937 */
+
+    --foreground: 210 20% 98%;           /* #F9FAFB */
+    --text2: 218 11% 65%;                /* #9CA3AF */
+    --text3: 220 9% 46%;                 /* #6B7280 */
+
+    --border: 215 19% 27% / 0.9;         /* #374151 */
+    --border-bright: 204 70% 53% / 0.55;
+
+    --accent: 204 70% 53%;               /* unchanged */
+    --accent-foreground: 0 0% 100%;
+    --accent-dark: 204 65% 44%;
+    --accent-light: 204 70% 53% / 0.15;
+    --accent-glow: 204 70% 53% / 0.4;
+
+    --success: 142 71% 45%;
+    --streak: 24 95% 58%;
+    --locked: 217 33% 17%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    --card: var(--bg-card);
+    --card-foreground: var(--foreground);
+    --popover: var(--bg-card);
+    --popover-foreground: var(--foreground);
+    --primary: var(--accent);
+    --primary-foreground: var(--accent-foreground);
+    --secondary: var(--bg-elevated);
+    --secondary-foreground: var(--foreground);
+    --muted: var(--bg-elevated);
+    --muted-foreground: var(--text2);
+    --input: 215 19% 27%;
+    --ring: var(--accent);
+
+    --shadow-card: 0 4px 20px rgba(0,0,0,0.3);
+    --shadow-glow: 0 0 40px hsl(var(--accent) / 0.18);
+    --shadow-accent: 0 0 16px hsl(var(--accent) / 0.5);
+
+    color-scheme: dark;
+  }
+
+  /* Smooth theme transition on every element */
+  *, *::before, *::after {
+    transition: background-color 0.3s ease, color 0.3s ease,
+                border-color 0.3s ease, box-shadow 0.3s ease,
+                fill 0.3s ease, stroke 0.3s ease;
+  }
+
+  /* Scrollbar (dark) */
+  .dark ::-webkit-scrollbar { width: 10px; height: 10px; }
+  .dark ::-webkit-scrollbar-track { background: #111827; }
+  .dark ::-webkit-scrollbar-thumb { background: #374151; border-radius: 4px; }
+  .dark ::-webkit-scrollbar-thumb:hover { background: #4B5563; }
+
+  /* Selection */
+  ::selection { background: rgba(52,152,219,0.25); color: inherit; }
+  .dark ::selection { background: rgba(52,152,219,0.35); color: #F9FAFB; }
+}
+
+/* ===========================================================
+   DARK-MODE OVERRIDES FOR HEX-COLOR HARDCODED COMPONENTS
+   (Koko chat, Notifications dropdown, Settings, Skills hex bits)
+   These rebalance components that don't yet use semantic tokens. */
+@layer utilities {
+  /* Generic hex-bg surfaces -> dark surfaces */
+  .dark [style*="background: #FFFFFF"],
+  .dark [style*="background:#FFFFFF"],
+  .dark [style*="background: #fff"],
+  .dark [style*="background:#fff"] { background: #111827 !important; }
+
+  .dark [style*="background: #F4F9FE"],
+  .dark [style*="background:#F4F9FE"] { background: #0F172A !important; }
+
+  .dark [style*="background: #EBF5FB"],
+  .dark [style*="background:#EBF5FB"] { background: rgba(52,152,219,0.15) !important; }
+
+  .dark [style*="background: #F9FAFB"],
+  .dark [style*="background:#F9FAFB"],
+  .dark [style*="background: #F3F4F6"],
+  .dark [style*="background:#F3F4F6"] { background: #1F2937 !important; }
+
+  .dark [style*="background: #F0F8FF"],
+  .dark [style*="background:#F0F8FF"] { background: rgba(52,152,219,0.10) !important; }
+
+  /* Borders */
+  .dark [style*="border: 1px solid #E5E7EB"],
+  .dark [style*="border:1px solid #E5E7EB"],
+  .dark [style*="border-color: #E5E7EB"],
+  .dark [style*="borderColor: \"#E5E7EB\""],
+  .dark [style*="border: 1.5px solid #E5E7EB"] { border-color: #374151 !important; }
+
+  .dark [style*="borderBottom: \"1px solid #E5E7EB\""] { border-bottom-color: #374151 !important; }
+
+  /* Hardcoded dark text -> light */
+  .dark [style*="color: #111"]:not([style*="background"]),
+  .dark [style*="color:#111"]:not([style*="background"]) { color: #F9FAFB !important; }
+
+  /* Tailwind utility classes used by hex-color components */
+  .dark .bg-white { background-color: #111827 !important; }
+  .dark .bg-\[\#F4F9FE\] { background-color: #0F172A !important; }
+  .dark .bg-\[\#EBF5FB\] { background-color: rgba(52,152,219,0.15) !important; }
+  .dark .bg-\[\#F9FAFB\] { background-color: #1F2937 !important; }
+
+  .dark .border-\[\#E5E7EB\] { border-color: #374151 !important; }
+  .dark .text-\[\#111\] { color: #F9FAFB !important; }
+  .dark .text-\[\#9CA3AF\] { color: #9CA3AF !important; }
+  .dark .text-\[\#6B7280\] { color: #9CA3AF !important; }
 }
 
 @layer base {
@@ -174,5 +288,31 @@
   @keyframes ws-modal-in {
     from { transform: scale(0.95); opacity: 0; }
     to   { transform: scale(1); opacity: 1; }
+  }
+
+  /* Welcome toast */
+  @keyframes ws-toast-in {
+    from { transform: translateX(120%); opacity: 0; }
+    to   { transform: translateX(0); opacity: 1; }
+  }
+  @keyframes ws-toast-out {
+    from { transform: translateX(0); opacity: 1; }
+    to   { transform: translateX(120%); opacity: 0; }
+  }
+  @keyframes ws-toast-progress {
+    from { transform: scaleX(1); }
+    to   { transform: scaleX(0); }
+  }
+
+  /* Stronger Koko pulse (first 6s after login) */
+  @keyframes ws-koko-pulse-strong {
+    0%, 100% { box-shadow: 0 8px 24px rgba(52,152,219,0.4); }
+    50%      { box-shadow: 0 8px 40px rgba(52,152,219,0.75); }
+  }
+
+  /* Tooltip pop */
+  @keyframes ws-tooltip-in {
+    from { opacity: 0; transform: translateY(-50%) scale(0.9); }
+    to   { opacity: 1; transform: translateY(-50%) scale(1); }
   }
 }
