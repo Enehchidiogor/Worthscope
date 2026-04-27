@@ -1,7 +1,7 @@
+import { useEffect } from "react";
 import { Sidebar } from "@/components/dashboard/Sidebar";
 import { TopBar } from "@/components/dashboard/TopBar";
 import { Greeting } from "@/components/dashboard/Greeting";
-import { KokoPanel } from "@/components/dashboard/KokoPanel";
 import { Roadmap } from "@/components/dashboard/Roadmap";
 import { CurrentPhase } from "@/components/dashboard/CurrentPhase";
 import { Missions } from "@/components/dashboard/Missions";
@@ -9,8 +9,28 @@ import { SkillProgress } from "@/components/dashboard/SkillProgress";
 import { StreakCard } from "@/components/dashboard/StreakCard";
 import { CareerSummary } from "@/components/dashboard/CareerSummary";
 import { MobileTabBar } from "@/components/dashboard/MobileTabBar";
+import { WelcomeToast } from "@/components/dashboard/WelcomeToast";
 
 const Index = () => {
+  /* On every dashboard mount: trigger Koko's "login" sequence
+     (toast, button pulse + tooltip). On the FIRST login only,
+     also auto-open the chat panel with intro messages. */
+  useEffect(() => {
+    const isFirstLogin = !localStorage.getItem("worthscope_first_login");
+
+    // Always: signal floating Koko to do its strong-pulse + tooltip
+    window.dispatchEvent(new CustomEvent("koko:login-pulse"));
+
+    if (isFirstLogin) {
+      // Auto-open the chat 2s after dashboard load with a guided intro
+      const t = window.setTimeout(() => {
+        window.dispatchEvent(new CustomEvent("koko:intro"));
+      }, 2000);
+      localStorage.setItem("worthscope_first_login", "true");
+      return () => clearTimeout(t);
+    }
+  }, []);
+
   return (
     <div className="min-h-screen bg-background font-poppins text-foreground">
       <Sidebar />
@@ -20,13 +40,13 @@ const Index = () => {
 
         <main className="mx-auto w-full max-w-[1100px] px-4 pb-24 pt-8 md:px-8 md:pb-12">
           <Greeting />
-          <KokoPanel />
+          {/* KokoPanel removed — replaced by floating chat + welcome toast */}
           <Roadmap />
           <CurrentPhase />
 
           <section
             className="ws-fade-up mb-6 grid grid-cols-1 gap-5 lg:grid-cols-2"
-            style={{ animationDelay: "0.65s" }}
+            style={{ animationDelay: "0.5s" }}
           >
             <Missions />
             <SkillProgress />
@@ -34,7 +54,7 @@ const Index = () => {
 
           <section
             className="ws-fade-up grid grid-cols-1 gap-5 lg:grid-cols-2"
-            style={{ animationDelay: "0.8s" }}
+            style={{ animationDelay: "0.65s" }}
           >
             <StreakCard />
             <CareerSummary />
@@ -43,6 +63,7 @@ const Index = () => {
       </div>
 
       <MobileTabBar />
+      <WelcomeToast />
     </div>
   );
 };
