@@ -14,22 +14,20 @@ const Skills = () => {
     <div className="min-h-screen bg-background">
       <Sidebar activePath="/skills" />
 
-      {/* Top bar — inner content centered to match main width */}
-      <header className="sticky top-0 z-30 border-b border-border bg-background/85 backdrop-blur-xl md:ml-[220px]">
-        <div className="mx-auto flex h-16 w-full max-w-[860px] items-center justify-between px-4 md:px-12">
-          <h1 className="text-[18px] font-semibold text-foreground">Skill Progress</h1>
-          <div className="flex items-center gap-4">
-            <div className="rounded-full border border-accent/20 bg-accent/10 px-3.5 py-1.5">
-              <span className="text-[12px] font-semibold text-accent">Overall: 35%</span>
-            </div>
-            <button className="relative text-text2 transition-colors hover:text-foreground" aria-label="Notifications">
-              <IconBell className="h-5 w-5" />
-              <span className="absolute -right-0.5 -top-0.5 h-2 w-2 rounded-full bg-destructive ring-2 ring-background" />
-            </button>
-            <button className="grid h-9 w-9 place-items-center rounded-full bg-gradient-accent text-[14px] font-semibold text-white">
-              U
-            </button>
+      {/* Top bar — flush to page edges, matches other pages */}
+      <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-border bg-background/85 px-4 backdrop-blur-xl md:ml-[220px] md:px-8">
+        <h1 className="text-[18px] font-semibold text-foreground">Skill Progress</h1>
+        <div className="flex items-center gap-4">
+          <div className="rounded-full border border-accent/20 bg-accent/10 px-3.5 py-1.5">
+            <span className="text-[12px] font-semibold text-accent">Overall: 35%</span>
           </div>
+          <button className="relative text-text2 transition-colors hover:text-foreground" aria-label="Notifications">
+            <IconBell className="h-5 w-5" />
+            <span className="absolute -right-0.5 -top-0.5 h-2 w-2 rounded-full bg-destructive ring-2 ring-background" />
+          </button>
+          <button className="grid h-9 w-9 place-items-center rounded-full bg-gradient-accent text-[14px] font-semibold text-white">
+            U
+          </button>
         </div>
       </header>
 
