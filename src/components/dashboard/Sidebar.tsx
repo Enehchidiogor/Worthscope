@@ -10,7 +10,6 @@ const items: Item[] = [
   { label: "My Roadmap", Icon: IconMap, to: "/roadmap" },
   { label: "Missions", Icon: IconTarget, to: "/missions" },
   { label: "Skill Progress", Icon: IconChart, to: "/skills" },
-  { label: "Koko AI", Icon: IconSpark, to: "/koko" },
   { label: "Settings", Icon: IconSettings, to: "/settings" },
 ];
 
@@ -18,7 +17,7 @@ export const Sidebar = ({ activePath = "/" }: { activePath?: string }) => {
   return (
     <aside className="hidden md:flex fixed left-0 top-0 z-40 h-screen w-[220px] flex-col border-r border-border bg-card px-4 py-6">
       <div className="mb-9 px-1">
-        <img src={logo} alt="WorthScope — See Your Worth. Build Your Future." className="h-10 w-auto object-contain" />
+        <img src={logo} alt="WorthScope — See Your Worth. Build Your Future." className="h-16 w-auto object-contain" />
       </div>
 
       <nav className="flex flex-col gap-1">
