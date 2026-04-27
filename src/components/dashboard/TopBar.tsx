@@ -1,4 +1,4 @@
-import { IconBell } from "./icons";
+import { NotificationsBell } from "@/components/notifications/NotificationsBell";
 
 type Props = {
   title?: string;
@@ -22,11 +22,8 @@ export const TopBar = ({ title = "Dashboard", progress }: Props) => (
         </div>
       )}
 
-      {/* Notification */}
-      <button className="relative text-text2 transition-colors hover:text-foreground" aria-label="Notifications">
-        <IconBell className="h-5 w-5" />
-        <span className="absolute -right-0.5 -top-0.5 h-2 w-2 rounded-full bg-destructive ring-2 ring-background" />
-      </button>
+      {/* Notifications */}
+      <NotificationsBell />
 
       {/* Avatar */}
       <button
