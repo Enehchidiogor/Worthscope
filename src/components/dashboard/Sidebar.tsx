@@ -1,4 +1,4 @@
-import { IconHome, IconMap, IconTarget, IconChart, IconSpark, IconSettings } from "./icons";
+import { IconHome, IconMap, IconTarget, IconChart, IconBriefcase, IconSettings } from "./icons";
 import type { ComponentType } from "react";
 import { Link } from "react-router-dom";
 import logo from "@/assets/worthscope-logo.png";
@@ -10,6 +10,7 @@ const items: Item[] = [
   { label: "My Roadmap", Icon: IconMap, to: "/roadmap" },
   { label: "Missions", Icon: IconTarget, to: "/missions" },
   { label: "Skill Progress", Icon: IconChart, to: "/skills" },
+  { label: "Career Opportunities", Icon: IconBriefcase, to: "/career" },
   { label: "Settings", Icon: IconSettings, to: "/settings" },
 ];
 
