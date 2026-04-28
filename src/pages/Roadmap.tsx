@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { Link } from "react-router-dom";
 import { Sidebar } from "@/components/dashboard/Sidebar";
 import { TopBar } from "@/components/dashboard/TopBar";
 import { MobileTabBar } from "@/components/dashboard/MobileTabBar";
@@ -123,6 +124,39 @@ const Roadmap = () => {
                   ))}
                 </div>
               </div>
+
+              {/* "Career Ready" end-of-roadmap banner — shows when all nodes done */}
+              {nodes.every((n) => n.status === "completed") && (
+                <div
+                  className="ws-fade-up mx-auto mt-10 max-w-md rounded-[16px] p-6 text-center"
+                  style={{
+                    background: "linear-gradient(135deg, #EBF5FB, #F0FFF4)",
+                    border: "1px solid rgba(52,152,219,0.2)",
+                  }}
+                >
+                  <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#3498DB" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mx-auto">
+                    <path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0z" />
+                    <path d="M17 4h3v3a3 3 0 0 1-3 3M7 4H4v3a3 3 0 0 0 3 3" />
+                  </svg>
+                  <div style={{ fontWeight: 700, fontSize: 16, color: "#111111", marginTop: 10 }}>
+                    Career Opportunities Unlocked! 🎉
+                  </div>
+                  <div style={{ fontWeight: 400, fontSize: 13, color: "#6B7280", marginTop: 6 }}>
+                    You've completed your roadmap. Your matched job opportunities are now available.
+                  </div>
+                  <Link
+                    to="/career"
+                    className="inline-block"
+                    style={{
+                      background: "#3498DB", color: "#FFFFFF",
+                      fontWeight: 600, fontSize: 14, borderRadius: 10,
+                      padding: "11px 22px", marginTop: 16, textDecoration: "none",
+                    }}
+                  >
+                    View My Matched Jobs →
+                  </Link>
+                </div>
+              )}
             </section>
 
             {/* RIGHT: Koko */}
