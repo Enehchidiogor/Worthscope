@@ -47,11 +47,11 @@ const I = ({
 
 /* ───── Journey nodes (hero) ───── */
 const JOURNEY = [
-  { label: "Lost & Unsure", icon: "<circle cx='12' cy='12' r='9'/><path d='M9.5 9a2.5 2.5 0 0 1 5 0c0 1.5-2.5 2-2.5 4'/><circle cx='12' cy='17' r='.6' fill='currentColor'/>" },
-  { label: "Take the Assessment", icon: "<path d='M9 11l3 3 7-7'/><path d='M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11'/>" },
-  { label: "Profile Analyzed", icon: "<path d='M3 12a9 9 0 1 0 9-9'/><path d='M12 7v5l3 2'/>" },
-  { label: "Career Path Unlocked", icon: "<rect x='3' y='11' width='18' height='10' rx='2'/><path d='M7 11V7a5 5 0 0 1 10 0'/>" },
-  { label: "You're on Your Way", icon: "<path d='M5 13l4 4L19 7'/>" },
+  { label: "Lost & Unsure", sub: "Too many career options to pick", side: "right", icon: "<circle cx='12' cy='12' r='9'/><path d='M9.5 9a2.5 2.5 0 0 1 5 0c0 1.5-2.5 2-2.5 4'/><circle cx='12' cy='17' r='.6' fill='currentColor'/>" },
+  { label: "Take the Assessment", sub: "Answer questions about yourself", side: "left", icon: "<path d='M9 11l3 3 7-7'/><path d='M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11'/>" },
+  { label: "Profile Analyzed", sub: "AI maps your strengths & goals", side: "right", icon: "<path d='M3 12a9 9 0 1 0 9-9'/><path d='M12 7v5l3 2'/>" },
+  { label: "Career Path Unlocked", sub: "Top matches + alternatives", side: "left", icon: "<rect x='3' y='11' width='18' height='10' rx='2'/><path d='M7 11V7a5 5 0 0 1 10 0'/>" },
+  { label: "You're on Your Way", sub: "Skills, courses, action plan", side: "right", icon: "<path d='M5 13l4 4L19 7'/>" },
 ];
 
 /* ───── Features ───── */
