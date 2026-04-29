@@ -8,6 +8,8 @@ import Roadmap from "./pages/Roadmap.tsx";
 import Mission from "./pages/Mission.tsx";
 import Skills from "./pages/Skills.tsx";
 import Career from "./pages/Career.tsx";
+import Assessment from "./pages/Assessment.tsx";
+import CareerResults from "./pages/CareerResults.tsx";
 import Settings from "./pages/Settings.tsx";
 import NotFound from "./pages/NotFound.tsx";
 import { KokoFloatingChat } from "@/components/koko/KokoFloatingChat";
@@ -27,6 +29,8 @@ const App = () => (
           <Route path="/missions" element={<Mission />} />
           <Route path="/skills" element={<Skills />} />
           <Route path="/career" element={<Career />} />
+          <Route path="/assessment" element={<Assessment />} />
+          <Route path="/career-results" element={<CareerResults />} />
           <Route path="/settings" element={<Settings />} />
           <Route path="/koko" element={<Index />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
