@@ -29,7 +29,7 @@ export default function SignUp() {
 
   const onSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    navigate("/dashboard");
+    navigate("/onboarding");
   };
 
   const barColor = (idx: number) => (strength.level > idx ? strength.color : BORDER);

@@ -195,7 +195,7 @@ export default function Landing() {
               opacity: 0, animation: "ws-fade-up 0.5s ease 0.55s forwards",
             }}>
               <button
-                onClick={() => navigate("/assessment")}
+                onClick={() => navigate("/onboarding")}
                 className="ws-btn-primary"
                 style={{
                   background: ACCENT, color: "#fff", border: "none", borderRadius: 8,
@@ -379,7 +379,7 @@ export default function Landing() {
               Join thousands of students discovering their right career path with WorthScope.
             </p>
             <button
-              onClick={() => navigate("/assessment")}
+              onClick={() => navigate("/onboarding")}
               className="ws-cta-btn"
               style={{
                 marginTop: 30, background: "#fff", color: ACCENT, border: "none",
