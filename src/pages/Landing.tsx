@@ -235,7 +235,7 @@ export default function Landing() {
               <span style={{ width: 6, height: 6, borderRadius: "50%", background: ACCENT, animation: "ws-float 1.6s ease-in-out infinite" }} />
               AI-Powered Career Intelligence
             </span>
-            <h1 style={{ fontSize: 52, lineHeight: 1.1, fontWeight: 600, margin: "20px 0 18px", letterSpacing: -1, color: TEXT }}>
+            <h1 style={{ fontSize: 50, lineHeight: 1.12, fontWeight: 500, margin: "20px 0 18px", letterSpacing: -0.8, color: TEXT }}>
               Find the <span style={{ color: ACCENT, fontWeight: 600 }}>Right Career</span> Path for You
             </h1>
             <p style={{ fontSize: 17, lineHeight: 1.65, color: TEXT2, maxWidth: 540, margin: 0, fontWeight: 400 }}>
