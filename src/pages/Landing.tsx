@@ -47,11 +47,11 @@ const I = ({
 
 /* ───── Journey nodes (hero) ───── */
 const JOURNEY = [
-  { label: "Lost & Unsure", icon: "<circle cx='12' cy='12' r='9'/><path d='M9.5 9a2.5 2.5 0 0 1 5 0c0 1.5-2.5 2-2.5 4'/><circle cx='12' cy='17' r='.6' fill='currentColor'/>" },
-  { label: "Take the Assessment", icon: "<path d='M9 11l3 3 7-7'/><path d='M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11'/>" },
-  { label: "Profile Analyzed", icon: "<path d='M3 12a9 9 0 1 0 9-9'/><path d='M12 7v5l3 2'/>" },
-  { label: "Career Path Unlocked", icon: "<rect x='3' y='11' width='18' height='10' rx='2'/><path d='M7 11V7a5 5 0 0 1 10 0'/>" },
-  { label: "You're on Your Way", icon: "<path d='M5 13l4 4L19 7'/>" },
+  { label: "Lost & Unsure", sub: "Too many career options to pick", side: "right", icon: "<circle cx='12' cy='12' r='9'/><path d='M9.5 9a2.5 2.5 0 0 1 5 0c0 1.5-2.5 2-2.5 4'/><circle cx='12' cy='17' r='.6' fill='currentColor'/>" },
+  { label: "Take the Assessment", sub: "Answer questions about yourself", side: "left", icon: "<path d='M9 11l3 3 7-7'/><path d='M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11'/>" },
+  { label: "Profile Analyzed", sub: "AI maps your strengths & goals", side: "right", icon: "<path d='M3 12a9 9 0 1 0 9-9'/><path d='M12 7v5l3 2'/>" },
+  { label: "Career Path Unlocked", sub: "Top matches + alternatives", side: "left", icon: "<rect x='3' y='11' width='18' height='10' rx='2'/><path d='M7 11V7a5 5 0 0 1 10 0'/>" },
+  { label: "You're on Your Way", sub: "Skills, courses, action plan", side: "right", icon: "<path d='M5 13l4 4L19 7'/>" },
 ];
 
 /* ───── Features ───── */
@@ -136,6 +136,10 @@ export default function Landing() {
         .ws-link:hover::after{width:100%}
         .ws-pill{transition:transform .2s ease,background .2s ease}
         .ws-pill:hover{transform:translateY(-2px);background:${ACCENT};color:#fff;border-color:${ACCENT}}
+        .ws-nav-link:hover{background:rgba(59,130,246,.08);color:${ACCENT}}
+        .ws-jnode{transition:transform .3s cubic-bezier(.2,.7,.3,1.3)}
+        .ws-jnode:hover{transform:scale(1.12)}
+        .ws-jnode:hover .ws-jlabel{opacity:1;transform:translateY(0)}
       `}</style>
 
       {/* ───────────── NAVBAR ───────────── */}
@@ -152,26 +156,55 @@ export default function Landing() {
           transition: "all .25s ease",
         }}
       >
-        <div style={{ maxWidth: 1200, margin: "0 auto", padding: "0 24px", height: 88, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-          <button onClick={() => navigate("/")} style={{ display: "flex", alignItems: "center", background: "transparent", border: "none", cursor: "pointer", padding: 0 }}>
+        <div style={{ maxWidth: 1280, margin: "0 auto", padding: "0 28px", height: 88, display: "grid", gridTemplateColumns: "1fr auto 1fr", alignItems: "center", gap: 16 }}>
+          <button onClick={() => navigate("/")} style={{ justifySelf: "start", display: "flex", alignItems: "center", background: "transparent", border: "none", cursor: "pointer", padding: 0 }}>
             <img src={logo} alt="WorthScope" style={{ height: 72, width: "auto", objectFit: "contain", display: "block" }} />
           </button>
 
-          <nav style={{ display: "flex", gap: 36, alignItems: "center" }} className="ws-nav-center">
+          <nav
+            className="ws-nav-pill"
+            style={{
+              justifySelf: "center",
+              display: "flex",
+              gap: 4,
+              alignItems: "center",
+              background: "#fff",
+              border: `1px solid ${BORDER}`,
+              borderRadius: 999,
+              padding: "6px 10px",
+              boxShadow: "0 6px 20px -10px rgba(17,17,17,0.15)",
+            }}
+          >
             {[
               { label: "Home", id: "hero" },
               { label: "Services", id: "features" },
               { label: "About", id: "solution" },
               { label: "Contact", id: "cta" },
             ].map((l) => (
-              <button key={l.id} onClick={() => scrollTo(l.id)} className="ws-link" style={{ background: "transparent", border: "none", cursor: "pointer", color: TEXT, fontSize: 15, fontWeight: 500, fontFamily: FONT }}>
+              <button
+                key={l.id}
+                onClick={() => scrollTo(l.id)}
+                className="ws-nav-link"
+                style={{
+                  background: "transparent",
+                  border: "none",
+                  cursor: "pointer",
+                  color: TEXT,
+                  fontSize: 14,
+                  fontWeight: 500,
+                  fontFamily: FONT,
+                  padding: "8px 18px",
+                  borderRadius: 999,
+                  transition: "all .2s ease",
+                }}
+              >
                 {l.label}
               </button>
             ))}
           </nav>
 
-          <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
-            <button onClick={() => navigate("/signin")} className="ws-btn-primary" style={{ background: ACCENT, color: "#fff", border: "none", padding: "10px 20px", borderRadius: 999, fontWeight: 600, fontSize: 14, cursor: "pointer", fontFamily: FONT }}>
+          <div style={{ justifySelf: "end", display: "flex", gap: 10, alignItems: "center" }}>
+            <button onClick={() => navigate("/signin")} className="ws-btn-primary" style={{ background: ACCENT, color: "#fff", border: "none", padding: "10px 22px", borderRadius: 999, fontWeight: 500, fontSize: 14, cursor: "pointer", fontFamily: FONT }}>
               Sign In
             </button>
             <button onClick={() => setMobileOpen((o) => !o)} aria-label="Menu" style={{ display: "none", background: "transparent", border: "none", cursor: "pointer" }} className="ws-mobile-btn">
@@ -202,35 +235,25 @@ export default function Landing() {
               <span style={{ width: 6, height: 6, borderRadius: "50%", background: ACCENT, animation: "ws-float 1.6s ease-in-out infinite" }} />
               AI-Powered Career Intelligence
             </span>
-            <h1 style={{ fontSize: 60, lineHeight: 1.05, fontWeight: 800, margin: "20px 0 18px", letterSpacing: -1.5, color: TEXT }}>
-              Find the <span style={{ color: ACCENT }}>Right Career</span> Path for You
+            <h1 style={{ fontSize: 48, lineHeight: 1.15, fontWeight: 400, margin: "20px 0 18px", letterSpacing: -0.5, color: TEXT }}>
+              Find the <span style={{ color: ACCENT, fontWeight: 600 }}>Right Career</span> Path for You
             </h1>
-            <p style={{ fontSize: 18, lineHeight: 1.65, color: TEXT2, maxWidth: 540, margin: 0 }}>
+            <p style={{ fontSize: 17, lineHeight: 1.65, color: TEXT2, maxWidth: 540, margin: 0, fontWeight: 400 }}>
               WorthScope helps students discover the career path that fits their strengths, interests, and goals — then shows you exactly what to do next.
             </p>
             <div style={{ display: "flex", gap: 14, marginTop: 36, flexWrap: "wrap" }}>
-              <button onClick={() => navigate("/onboarding")} className="ws-btn-primary" style={{ background: ACCENT, color: "#fff", border: "none", padding: "16px 28px", borderRadius: 14, fontWeight: 600, fontSize: 16, cursor: "pointer", fontFamily: FONT, display: "inline-flex", alignItems: "center", gap: 10 }}>
+              <button onClick={() => navigate("/onboarding")} className="ws-btn-primary" style={{ background: ACCENT, color: "#fff", border: "none", padding: "16px 28px", borderRadius: 14, fontWeight: 500, fontSize: 15, cursor: "pointer", fontFamily: FONT, display: "inline-flex", alignItems: "center", gap: 10 }}>
                 Start Assessment
                 <I d="<path d='M5 12h14M13 5l7 7-7 7'/>" size={18} stroke="#fff" />
               </button>
-              <button onClick={() => scrollTo("how")} className="ws-btn-outline" style={{ background: "transparent", color: TEXT, border: `1.5px solid ${BORDER}`, padding: "16px 28px", borderRadius: 14, fontWeight: 600, fontSize: 16, cursor: "pointer", fontFamily: FONT }}>
+              <button onClick={() => scrollTo("how")} className="ws-btn-outline" style={{ background: "transparent", color: TEXT, border: `1.5px solid ${BORDER}`, padding: "16px 28px", borderRadius: 14, fontWeight: 500, fontSize: 15, cursor: "pointer", fontFamily: FONT }}>
                 See How It Works
               </button>
-            </div>
-
-            {/* Trust row */}
-            <div style={{ display: "flex", gap: 28, marginTop: 44, flexWrap: "wrap" }}>
-              {[{ n: "12k+", l: "Students" }, { n: "94%", l: "Clarity Rate" }, { n: "150+", l: "Career Paths" }].map((s) => (
-                <div key={s.l}>
-                  <div style={{ fontSize: 24, fontWeight: 800, color: TEXT, letterSpacing: -0.5 }}>{s.n}</div>
-                  <div style={{ fontSize: 13, color: TEXT2, marginTop: 2 }}>{s.l}</div>
-                </div>
-              ))}
             </div>
           </div>
 
           {/* RIGHT — Animated journey */}
-          <div className="ws-reveal" style={{ position: "relative", height: 560 }}>
+          <div className="ws-reveal" style={{ position: "relative", height: 620 }}>
             <JourneyDiagram active={activeNode} />
           </div>
         </div>
@@ -240,7 +263,7 @@ export default function Landing() {
       <section id="problem" style={{ background: BG2, padding: "100px 0", borderTop: `1px solid ${BORDER}`, borderBottom: `1px solid ${BORDER}` }}>
         <div style={{ maxWidth: 1200, margin: "0 auto", padding: "0 24px", display: "grid", gridTemplateColumns: "1fr 1fr", gap: 64, alignItems: "center" }}>
           <div className="ws-reveal">
-            <h2 style={{ fontSize: 42, fontWeight: 800, lineHeight: 1.15, margin: 0, color: TEXT, letterSpacing: -1 }}>
+            <h2 style={{ fontSize: 42, fontWeight: 600, lineHeight: 1.15, margin: 0, color: TEXT, letterSpacing: -1 }}>
               Most Students <span style={{ color: ACCENT }}>Guess</span> Their Future
             </h2>
             <p style={{ fontSize: 17, lineHeight: 1.7, color: TEXT2, marginTop: 20 }}>
@@ -265,7 +288,7 @@ export default function Landing() {
       <section id="solution" style={{ padding: "110px 0", background: "#fff" }}>
         <div style={{ maxWidth: 1200, margin: "0 auto", padding: "0 24px", display: "grid", gridTemplateColumns: "1fr 1fr", gap: 64, alignItems: "center" }}>
           <div className="ws-reveal">
-            <h2 style={{ fontSize: 42, fontWeight: 800, lineHeight: 1.15, margin: 0, color: TEXT, letterSpacing: -1 }}>
+            <h2 style={{ fontSize: 42, fontWeight: 600, lineHeight: 1.15, margin: 0, color: TEXT, letterSpacing: -1 }}>
               WorthScope Gives You <span style={{ color: ACCENT }}>Clarity</span>
             </h2>
             <p style={{ fontSize: 17, lineHeight: 1.7, color: TEXT2, marginTop: 20 }}>
@@ -293,7 +316,7 @@ export default function Landing() {
       <section id="how" style={{ padding: "110px 0", background: BG2, borderTop: `1px solid ${BORDER}`, borderBottom: `1px solid ${BORDER}` }}>
         <div style={{ maxWidth: 1200, margin: "0 auto", padding: "0 24px" }}>
           <div className="ws-reveal" style={{ textAlign: "center", maxWidth: 720, margin: "0 auto 60px" }}>
-            <h2 style={{ fontSize: 42, fontWeight: 800, margin: 0, letterSpacing: -1, color: TEXT }}>How It Works</h2>
+            <h2 style={{ fontSize: 42, fontWeight: 600, margin: 0, letterSpacing: -0.6, color: TEXT }}>How It Works</h2>
             <p style={{ fontSize: 17, color: TEXT2, marginTop: 14 }}>Three simple steps to your career blueprint.</p>
           </div>
 
@@ -324,7 +347,7 @@ export default function Landing() {
       <section id="features" style={{ padding: "110px 0", background: "#fff" }}>
         <div style={{ maxWidth: 1200, margin: "0 auto", padding: "0 24px" }}>
           <div className="ws-reveal" style={{ textAlign: "center", maxWidth: 760, margin: "0 auto 56px" }}>
-            <h2 style={{ fontSize: 42, fontWeight: 800, margin: 0, letterSpacing: -1, color: TEXT }}>
+            <h2 style={{ fontSize: 42, fontWeight: 600, margin: 0, letterSpacing: -0.6, color: TEXT }}>
               Everything You Need to Plan Your Future
             </h2>
             <p style={{ fontSize: 17, color: TEXT2, marginTop: 14 }}>
@@ -351,7 +374,7 @@ export default function Landing() {
         <div aria-hidden style={{ position: "absolute", inset: 0, background: "radial-gradient(circle at 80% 20%, rgba(255,255,255,.18), transparent 50%)" }} />
         <div style={{ maxWidth: 1200, margin: "0 auto", padding: "0 24px", display: "grid", gridTemplateColumns: "1.1fr .9fr", gap: 56, alignItems: "center", position: "relative" }}>
           <div className="ws-reveal">
-            <h2 style={{ fontSize: 46, fontWeight: 800, color: "#fff", lineHeight: 1.1, margin: 0, letterSpacing: -1.2 }}>
+            <h2 style={{ fontSize: 46, fontWeight: 600, color: "#fff", lineHeight: 1.1, margin: 0, letterSpacing: -1.2 }}>
               Stop Guessing. Start Planning.
             </h2>
             <p style={{ color: "rgba(255,255,255,.85)", fontSize: 17, lineHeight: 1.7, marginTop: 18, maxWidth: 520 }}>
@@ -409,80 +432,106 @@ export default function Landing() {
 /* ───────────────────────────── COMPONENTS ───────────────────────────── */
 
 function JourneyDiagram({ active }: { active: number }) {
+  // Center column for nodes; labels alternate left/right (off the path).
+  const CX = 50; // % center
+  const ys = [60, 170, 280, 390, 500];
   return (
     <div style={{ position: "relative", height: "100%", width: "100%" }}>
-      {/* curved path */}
-      <svg viewBox="0 0 320 560" width="100%" height="100%" style={{ position: "absolute", inset: 0 }}>
-        <defs>
-          <linearGradient id="jpath" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor={ACCENT} stopOpacity="0.25" />
-            <stop offset="50%" stopColor={ACCENT} stopOpacity="0.85" />
-            <stop offset="100%" stopColor={ACCENT} stopOpacity="0.25" />
-          </linearGradient>
-        </defs>
-        <path
-          d="M160,30 C 80,120 240,200 160,290 C 80,380 240,460 160,540"
-          fill="none"
-          stroke="url(#jpath)"
-          strokeWidth="2.5"
-          strokeDasharray="6 6"
-          style={{ animation: "ws-dash 2.5s linear infinite" }}
-        />
-      </svg>
+      {/* Section header */}
+      <div style={{ textAlign: "center", marginBottom: 14 }}>
+        <div style={{ fontSize: 12, fontWeight: 600, color: ACCENT, letterSpacing: 1.2, textTransform: "uppercase" }}>
+          Your Journey
+        </div>
+        <div style={{ fontSize: 18, fontWeight: 600, color: TEXT, marginTop: 4 }}>
+          From Confusion to Clarity
+        </div>
+      </div>
 
-      {/* nodes */}
-      {JOURNEY.map((n, i) => {
-        const ys = [40, 160, 280, 400, 520];
-        const xs = [160, 80, 240, 80, 160];
-        const isActive = i === active;
-        const isPast = i < active;
-        return (
-          <div
-            key={n.label}
-            style={{
-              position: "absolute",
-              top: ys[i] - 30,
-              left: `calc(${(xs[i] / 320) * 100}% - 30px)`,
-              animation: `ws-float ${3 + i * 0.4}s ease-in-out infinite`,
-              animationDelay: `${i * 0.2}s`,
-            }}
-          >
+      <div style={{ position: "relative", height: 560, width: "100%" }}>
+        {/* curved vertical path through the center */}
+        <svg viewBox="0 0 320 560" width="100%" height="100%" preserveAspectRatio="none" style={{ position: "absolute", inset: 0, pointerEvents: "none" }}>
+          <defs>
+            <linearGradient id="jpath" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor={ACCENT} stopOpacity="0.25" />
+              <stop offset="50%" stopColor={ACCENT} stopOpacity="0.85" />
+              <stop offset="100%" stopColor={ACCENT} stopOpacity="0.25" />
+            </linearGradient>
+          </defs>
+          <path
+            d="M160,40 C 120,140 200,200 160,290 C 120,380 200,440 160,540"
+            fill="none"
+            stroke="url(#jpath)"
+            strokeWidth="2.5"
+            strokeDasharray="6 6"
+            style={{ animation: "ws-dash 2.5s linear infinite" }}
+          />
+        </svg>
+
+        {/* nodes */}
+        {JOURNEY.map((n, i) => {
+          const isActive = i === active;
+          const isPast = i < active;
+          const labelOnRight = n.side === "right";
+          return (
             <div
-              style={{
-                width: 60, height: 60, borderRadius: "50%",
-                background: isActive ? ACCENT : isPast ? "rgba(59,130,246,.15)" : "#fff",
-                color: isActive ? "#fff" : isPast ? ACCENT : TEXT2,
-                border: `2px solid ${isActive || isPast ? ACCENT : BORDER}`,
-                display: "grid", placeItems: "center",
-                boxShadow: isActive ? "0 12px 28px -8px rgba(59,130,246,.55)" : "0 6px 18px -8px rgba(17,17,17,.15)",
-                animation: isActive ? "ws-pulse-ring 2s ease-in-out infinite" : undefined,
-                transition: "all .4s ease",
-              }}
-            >
-              <I d={n.icon} size={24} stroke={isActive ? "#fff" : isPast ? ACCENT : TEXT2} />
-            </div>
-            <div
+              key={n.label}
+              className="ws-jnode"
               style={{
                 position: "absolute",
-                top: 68,
-                left: "50%",
-                transform: "translateX(-50%)",
-                whiteSpace: "nowrap",
-                fontSize: 12,
-                fontWeight: isActive ? 700 : 500,
-                color: isActive ? TEXT : TEXT2,
-                background: "#fff",
-                padding: "4px 10px",
-                borderRadius: 8,
-                border: `1px solid ${BORDER}`,
-                boxShadow: "0 4px 10px -4px rgba(17,17,17,.08)",
+                top: ys[i] - 28,
+                left: `calc(${CX}% - 28px)`,
+                width: 56,
+                height: 56,
+                cursor: "pointer",
               }}
             >
-              {n.label}
+              <div
+                style={{
+                  width: 56, height: 56, borderRadius: "50%",
+                  background: isActive ? ACCENT : isPast ? "rgba(59,130,246,.15)" : "#fff",
+                  color: isActive ? "#fff" : isPast ? ACCENT : TEXT2,
+                  border: `2px solid ${isActive || isPast ? ACCENT : BORDER}`,
+                  display: "grid", placeItems: "center",
+                  boxShadow: isActive ? "0 12px 28px -8px rgba(59,130,246,.55)" : "0 6px 18px -8px rgba(17,17,17,.15)",
+                  animation: isActive ? "ws-pulse-ring 2s ease-in-out infinite" : `ws-float ${3 + i * 0.4}s ease-in-out infinite`,
+                  transition: "all .4s ease",
+                }}
+              >
+                <I d={n.icon} size={22} stroke={isActive ? "#fff" : isPast ? ACCENT : TEXT2} />
+              </div>
+
+              {/* Label off to the side, never on the path */}
+              <div
+                style={{
+                  position: "absolute",
+                  top: "50%",
+                  transform: "translateY(-50%)",
+                  ...(labelOnRight
+                    ? { left: 78, textAlign: "left" as const }
+                    : { right: 78, textAlign: "right" as const }),
+                  width: 150,
+                  pointerEvents: "none",
+                }}
+              >
+                <div
+                  style={{
+                    fontSize: 13,
+                    fontWeight: 600,
+                    color: isActive ? ACCENT : TEXT,
+                    lineHeight: 1.25,
+                    transition: "color .2s ease",
+                  }}
+                >
+                  {n.label}
+                </div>
+                <div style={{ fontSize: 11.5, color: TEXT2, marginTop: 3, lineHeight: 1.35, fontWeight: 400 }}>
+                  {n.sub}
+                </div>
+              </div>
             </div>
-          </div>
-        );
-      })}
+          );
+        })}
+      </div>
     </div>
   );
 }
@@ -589,33 +638,49 @@ function ResultPreviewCard() {
 }
 
 function RoadmapPath() {
+  // Labels placed away from the path; anchor + dy chosen per node so text never overlaps the line.
+  const nodes = [
+    { x: 40, y: 300, l: "START", anchor: "middle", dy: 32, big: false, pulse: false },
+    { x: 140, y: 220, l: "Discovery", anchor: "start", dy: 4, dx: 18, big: false, pulse: false },
+    { x: 230, y: 130, l: "Skill Building", anchor: "end", dy: 4, dx: -18, big: false, pulse: false },
+    { x: 330, y: 50, l: "YOUR GOAL", anchor: "middle", dy: -22, big: true, pulse: true },
+  ] as const;
+
   return (
-    <div style={{ position: "relative", height: 380, background: "rgba(255,255,255,.08)", borderRadius: 22, padding: 24, border: "1px solid rgba(255,255,255,.15)", backdropFilter: "blur(10px)" }}>
-      <svg viewBox="0 0 360 340" width="100%" height="100%">
+    <div style={{ position: "relative", height: 380, padding: 0, background: "transparent", border: "none" }}>
+      <svg viewBox="0 0 380 360" width="100%" height="100%" style={{ overflow: "visible" }}>
         <defs>
           <linearGradient id="rmp" x1="0" y1="1" x2="1" y2="0">
-            <stop offset="0%" stopColor="#fff" stopOpacity=".4" />
+            <stop offset="0%" stopColor="#fff" stopOpacity=".5" />
             <stop offset="100%" stopColor="#fff" stopOpacity="1" />
           </linearGradient>
         </defs>
         <path
-          d="M30,300 C 100,260 80,180 180,160 C 280,140 260,60 330,40"
+          d="M40,300 C 110,260 90,180 180,170 C 270,160 250,70 330,50"
           fill="none"
           stroke="url(#rmp)"
-          strokeWidth="3"
+          strokeWidth="2.5"
           strokeDasharray="8 6"
           style={{ animation: "ws-dash 3s linear infinite" }}
         />
-        {[
-          { x: 30, y: 300, l: "START" },
-          { x: 130, y: 230, l: "Discovery" },
-          { x: 230, y: 130, l: "Skill Building" },
-          { x: 330, y: 40, l: "YOUR GOAL" },
-        ].map((n, i) => (
+        {nodes.map((n) => (
           <g key={n.l}>
-            <circle cx={n.x} cy={n.y} r={i === 3 ? 14 : 10} fill="#fff" style={{ animation: `ws-float ${2.5 + i * 0.3}s ease-in-out infinite` }} />
-            {i === 3 && <circle cx={n.x} cy={n.y} r="22" fill="none" stroke="#fff" strokeOpacity=".5" strokeWidth="1.5" style={{ animation: "ws-pulse-ring 2s ease-in-out infinite" }} />}
-            <text x={n.x} y={n.y - 22} textAnchor="middle" fill="#fff" fontSize="12" fontWeight="600" fontFamily={FONT}>{n.l}</text>
+            {n.pulse && (
+              <circle cx={n.x} cy={n.y} r="22" fill="none" stroke="#fff" strokeOpacity=".5" strokeWidth="1.5" style={{ animation: "ws-pulse-ring 2s ease-in-out infinite" }} />
+            )}
+            <circle cx={n.x} cy={n.y} r={n.big ? 12 : 8} fill="#fff" />
+            <text
+              x={n.x + ("dx" in n ? (n as any).dx : 0)}
+              y={n.y + n.dy}
+              textAnchor={n.anchor}
+              fill="#fff"
+              fontSize={n.big ? "13" : "12"}
+              fontWeight="600"
+              fontFamily={FONT}
+              style={{ letterSpacing: n.big ? 0.5 : 0 }}
+            >
+              {n.l}
+            </text>
           </g>
         ))}
       </svg>
