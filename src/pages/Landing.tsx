@@ -152,26 +152,55 @@ export default function Landing() {
           transition: "all .25s ease",
         }}
       >
-        <div style={{ maxWidth: 1200, margin: "0 auto", padding: "0 24px", height: 88, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-          <button onClick={() => navigate("/")} style={{ display: "flex", alignItems: "center", background: "transparent", border: "none", cursor: "pointer", padding: 0 }}>
+        <div style={{ maxWidth: 1280, margin: "0 auto", padding: "0 28px", height: 88, display: "grid", gridTemplateColumns: "1fr auto 1fr", alignItems: "center", gap: 16 }}>
+          <button onClick={() => navigate("/")} style={{ justifySelf: "start", display: "flex", alignItems: "center", background: "transparent", border: "none", cursor: "pointer", padding: 0 }}>
             <img src={logo} alt="WorthScope" style={{ height: 72, width: "auto", objectFit: "contain", display: "block" }} />
           </button>
 
-          <nav style={{ display: "flex", gap: 36, alignItems: "center" }} className="ws-nav-center">
+          <nav
+            className="ws-nav-pill"
+            style={{
+              justifySelf: "center",
+              display: "flex",
+              gap: 4,
+              alignItems: "center",
+              background: "#fff",
+              border: `1px solid ${BORDER}`,
+              borderRadius: 999,
+              padding: "6px 10px",
+              boxShadow: "0 6px 20px -10px rgba(17,17,17,0.15)",
+            }}
+          >
             {[
               { label: "Home", id: "hero" },
               { label: "Services", id: "features" },
               { label: "About", id: "solution" },
               { label: "Contact", id: "cta" },
             ].map((l) => (
-              <button key={l.id} onClick={() => scrollTo(l.id)} className="ws-link" style={{ background: "transparent", border: "none", cursor: "pointer", color: TEXT, fontSize: 15, fontWeight: 500, fontFamily: FONT }}>
+              <button
+                key={l.id}
+                onClick={() => scrollTo(l.id)}
+                className="ws-nav-link"
+                style={{
+                  background: "transparent",
+                  border: "none",
+                  cursor: "pointer",
+                  color: TEXT,
+                  fontSize: 14,
+                  fontWeight: 500,
+                  fontFamily: FONT,
+                  padding: "8px 18px",
+                  borderRadius: 999,
+                  transition: "all .2s ease",
+                }}
+              >
                 {l.label}
               </button>
             ))}
           </nav>
 
-          <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
-            <button onClick={() => navigate("/signin")} className="ws-btn-primary" style={{ background: ACCENT, color: "#fff", border: "none", padding: "10px 20px", borderRadius: 999, fontWeight: 600, fontSize: 14, cursor: "pointer", fontFamily: FONT }}>
+          <div style={{ justifySelf: "end", display: "flex", gap: 10, alignItems: "center" }}>
+            <button onClick={() => navigate("/signin")} className="ws-btn-primary" style={{ background: ACCENT, color: "#fff", border: "none", padding: "10px 22px", borderRadius: 999, fontWeight: 500, fontSize: 14, cursor: "pointer", fontFamily: FONT }}>
               Sign In
             </button>
             <button onClick={() => setMobileOpen((o) => !o)} aria-label="Menu" style={{ display: "none", background: "transparent", border: "none", cursor: "pointer" }} className="ws-mobile-btn">
