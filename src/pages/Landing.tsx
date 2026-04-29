@@ -61,30 +61,42 @@ export default function Landing() {
       {/* NAVBAR */}
       <nav
         style={{
-          position: "fixed", top: 0, left: 0, right: 0, height: 64, zIndex: 50,
-          background: scrolled ? "rgba(255,255,255,0.95)" : "rgba(255,255,255,0.75)",
+          position: "fixed", top: 0, left: 0, right: 0, height: 76, zIndex: 50,
+          background: scrolled ? "rgba(255,255,255,0.92)" : "rgba(255,255,255,0.6)",
           backdropFilter: "blur(16px) saturate(180%)",
           WebkitBackdropFilter: "blur(16px) saturate(180%)",
-          borderBottom: `1px solid ${scrolled ? "rgba(229,231,235,0.9)" : "rgba(229,231,235,0.5)"}`,
-          boxShadow: scrolled ? "0 4px 20px rgba(0,0,0,0.06)" : "none",
+          borderBottom: scrolled ? `1px solid rgba(229,231,235,0.9)` : "1px solid transparent",
+          boxShadow: scrolled ? "0 4px 20px rgba(0,0,0,0.05)" : "none",
           transition: "all 0.28s ease",
           display: "flex", alignItems: "center", justifyContent: "space-between",
-          padding: "0 28px",
+          padding: "0 36px",
         }}
       >
-        <a href="#home" style={{ display: "flex", alignItems: "center", gap: 10, textDecoration: "none" }}>
-          <img src={logo} alt="WorthScope" style={{ height: 40, width: "auto" }} />
+        <a href="#home" style={{ display: "flex", flexDirection: "column", textDecoration: "none", lineHeight: 1 }}>
+          <img src={logo} alt="WorthScope" style={{ height: 36, width: "auto" }} />
+          <span style={{ marginTop: 2, fontSize: 9, color: TEXT3, letterSpacing: 0.2 }}>See Your Worth. Build Your Future.</span>
         </a>
 
-        <div className="ws-nav-links" style={{ display: "flex", alignItems: "center", gap: 4 }}>
+        <div
+          className="ws-nav-links"
+          style={{
+            position: "absolute", left: "50%", transform: "translateX(-50%)",
+            display: "flex", alignItems: "center", gap: 2,
+            background: "#FFFFFF",
+            border: `1px solid ${BORDER}`,
+            borderRadius: 100,
+            padding: "6px 8px",
+            boxShadow: "0 4px 16px rgba(0,0,0,0.04)",
+          }}
+        >
           {navLinks.map((l) => (
             <a
               key={l.label}
               href={l.href}
               className="ws-nav-link"
               style={{
-                fontSize: 15, fontWeight: 500, color: TEXT, textDecoration: "none",
-                padding: "6px 14px", borderRadius: 8, transition: "all 0.2s ease",
+                fontSize: 14, fontWeight: 500, color: TEXT, textDecoration: "none",
+                padding: "8px 18px", borderRadius: 100, transition: "all 0.2s ease",
               }}
             >
               {l.label}
@@ -145,18 +157,20 @@ export default function Landing() {
       </nav>
 
       {/* HERO */}
-      <section id="home" style={{ minHeight: "100vh", paddingTop: 64, padding: "104px 40px 80px" }}>
+      <section id="home" style={{ minHeight: "100vh", paddingTop: 76, padding: "116px 40px 80px" }}>
+        <div className="ws-hero-eyebrow-wrap" style={{ maxWidth: 1200, margin: "0 auto", textAlign: "center", marginBottom: 28 }}>
+          <div className="ws-eyebrow" style={{
+            display: "inline-flex", alignItems: "center", gap: 8,
+            background: ACCENT_LIGHT, border: `1px solid rgba(52,152,219,0.3)`,
+            borderRadius: 100, padding: "6px 14px", fontSize: 13, color: ACCENT, fontWeight: 500,
+            opacity: 0, animation: "ws-fade-up 0.5s ease 0.1s forwards",
+          }}>
+            <span style={{ width: 8, height: 8, borderRadius: "50%", background: ACCENT, animation: "ws-pulse 2s infinite" }} />
+            AI-Powered Career Intelligence
+          </div>
+        </div>
         <div style={{ maxWidth: 1200, margin: "0 auto", display: "grid", gridTemplateColumns: "55fr 45fr", gap: 56, alignItems: "center" }} className="ws-hero-grid">
           <div>
-            <div className="ws-eyebrow" style={{
-              display: "inline-flex", alignItems: "center", gap: 8,
-              background: ACCENT_LIGHT, border: `1px solid rgba(52,152,219,0.3)`,
-              borderRadius: 100, padding: "6px 14px", fontSize: 13, color: ACCENT, fontWeight: 500,
-              opacity: 0, animation: "ws-fade-up 0.5s ease 0.1s forwards",
-            }}>
-              <span style={{ width: 8, height: 8, borderRadius: "50%", background: ACCENT, animation: "ws-pulse 2s infinite" }} />
-              AI-Powered Career Intelligence
-            </div>
 
             <h1 style={{
               marginTop: 24, fontWeight: 700, fontSize: "clamp(40px, 5.5vw, 60px)",
