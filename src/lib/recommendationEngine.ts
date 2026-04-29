@@ -4,30 +4,36 @@
  */
 
 export type Answers = {
-  // Profile
-  ageRange: string | null;
+  // Profile (sourced from worthscope_user_profile, merged in by Assessment)
+  fullName?: string;
+  firstName?: string;
+  age?: number | null;
+  ageRange?: string | null;
   educationLevel: "secondary" | "university" | null;
+  classOrLevel?: string | null;
 
   // Core traits
   strongSubjects: string[];
   interests: string[];
   activities: string[];
   personality: string | null;
-  careerClarity: string | null;
+  careerClarity?: string | null;
 
-  // Career direction refinement (NEW)
-  careerInclination: string | null;        // "Yes, I have one in mind" | "I have a few ideas" | "No, I'm not sure at all"
-  statedCareer: string | null;             // free text from Q8B
-  preferenceConflict: string | null;       // Q9
-  taskInterests: string[];                 // Q10, max 2
-  outputPreference: string | null;         // Q11
-  careerConfidence: string | null;         // Q12
+  // Career direction refinement
+  careerInclination: string | null;
+  statedCareer: string | null;
+  preferenceConflict: string | null;
+  taskInterests: string[];
+  outputPreference: string | null;
+  careerConfidence: string | null;
 
-  // Branch
-  schoolClass: string | null;
-  skillsStarted: string | null;
-  uniLevel: string | null;
-  courseAlignment: string | null;
+  // Course alignment (now derived from Q7 wording adapted by stage)
+  courseAlignment?: string | null;
+
+  // Legacy (unused by new flow but kept optional for back-compat)
+  schoolClass?: string | null;
+  skillsStarted?: string | null;
+  uniLevel?: string | null;
 
   // Final
   goalOrConcern: string;
