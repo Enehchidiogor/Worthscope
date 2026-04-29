@@ -15,7 +15,7 @@ export default function SignIn() {
 
   const onSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    navigate("/dashboard");
+    navigate("/onboarding");
   };
 
   return (
