@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { CareerIcon } from "@/components/career/CareerIcon";
 import { loadResults, type CareerResult } from "@/lib/recommendationEngine";
+import logo from "@/assets/worthscope-logo.png";
 
 const ACCENT = "#3498DB";
 const ACCENT_DARK = "#217DBB";
@@ -49,7 +50,11 @@ export default function CareerResults() {
           animation: "ws-fade-in 0.4s ease",
         }}
       >
-        <div style={{ fontWeight: 700, fontSize: 20, color: ACCENT }}>WorthScope</div>
+        <img
+          src={logo}
+          alt="WorthScope — See Your Worth. Build Your Future."
+          style={{ height: 64, width: "auto", objectFit: "contain", display: "block" }}
+        />
         <button
           onClick={() => navigate("/assessment")}
           style={{
