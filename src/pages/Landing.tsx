@@ -638,33 +638,49 @@ function ResultPreviewCard() {
 }
 
 function RoadmapPath() {
+  // Labels placed away from the path; anchor + dy chosen per node so text never overlaps the line.
+  const nodes = [
+    { x: 40, y: 300, l: "START", anchor: "middle", dy: 32, big: false, pulse: false },
+    { x: 140, y: 220, l: "Discovery", anchor: "start", dy: 4, dx: 18, big: false, pulse: false },
+    { x: 230, y: 130, l: "Skill Building", anchor: "end", dy: 4, dx: -18, big: false, pulse: false },
+    { x: 330, y: 50, l: "YOUR GOAL", anchor: "middle", dy: -22, big: true, pulse: true },
+  ] as const;
+
   return (
-    <div style={{ position: "relative", height: 380, background: "rgba(255,255,255,.08)", borderRadius: 22, padding: 24, border: "1px solid rgba(255,255,255,.15)", backdropFilter: "blur(10px)" }}>
-      <svg viewBox="0 0 360 340" width="100%" height="100%">
+    <div style={{ position: "relative", height: 380, padding: 0, background: "transparent", border: "none" }}>
+      <svg viewBox="0 0 380 360" width="100%" height="100%" style={{ overflow: "visible" }}>
         <defs>
           <linearGradient id="rmp" x1="0" y1="1" x2="1" y2="0">
-            <stop offset="0%" stopColor="#fff" stopOpacity=".4" />
+            <stop offset="0%" stopColor="#fff" stopOpacity=".5" />
             <stop offset="100%" stopColor="#fff" stopOpacity="1" />
           </linearGradient>
         </defs>
         <path
-          d="M30,300 C 100,260 80,180 180,160 C 280,140 260,60 330,40"
+          d="M40,300 C 110,260 90,180 180,170 C 270,160 250,70 330,50"
           fill="none"
           stroke="url(#rmp)"
-          strokeWidth="3"
+          strokeWidth="2.5"
           strokeDasharray="8 6"
           style={{ animation: "ws-dash 3s linear infinite" }}
         />
-        {[
-          { x: 30, y: 300, l: "START" },
-          { x: 130, y: 230, l: "Discovery" },
-          { x: 230, y: 130, l: "Skill Building" },
-          { x: 330, y: 40, l: "YOUR GOAL" },
-        ].map((n, i) => (
+        {nodes.map((n) => (
           <g key={n.l}>
-            <circle cx={n.x} cy={n.y} r={i === 3 ? 14 : 10} fill="#fff" style={{ animation: `ws-float ${2.5 + i * 0.3}s ease-in-out infinite` }} />
-            {i === 3 && <circle cx={n.x} cy={n.y} r="22" fill="none" stroke="#fff" strokeOpacity=".5" strokeWidth="1.5" style={{ animation: "ws-pulse-ring 2s ease-in-out infinite" }} />}
-            <text x={n.x} y={n.y - 22} textAnchor="middle" fill="#fff" fontSize="12" fontWeight="600" fontFamily={FONT}>{n.l}</text>
+            {n.pulse && (
+              <circle cx={n.x} cy={n.y} r="22" fill="none" stroke="#fff" strokeOpacity=".5" strokeWidth="1.5" style={{ animation: "ws-pulse-ring 2s ease-in-out infinite" }} />
+            )}
+            <circle cx={n.x} cy={n.y} r={n.big ? 12 : 8} fill="#fff" />
+            <text
+              x={n.x + ("dx" in n ? (n as any).dx : 0)}
+              y={n.y + n.dy}
+              textAnchor={n.anchor}
+              fill="#fff"
+              fontSize={n.big ? "13" : "12"}
+              fontWeight="600"
+              fontFamily={FONT}
+              style={{ letterSpacing: n.big ? 0.5 : 0 }}
+            >
+              {n.l}
+            </text>
           </g>
         ))}
       </svg>
