@@ -207,12 +207,27 @@ export const CareerOpportunitiesCard = () => {
           </span>
         ))}
       </div>
-      <div
-        className="mt-3 text-center"
-        style={{ fontWeight: 500, fontSize: 12, color: "#9CA3AF" }}
-      >
-        Complete your journey to see your matched roles
+      <div className="mt-4 text-center">
+        <Link
+          to="/assessment"
+          style={{
+            display: "inline-block",
+            background: "#3498DB",
+            color: "#FFFFFF",
+            fontWeight: 600,
+            fontSize: 13,
+            padding: "10px 18px",
+            borderRadius: 10,
+            textDecoration: "none",
+          }}
+        >
+          {hasAssessment ? "Retake Assessment →" : "Take Assessment →"}
+        </Link>
+        <div className="mt-2" style={{ fontWeight: 500, fontSize: 12, color: "#9CA3AF" }}>
+          Unlock your real career matches in ~3 minutes
+        </div>
       </div>
+
     </section>
   );
 };
