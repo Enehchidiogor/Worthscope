@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { generateCareerResults, type Answers } from "@/lib/recommendationEngine";
+import logo from "@/assets/worthscope-logo.png";
 
 /* WorthScope — 15-Question Career Assessment with refinement section.
    Pure CSS animations, Poppins, single accent #3498DB. */
@@ -554,7 +555,11 @@ export default function Assessment() {
             borderBottom: "1px solid rgba(52,152,219,0.1)",
           }}
         >
-          <div style={{ fontWeight: 700, fontSize: 20, color: ACCENT }}>WorthScope</div>
+          <img
+            src={logo}
+            alt="WorthScope — See Your Worth. Build Your Future."
+            style={{ height: 64, width: "auto", objectFit: "contain", display: "block" }}
+          />
 
           {screen !== "welcome" ? (
             <div style={{ position: "relative", width: 200, maxWidth: "40vw" }}>
