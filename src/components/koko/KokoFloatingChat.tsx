@@ -38,7 +38,12 @@ const fallbackReply = (text: string) =>
 export const KokoFloatingChat = () => {
   const { pathname } = useLocation();
   const navigate = useNavigate();
-  const hidden = pathname.startsWith("/onboarding") || pathname.startsWith("/assessment");
+  const hidden =
+    pathname === "/" ||
+    pathname.startsWith("/signin") ||
+    pathname.startsWith("/signup") ||
+    pathname.startsWith("/onboarding") ||
+    pathname.startsWith("/assessment");
 
   const [open, setOpen] = useState(false);
   const [unread, setUnread] = useState(true);

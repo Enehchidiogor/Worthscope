@@ -2,32 +2,83 @@ import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import logo from "@/assets/worthscope-logo.png";
 
-const ACCENT = "#3498DB";
-const ACCENT_DARK = "#217BBB";
-const ACCENT_LIGHT = "#EBF5FB";
+/* WorthScope — Landing Page
+   Modern, clean, highly interactive. Built per spec:
+   - Glassmorphism navbar (sticky, transitions on scroll)
+   - Hero with animated vertical journey diagram
+   - Problem / Solution / How it Works / Features / CTA / Footer
+   - All visuals are SVG / CSS — no external images
+*/
+
+const ACCENT = "#3B82F6";
+const ACCENT_DARK = "#2563EB";
 const TEXT = "#111111";
 const TEXT2 = "#6B7280";
-const TEXT3 = "#9CA3AF";
 const BORDER = "#E5E7EB";
-const BG2 = "#F8FAFC";
-const FONT = "'DM Sans', sans-serif";
+const BG2 = "#FAFAFA";
+const FONT = "'Poppins', 'Inter', sans-serif";
 
-const Icon = ({ d, size = 20, stroke = ACCENT, fill = "none", sw = 1.8 }: { d: string; size?: number; stroke?: string; fill?: string; sw?: number }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill={fill} stroke={stroke} strokeWidth={sw} strokeLinecap="round" strokeLinejoin="round" dangerouslySetInnerHTML={{ __html: d }} />
+/* ───── Tiny inline icon helper ───── */
+const I = ({
+  d,
+  size = 20,
+  stroke = "currentColor",
+  sw = 1.8,
+  fill = "none",
+}: {
+  d: string;
+  size?: number;
+  stroke?: string;
+  sw?: number;
+  fill?: string;
+}) => (
+  <svg
+    width={size}
+    height={size}
+    viewBox="0 0 24 24"
+    fill={fill}
+    stroke={stroke}
+    strokeWidth={sw}
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    dangerouslySetInnerHTML={{ __html: d }}
+  />
 );
+
+/* ───── Journey nodes (hero) ───── */
+const JOURNEY = [
+  { label: "Lost & Unsure", icon: "<circle cx='12' cy='12' r='9'/><path d='M9.5 9a2.5 2.5 0 0 1 5 0c0 1.5-2.5 2-2.5 4'/><circle cx='12' cy='17' r='.6' fill='currentColor'/>" },
+  { label: "Take the Assessment", icon: "<path d='M9 11l3 3 7-7'/><path d='M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11'/>" },
+  { label: "Profile Analyzed", icon: "<path d='M3 12a9 9 0 1 0 9-9'/><path d='M12 7v5l3 2'/>" },
+  { label: "Career Path Unlocked", icon: "<rect x='3' y='11' width='18' height='10' rx='2'/><path d='M7 11V7a5 5 0 0 1 10 0'/>" },
+  { label: "You're on Your Way", icon: "<path d='M5 13l4 4L19 7'/>" },
+];
+
+/* ───── Features ───── */
+const FEATURES = [
+  { t: "Career Pathway", d: "A clear, step-by-step path from where you are to your goal.", i: "<path d='M4 20l4-4 4 4 8-8'/><circle cx='20' cy='12' r='2'/>" },
+  { t: "Skill Gap Scanner", d: "See exactly which skills to build next — and which to skip.", i: "<circle cx='11' cy='11' r='7'/><path d='M21 21l-4.3-4.3'/>" },
+  { t: "Course Intelligence", d: "Find the right courses, programs, and degrees for your path.", i: "<path d='M4 19V6a2 2 0 0 1 2-2h12v15H6a2 2 0 0 0-2 2z'/><path d='M8 7h8'/>" },
+  { t: "Future Earning Insights", d: "Real salary data so you can plan your future with confidence.", i: "<path d='M3 17l6-6 4 4 7-7'/><path d='M14 8h7v7'/>" },
+  { t: "Job Matching Insights", d: "See the roles that fit you — locally and globally.", i: "<rect x='3' y='7' width='18' height='13' rx='2'/><path d='M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2'/>" },
+  { t: "Parent Dashboard", d: "Parents get visibility, not pressure — clarity for the whole family.", i: "<circle cx='9' cy='8' r='3'/><circle cx='17' cy='10' r='2.5'/><path d='M3 20c0-3 3-5 6-5s6 2 6 5'/><path d='M14 20c0-2 2-3.5 4-3.5s4 1.5 4 3.5'/>" },
+];
 
 export default function Landing() {
   const navigate = useNavigate();
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [activeNode, setActiveNode] = useState(1);
   const observed = useRef<Set<Element>>(new Set());
 
+  /* Sticky navbar */
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
+  /* Scroll-reveal */
   useEffect(() => {
     const io = new IntersectionObserver(
       (entries) => {
@@ -38,7 +89,7 @@ export default function Landing() {
           }
         });
       },
-      { threshold: 0.15 }
+      { threshold: 0.12 }
     );
     document.querySelectorAll(".ws-reveal").forEach((el) => {
       if (!observed.current.has(el)) {
@@ -49,279 +100,220 @@ export default function Landing() {
     return () => io.disconnect();
   }, []);
 
-  const navLinks = [
-    { label: "Home", href: "#home" },
-    { label: "Services", href: "#features" },
-    { label: "About", href: "#how" },
-    { label: "Contact", href: "#cta" },
-  ];
+  /* Cycle the "current" hero node */
+  useEffect(() => {
+    const t = setInterval(() => setActiveNode((n) => (n + 1) % JOURNEY.length), 2200);
+    return () => clearInterval(t);
+  }, []);
+
+  const scrollTo = (id: string) => {
+    const el = document.getElementById(id);
+    if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+    setMobileOpen(false);
+  };
 
   return (
-    <div style={{ background: "#FFFFFF", color: TEXT, fontFamily: FONT, scrollBehavior: "smooth" }}>
-      {/* NAVBAR */}
-      <nav
+    <div style={{ background: "#FFFFFF", color: TEXT, fontFamily: FONT, minHeight: "100vh" }}>
+      {/* ─── Fonts + global animations ─── */}
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap');
+        .ws-reveal{opacity:0;transform:translateY(24px);transition:opacity .8s ease,transform .8s ease}
+        .ws-reveal.ws-in{opacity:1;transform:translateY(0)}
+        @keyframes ws-float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+        @keyframes ws-pulse-ring{0%{box-shadow:0 0 0 0 rgba(59,130,246,.45)}70%{box-shadow:0 0 0 14px rgba(59,130,246,0)}100%{box-shadow:0 0 0 0 rgba(59,130,246,0)}}
+        @keyframes ws-dash{to{stroke-dashoffset:-24}}
+        @keyframes ws-orbit{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+        @keyframes ws-glow{0%,100%{filter:drop-shadow(0 0 4px rgba(59,130,246,.35))}50%{filter:drop-shadow(0 0 14px rgba(59,130,246,.7))}}
+        .ws-card{transition:transform .25s ease,box-shadow .25s ease,border-color .25s ease}
+        .ws-card:hover{transform:translateY(-6px);box-shadow:0 20px 40px -20px rgba(17,17,17,.18);border-color:${ACCENT}}
+        .ws-btn-primary{transition:transform .2s ease,box-shadow .2s ease,background .2s ease}
+        .ws-btn-primary:hover{transform:translateY(-2px);box-shadow:0 12px 28px -8px rgba(59,130,246,.55);background:${ACCENT_DARK}}
+        .ws-btn-outline{transition:all .2s ease}
+        .ws-btn-outline:hover{background:${ACCENT};color:#fff;border-color:${ACCENT}}
+        .ws-link{position:relative;transition:color .2s ease}
+        .ws-link:hover{color:${ACCENT}}
+        .ws-link::after{content:'';position:absolute;left:0;bottom:-4px;width:0;height:2px;background:${ACCENT};transition:width .25s ease}
+        .ws-link:hover::after{width:100%}
+        .ws-pill{transition:transform .2s ease,background .2s ease}
+        .ws-pill:hover{transform:translateY(-2px);background:${ACCENT};color:#fff;border-color:${ACCENT}}
+      `}</style>
+
+      {/* ───────────── NAVBAR ───────────── */}
+      <header
         style={{
-          position: "fixed", top: 0, left: 0, right: 0, height: 76, zIndex: 50,
-          background: scrolled ? "rgba(255,255,255,0.92)" : "rgba(255,255,255,0.6)",
-          backdropFilter: "blur(16px) saturate(180%)",
-          WebkitBackdropFilter: "blur(16px) saturate(180%)",
-          borderBottom: scrolled ? `1px solid rgba(229,231,235,0.9)` : "1px solid transparent",
-          boxShadow: scrolled ? "0 4px 20px rgba(0,0,0,0.05)" : "none",
-          transition: "all 0.28s ease",
-          display: "flex", alignItems: "center", justifyContent: "space-between",
-          padding: "0 36px",
+          position: "fixed",
+          top: 0, left: 0, right: 0,
+          zIndex: 50,
+          background: scrolled ? "rgba(255,255,255,0.92)" : "rgba(255,255,255,0.65)",
+          backdropFilter: "saturate(180%) blur(16px)",
+          WebkitBackdropFilter: "saturate(180%) blur(16px)",
+          borderBottom: `1px solid ${scrolled ? "rgba(229,231,235,1)" : "rgba(229,231,235,.6)"}`,
+          boxShadow: scrolled ? "0 8px 24px -16px rgba(17,17,17,.15)" : "none",
+          transition: "all .25s ease",
         }}
       >
-        <a href="#home" style={{ display: "flex", flexDirection: "column", textDecoration: "none", lineHeight: 1 }}>
-          <img src={logo} alt="WorthScope" style={{ height: 36, width: "auto" }} />
-          <span style={{ marginTop: 2, fontSize: 9, color: TEXT3, letterSpacing: 0.2 }}>See Your Worth. Build Your Future.</span>
-        </a>
+        <div style={{ maxWidth: 1200, margin: "0 auto", padding: "0 24px", height: 72, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+          <button onClick={() => navigate("/")} style={{ display: "flex", alignItems: "center", gap: 10, background: "transparent", border: "none", cursor: "pointer" }}>
+            <img src={logo} alt="WorthScope" style={{ height: 36, width: "auto" }} />
+            <span style={{ fontWeight: 700, fontSize: 18, color: TEXT, letterSpacing: -0.3 }}>WorthScope</span>
+          </button>
 
-        <div
-          className="ws-nav-links"
-          style={{
-            position: "absolute", left: "50%", transform: "translateX(-50%)",
-            display: "flex", alignItems: "center", gap: 2,
-            background: "#FFFFFF",
-            border: `1px solid ${BORDER}`,
-            borderRadius: 100,
-            padding: "6px 8px",
-            boxShadow: "0 4px 16px rgba(0,0,0,0.04)",
-          }}
-        >
-          {navLinks.map((l) => (
-            <a
-              key={l.label}
-              href={l.href}
-              className="ws-nav-link"
-              style={{
-                fontSize: 14, fontWeight: 500, color: TEXT, textDecoration: "none",
-                padding: "8px 18px", borderRadius: 100, transition: "all 0.2s ease",
-              }}
-            >
-              {l.label}
-            </a>
-          ))}
-        </div>
-
-        <button
-          onClick={() => navigate("/signin")}
-          className="ws-signin-btn"
-          style={{
-            background: ACCENT, color: "#fff", border: "none", borderRadius: 8,
-            padding: "10px 22px", fontSize: 14, fontWeight: 500, cursor: "pointer",
-            fontFamily: FONT, transition: "all 0.2s ease",
-          }}
-        >
-          Sign In
-        </button>
-
-        <button
-          className="ws-hamburger"
-          aria-label="Menu"
-          onClick={() => setMobileOpen((v) => !v)}
-          style={{
-            display: "none", background: "transparent", border: "none", cursor: "pointer", padding: 6,
-          }}
-        >
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={TEXT} strokeWidth="2" strokeLinecap="round">
-            <line x1="3" y1="6" x2="21" y2="6" />
-            <line x1="3" y1="12" x2="21" y2="12" />
-            <line x1="3" y1="18" x2="21" y2="18" />
-          </svg>
-        </button>
-
-        {mobileOpen && (
-          <div
-            className="ws-mobile-drawer"
-            style={{
-              position: "absolute", top: 64, left: 0, right: 0,
-              background: "rgba(255,255,255,0.95)", backdropFilter: "blur(16px)",
-              borderBottom: `1px solid ${BORDER}`, padding: 20,
-              display: "flex", flexDirection: "column", gap: 10,
-              animation: "ws-slide-down 0.3s ease",
-            }}
-          >
-            {navLinks.map((l) => (
-              <a key={l.label} href={l.href} onClick={() => setMobileOpen(false)}
-                style={{ fontSize: 16, fontWeight: 500, color: TEXT, textDecoration: "none", padding: "10px 4px" }}>
+          <nav style={{ display: "flex", gap: 36, alignItems: "center" }} className="ws-nav-center">
+            {[
+              { label: "Home", id: "hero" },
+              { label: "Services", id: "features" },
+              { label: "About", id: "solution" },
+              { label: "Contact", id: "cta" },
+            ].map((l) => (
+              <button key={l.id} onClick={() => scrollTo(l.id)} className="ws-link" style={{ background: "transparent", border: "none", cursor: "pointer", color: TEXT, fontSize: 15, fontWeight: 500, fontFamily: FONT }}>
                 {l.label}
-              </a>
+              </button>
             ))}
-            <button onClick={() => navigate("/signin")}
-              style={{ marginTop: 8, background: ACCENT, color: "#fff", border: "none", borderRadius: 8, padding: "12px", fontSize: 14, fontWeight: 600, cursor: "pointer", fontFamily: FONT }}>
+          </nav>
+
+          <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
+            <button onClick={() => navigate("/signin")} className="ws-btn-primary" style={{ background: ACCENT, color: "#fff", border: "none", padding: "10px 20px", borderRadius: 999, fontWeight: 600, fontSize: 14, cursor: "pointer", fontFamily: FONT }}>
               Sign In
             </button>
-          </div>
-        )}
-      </nav>
-
-      {/* HERO */}
-      <section id="home" style={{ minHeight: "100vh", paddingTop: 76, padding: "116px 40px 80px" }}>
-        <div className="ws-hero-eyebrow-wrap" style={{ maxWidth: 1200, margin: "0 auto", textAlign: "center", marginBottom: 28 }}>
-          <div className="ws-eyebrow" style={{
-            display: "inline-flex", alignItems: "center", gap: 8,
-            background: ACCENT_LIGHT, border: `1px solid rgba(52,152,219,0.3)`,
-            borderRadius: 100, padding: "6px 14px", fontSize: 13, color: ACCENT, fontWeight: 500,
-            opacity: 0, animation: "ws-fade-up 0.5s ease 0.1s forwards",
-          }}>
-            <span style={{ width: 8, height: 8, borderRadius: "50%", background: ACCENT, animation: "ws-pulse 2s infinite" }} />
-            AI-Powered Career Intelligence
+            <button onClick={() => setMobileOpen((o) => !o)} aria-label="Menu" style={{ display: "none", background: "transparent", border: "none", cursor: "pointer" }} className="ws-mobile-btn">
+              <I d="<path d='M4 6h16M4 12h16M4 18h16'/>" stroke={TEXT} />
+            </button>
           </div>
         </div>
-        <div style={{ maxWidth: 1200, margin: "0 auto", display: "grid", gridTemplateColumns: "55fr 45fr", gap: 56, alignItems: "center" }} className="ws-hero-grid">
-          <div>
 
-            <h1 style={{
-              marginTop: 24, fontWeight: 700, fontSize: "clamp(40px, 5.5vw, 60px)",
-              lineHeight: 1.1, letterSpacing: "-1.5px", color: TEXT,
-              opacity: 0, animation: "ws-fade-up 0.5s ease 0.25s forwards",
-            }}>
-              Find the<br />
-              <span style={{ color: ACCENT }}>Right Career</span><br />
-              Path for You
+        {mobileOpen && (
+          <div style={{ borderTop: `1px solid ${BORDER}`, background: "#fff", padding: "12px 24px", display: "flex", flexDirection: "column", gap: 8 }}>
+            {["Home","Services","About","Contact"].map((l, idx) => (
+              <button key={l} onClick={() => scrollTo(["hero","features","solution","cta"][idx])} style={{ background: "transparent", border: "none", textAlign: "left", padding: "10px 0", fontSize: 15, color: TEXT, cursor: "pointer", fontFamily: FONT }}>{l}</button>
+            ))}
+          </div>
+        )}
+      </header>
+
+      {/* ───────────── HERO ───────────── */}
+      <section id="hero" style={{ minHeight: "100vh", paddingTop: 120, paddingBottom: 80, display: "flex", alignItems: "center", position: "relative", overflow: "hidden" }}>
+        {/* Soft background accents */}
+        <div aria-hidden style={{ position: "absolute", top: -120, right: -120, width: 480, height: 480, borderRadius: "50%", background: "radial-gradient(circle, rgba(59,130,246,.12), transparent 70%)", pointerEvents: "none" }} />
+        <div aria-hidden style={{ position: "absolute", bottom: -160, left: -160, width: 480, height: 480, borderRadius: "50%", background: "radial-gradient(circle, rgba(59,130,246,.07), transparent 70%)", pointerEvents: "none" }} />
+
+        <div style={{ maxWidth: 1200, margin: "0 auto", padding: "0 24px", display: "grid", gridTemplateColumns: "1.05fr .95fr", gap: 64, alignItems: "center", width: "100%" }}>
+          {/* LEFT */}
+          <div className="ws-reveal">
+            <span style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "8px 14px", borderRadius: 999, background: "rgba(59,130,246,.08)", border: `1px solid rgba(59,130,246,.2)`, color: ACCENT, fontWeight: 600, fontSize: 13 }}>
+              <span style={{ width: 6, height: 6, borderRadius: "50%", background: ACCENT, animation: "ws-float 1.6s ease-in-out infinite" }} />
+              AI-Powered Career Intelligence
+            </span>
+            <h1 style={{ fontSize: 60, lineHeight: 1.05, fontWeight: 800, margin: "20px 0 18px", letterSpacing: -1.5, color: TEXT }}>
+              Find the <span style={{ color: ACCENT }}>Right Career</span> Path for You
             </h1>
-
-            <p style={{
-              marginTop: 24, fontSize: 17, color: TEXT2, maxWidth: 480, lineHeight: 1.75,
-              opacity: 0, animation: "ws-fade-up 0.5s ease 0.4s forwards",
-            }}>
-              WorthScope helps you discover the career path that fits your strengths,
-              interests, and goals — then shows you exactly what to do next.
+            <p style={{ fontSize: 18, lineHeight: 1.65, color: TEXT2, maxWidth: 540, margin: 0 }}>
+              WorthScope helps students discover the career path that fits their strengths, interests, and goals — then shows you exactly what to do next.
             </p>
-
-            <div style={{
-              marginTop: 32, display: "flex", gap: 14, flexWrap: "wrap",
-              opacity: 0, animation: "ws-fade-up 0.5s ease 0.55s forwards",
-            }}>
-              <button
-                onClick={() => navigate("/onboarding")}
-                className="ws-btn-primary"
-                style={{
-                  background: ACCENT, color: "#fff", border: "none", borderRadius: 8,
-                  height: 48, padding: "0 28px", fontSize: 15, fontWeight: 600, cursor: "pointer",
-                  fontFamily: FONT, transition: "all 0.2s ease",
-                }}
-              >
+            <div style={{ display: "flex", gap: 14, marginTop: 36, flexWrap: "wrap" }}>
+              <button onClick={() => navigate("/onboarding")} className="ws-btn-primary" style={{ background: ACCENT, color: "#fff", border: "none", padding: "16px 28px", borderRadius: 14, fontWeight: 600, fontSize: 16, cursor: "pointer", fontFamily: FONT, display: "inline-flex", alignItems: "center", gap: 10 }}>
                 Start Assessment
+                <I d="<path d='M5 12h14M13 5l7 7-7 7'/>" size={18} stroke="#fff" />
               </button>
-              <button
-                onClick={() => document.getElementById("how")?.scrollIntoView({ behavior: "smooth" })}
-                className="ws-btn-secondary"
-                style={{
-                  background: "transparent", color: TEXT, border: `1.5px solid ${BORDER}`, borderRadius: 8,
-                  height: 48, padding: "0 28px", fontSize: 15, fontWeight: 600, cursor: "pointer",
-                  fontFamily: FONT, transition: "all 0.2s ease",
-                }}
-              >
+              <button onClick={() => scrollTo("how")} className="ws-btn-outline" style={{ background: "transparent", color: TEXT, border: `1.5px solid ${BORDER}`, padding: "16px 28px", borderRadius: 14, fontWeight: 600, fontSize: 16, cursor: "pointer", fontFamily: FONT }}>
                 See How It Works
               </button>
             </div>
+
+            {/* Trust row */}
+            <div style={{ display: "flex", gap: 28, marginTop: 44, flexWrap: "wrap" }}>
+              {[{ n: "12k+", l: "Students" }, { n: "94%", l: "Clarity Rate" }, { n: "150+", l: "Career Paths" }].map((s) => (
+                <div key={s.l}>
+                  <div style={{ fontSize: 24, fontWeight: 800, color: TEXT, letterSpacing: -0.5 }}>{s.n}</div>
+                  <div style={{ fontSize: 13, color: TEXT2, marginTop: 2 }}>{s.l}</div>
+                </div>
+              ))}
+            </div>
           </div>
 
-          {/* Right: Journey diagram */}
-          <div style={{ opacity: 0, animation: "ws-fade-up 0.6s ease 0.3s forwards" }}>
-            <div style={{ display: "flex", alignItems: "baseline", gap: 12, marginBottom: 24 }}>
-              <span style={{ fontSize: 11, fontWeight: 600, color: TEXT3, letterSpacing: 2, textTransform: "uppercase" }}>Your Journey</span>
-              <span style={{ fontSize: 18, fontWeight: 700, color: TEXT }}>From Confusion to Clarity</span>
-            </div>
-
-            <JourneyDiagram />
+          {/* RIGHT — Animated journey */}
+          <div className="ws-reveal" style={{ position: "relative", height: 560 }}>
+            <JourneyDiagram active={activeNode} />
           </div>
         </div>
       </section>
 
-      {/* PROBLEM */}
-      <section style={{ padding: "100px 40px", background: "#FFFFFF" }}>
-        <div style={{ maxWidth: 1200, margin: "0 auto", display: "grid", gridTemplateColumns: "1fr 1fr", gap: 56, alignItems: "center" }} className="ws-2col">
+      {/* ───────────── PROBLEM ───────────── */}
+      <section id="problem" style={{ background: BG2, padding: "100px 0", borderTop: `1px solid ${BORDER}`, borderBottom: `1px solid ${BORDER}` }}>
+        <div style={{ maxWidth: 1200, margin: "0 auto", padding: "0 24px", display: "grid", gridTemplateColumns: "1fr 1fr", gap: 64, alignItems: "center" }}>
           <div className="ws-reveal">
-            <h2 style={{ fontSize: "clamp(28px, 3.6vw, 42px)", fontWeight: 700, lineHeight: 1.2, letterSpacing: "-1px", color: TEXT }}>
-              Most Students <span style={{ color: ACCENT, position: "relative" }}>Guess</span> Their Future
+            <h2 style={{ fontSize: 42, fontWeight: 800, lineHeight: 1.15, margin: 0, color: TEXT, letterSpacing: -1 }}>
+              Most Students <span style={{ color: ACCENT }}>Guess</span> Their Future
             </h2>
-            <p style={{ marginTop: 20, fontSize: 17, color: TEXT2, lineHeight: 1.75, maxWidth: 480 }}>
-              Choosing a course or career should not be based on pressure, confusion, or guesswork.
-              Many students make decisions too early without the right guidance.
+            <p style={{ fontSize: 17, lineHeight: 1.7, color: TEXT2, marginTop: 20 }}>
+              Career choices today are made under pressure — from family, peers, and school. With no real guidance, students pick courses they don't understand, chase trends they don't enjoy, and end up rebuilding from scratch years later.
             </p>
-            <div style={{ marginTop: 24, display: "flex", flexWrap: "wrap", gap: 10 }}>
-              {["No clear direction", "Peer pressure", "Wrong course choice"].map((t) => (
-                <span key={t} style={{
-                  background: BG2, color: TEXT2, fontSize: 13, fontWeight: 500,
-                  padding: "8px 16px", borderRadius: 100, border: `1px solid ${BORDER}`,
-                }}>
-                  {t}
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 10, marginTop: 28 }}>
+              {["No clear direction", "Peer pressure", "Wrong course choice"].map((p) => (
+                <span key={p} className="ws-pill" style={{ padding: "10px 18px", borderRadius: 999, background: "#fff", border: `1px solid ${BORDER}`, color: TEXT, fontSize: 14, fontWeight: 500, cursor: "default" }}>
+                  {p}
                 </span>
               ))}
             </div>
           </div>
 
           <div className="ws-reveal">
-            <NetworkDiagram />
+            <ConfusionDiagram />
           </div>
         </div>
       </section>
 
-      {/* SOLUTION */}
-      <section style={{ padding: "100px 40px", background: BG2 }}>
-        <div style={{ maxWidth: 1200, margin: "0 auto", display: "grid", gridTemplateColumns: "1fr 1fr", gap: 56, alignItems: "center" }} className="ws-2col">
+      {/* ───────────── SOLUTION ───────────── */}
+      <section id="solution" style={{ padding: "110px 0", background: "#fff" }}>
+        <div style={{ maxWidth: 1200, margin: "0 auto", padding: "0 24px", display: "grid", gridTemplateColumns: "1fr 1fr", gap: 64, alignItems: "center" }}>
           <div className="ws-reveal">
-            <span style={{ fontSize: 11, fontWeight: 600, color: ACCENT, letterSpacing: 1.5, textTransform: "uppercase" }}>Career Result</span>
-            <h2 style={{ marginTop: 12, fontSize: "clamp(28px, 3.6vw, 42px)", fontWeight: 700, lineHeight: 1.2, letterSpacing: "-1px", color: TEXT }}>
-              WorthScope Gives You Clarity
+            <h2 style={{ fontSize: 42, fontWeight: 800, lineHeight: 1.15, margin: 0, color: TEXT, letterSpacing: -1 }}>
+              WorthScope Gives You <span style={{ color: ACCENT }}>Clarity</span>
             </h2>
-            <p style={{ marginTop: 20, fontSize: 17, color: TEXT2, lineHeight: 1.75, maxWidth: 460 }}>
-              We analyze your strengths, interests, and goals to give you a personalized career
-              direction and a clear next step.
+            <p style={{ fontSize: 17, lineHeight: 1.7, color: TEXT2, marginTop: 20 }}>
+              Our AI analyses your strengths, interests, and goals across 15 carefully designed signals — then matches you with careers that fit you, not just trends. You walk away with a personalised plan, the skills to build, and the next step to take this week.
             </p>
+            <ul style={{ listStyle: "none", padding: 0, margin: "28px 0 0", display: "grid", gap: 12 }}>
+              {["Personalised career matches", "30-day action plan", "Skill roadmap built for you"].map((b) => (
+                <li key={b} style={{ display: "flex", alignItems: "center", gap: 12, fontSize: 15, color: TEXT }}>
+                  <span style={{ width: 22, height: 22, borderRadius: "50%", background: "rgba(59,130,246,.12)", display: "grid", placeItems: "center", color: ACCENT }}>
+                    <I d="<path d='M5 12l5 5L20 7'/>" size={13} stroke={ACCENT} sw={2.5} />
+                  </span>
+                  {b}
+                </li>
+              ))}
+            </ul>
           </div>
 
           <div className="ws-reveal">
-            <ResultCard />
+            <ResultPreviewCard />
           </div>
         </div>
       </section>
 
-      {/* HOW IT WORKS */}
-      <section id="how" style={{ padding: "100px 40px", background: "#FFFFFF" }}>
-        <div style={{ maxWidth: 1100, margin: "0 auto" }}>
-          <div className="ws-reveal" style={{ textAlign: "center" }}>
-            <h2 style={{ fontSize: "clamp(28px, 3.6vw, 42px)", fontWeight: 700, letterSpacing: "-1px", color: TEXT }}>
-              How It Works
-            </h2>
-            <p style={{ marginTop: 14, fontSize: 17, color: TEXT2 }}>
-              Three simple steps to your career blueprint.
-            </p>
+      {/* ───────────── HOW IT WORKS ───────────── */}
+      <section id="how" style={{ padding: "110px 0", background: BG2, borderTop: `1px solid ${BORDER}`, borderBottom: `1px solid ${BORDER}` }}>
+        <div style={{ maxWidth: 1200, margin: "0 auto", padding: "0 24px" }}>
+          <div className="ws-reveal" style={{ textAlign: "center", maxWidth: 720, margin: "0 auto 60px" }}>
+            <h2 style={{ fontSize: 42, fontWeight: 800, margin: 0, letterSpacing: -1, color: TEXT }}>How It Works</h2>
+            <p style={{ fontSize: 17, color: TEXT2, marginTop: 14 }}>Three simple steps to your career blueprint.</p>
           </div>
 
-          <div style={{ marginTop: 56, position: "relative" }}>
-            <div style={{
-              position: "absolute", top: 60, left: "16%", right: "16%",
-              height: 1.5, background: BORDER, zIndex: 0,
-            }} className="ws-connector" />
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 24, position: "relative", zIndex: 1 }} className="ws-3col">
+          <div style={{ position: "relative" }}>
+            {/* Connecting line */}
+            <div aria-hidden style={{ position: "absolute", top: 56, left: "12%", right: "12%", height: 2, background: `linear-gradient(90deg, transparent, ${ACCENT}55, transparent)` }} />
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 32, position: "relative" }}>
               {[
-                { n: 1, t: "Answer a Few Questions", s: "Tell us about your subjects, interests, and goals." },
-                { n: 2, t: "We Analyze Your Profile", s: "The system matches your data to relevant career paths." },
-                { n: 3, t: "Get Your Career Blueprint", s: "Receive your roadmap, skill suggestions, and future direction." },
-              ].map((step, i) => (
-                <div
-                  key={step.n}
-                  className="ws-reveal ws-step-card"
-                  style={{
-                    background: "#FFFFFF", border: `1px solid ${BORDER}`, borderRadius: 12,
-                    padding: 28, transition: "all 0.25s ease", cursor: "default",
-                    transitionDelay: `${i * 150}ms`,
-                  }}
-                >
-                  <div style={{
-                    width: 44, height: 44, borderRadius: "50%", background: ACCENT,
-                    color: "#fff", fontWeight: 700, fontSize: 18,
-                    display: "grid", placeItems: "center",
-                    boxShadow: "0 4px 12px rgba(52,152,219,0.3)",
-                  }}>
-                    {step.n}
+                { n: 1, t: "Answer a Few Questions", d: "15 quick, thoughtful questions about how you think and what excites you.", i: "<path d='M21 12a9 9 0 1 1-3-6.7'/><path d='M21 4v5h-5'/>" },
+                { n: 2, t: "We Analyze Your Profile", d: "Our AI cross-references your answers with thousands of real career paths.", i: "<circle cx='12' cy='12' r='3'/><path d='M19 12a7 7 0 1 1-14 0 7 7 0 0 1 14 0z'/>" },
+                { n: 3, t: "Get Your Career Blueprint", d: "Personalised matches, skills to build, and your first step — clear today.", i: "<path d='M9 11l3 3L22 4'/><path d='M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11'/>" },
+              ].map((s) => (
+                <div key={s.n} className="ws-reveal ws-card" style={{ background: "#fff", border: `1px solid ${BORDER}`, borderRadius: 20, padding: 32, textAlign: "center", position: "relative" }}>
+                  <div style={{ width: 64, height: 64, margin: "0 auto", borderRadius: 18, background: "linear-gradient(135deg,rgba(59,130,246,.12),rgba(59,130,246,.04))", display: "grid", placeItems: "center", color: ACCENT, position: "relative" }}>
+                    <I d={s.i} size={28} stroke={ACCENT} />
+                    <span style={{ position: "absolute", top: -8, right: -8, width: 26, height: 26, borderRadius: "50%", background: ACCENT, color: "#fff", fontSize: 12, fontWeight: 700, display: "grid", placeItems: "center" }}>{s.n}</span>
                   </div>
-                  <div style={{ marginTop: 18, fontWeight: 700, fontSize: 17, color: TEXT }}>{step.t}</div>
-                  <p style={{ marginTop: 8, fontSize: 14, color: TEXT2, lineHeight: 1.6 }}>{step.s}</p>
+                  <h3 style={{ fontSize: 19, fontWeight: 700, marginTop: 22, marginBottom: 10, color: TEXT }}>{s.t}</h3>
+                  <p style={{ fontSize: 14.5, color: TEXT2, lineHeight: 1.6, margin: 0 }}>{s.d}</p>
                 </div>
               ))}
             </div>
@@ -329,333 +321,302 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* FEATURES */}
-      <section id="features" style={{ padding: "100px 40px", background: BG2 }}>
-        <div style={{ maxWidth: 1200, margin: "0 auto" }}>
-          <h2 className="ws-reveal" style={{ textAlign: "center", fontSize: "clamp(28px, 3.6vw, 42px)", fontWeight: 700, letterSpacing: "-1px", color: TEXT }}>
-            Everything You Need to Plan Your Future
-          </h2>
+      {/* ───────────── FEATURES ───────────── */}
+      <section id="features" style={{ padding: "110px 0", background: "#fff" }}>
+        <div style={{ maxWidth: 1200, margin: "0 auto", padding: "0 24px" }}>
+          <div className="ws-reveal" style={{ textAlign: "center", maxWidth: 760, margin: "0 auto 56px" }}>
+            <h2 style={{ fontSize: 42, fontWeight: 800, margin: 0, letterSpacing: -1, color: TEXT }}>
+              Everything You Need to Plan Your Future
+            </h2>
+            <p style={{ fontSize: 17, color: TEXT2, marginTop: 14 }}>
+              Tools built for students, parents, and counsellors — all in one place.
+            </p>
+          </div>
 
-          <div style={{ marginTop: 56, display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 20 }} className="ws-3col">
-            {[
-              { i: '<polyline points="16 3 21 3 21 8"/><line x1="4" y1="20" x2="21" y2="3"/><polyline points="21 16 21 21 16 21"/><line x1="15" y1="15" x2="21" y2="21"/><line x1="4" y1="4" x2="9" y2="9"/>', t: "Career Pathway", s: "Discover which careers align with your profile and goals." },
-              { i: '<line x1="12" y1="20" x2="12" y2="10"/><line x1="18" y1="20" x2="18" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>', t: "Skill Gap Scanner", s: "See exactly which skills you need to close the gap." },
-              { i: '<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>', t: "Course Intelligence", s: "Get matched to the right courses for your career direction." },
-              { i: '<polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/>', t: "Future Earning Insights", s: "Understand earning potential across different career paths." },
-              { i: '<rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>', t: "Job Matching Insights", s: "See which roles are in demand and where your skills fit." },
-              { i: '<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>', t: "Parent Dashboard", s: "Parents can track progress and understand their child's direction." },
-            ].map((f, i) => (
-              <div
-                key={f.t}
-                className="ws-reveal ws-feature-card"
-                style={{
-                  background: "#FFFFFF", border: `1px solid ${BORDER}`, borderRadius: 12,
-                  padding: 28, transition: "all 0.25s ease", cursor: "default",
-                  transitionDelay: `${i * 80}ms`,
-                }}
-              >
-                <div style={{
-                  width: 44, height: 44, borderRadius: 10, background: ACCENT_LIGHT,
-                  display: "grid", placeItems: "center",
-                }}>
-                  <Icon d={f.i} size={20} stroke={ACCENT} />
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 24 }}>
+            {FEATURES.map((f) => (
+              <div key={f.t} className="ws-reveal ws-card" style={{ background: "#fff", border: `1px solid ${BORDER}`, borderRadius: 18, padding: 28 }}>
+                <div style={{ width: 48, height: 48, borderRadius: 12, background: "rgba(59,130,246,.1)", display: "grid", placeItems: "center", color: ACCENT, marginBottom: 18 }}>
+                  <I d={f.i} size={22} stroke={ACCENT} />
                 </div>
-                <div style={{ marginTop: 16, fontSize: 16, fontWeight: 600, color: TEXT }}>{f.t}</div>
-                <p style={{ marginTop: 8, fontSize: 14, color: TEXT2, lineHeight: 1.6 }}>{f.s}</p>
+                <h3 style={{ fontSize: 17, fontWeight: 700, color: TEXT, margin: "0 0 8px" }}>{f.t}</h3>
+                <p style={{ fontSize: 14, color: TEXT2, lineHeight: 1.6, margin: 0 }}>{f.d}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* CTA */}
-      <section id="cta" style={{ background: ACCENT, padding: "80px 40px", color: "#fff" }}>
-        <div style={{ maxWidth: 1200, margin: "0 auto", display: "grid", gridTemplateColumns: "1fr 1fr", gap: 56, alignItems: "center" }} className="ws-2col">
+      {/* ───────────── CTA ───────────── */}
+      <section id="cta" style={{ padding: "100px 0", background: ACCENT, position: "relative", overflow: "hidden" }}>
+        <div aria-hidden style={{ position: "absolute", inset: 0, background: "radial-gradient(circle at 80% 20%, rgba(255,255,255,.18), transparent 50%)" }} />
+        <div style={{ maxWidth: 1200, margin: "0 auto", padding: "0 24px", display: "grid", gridTemplateColumns: "1.1fr .9fr", gap: 56, alignItems: "center", position: "relative" }}>
           <div className="ws-reveal">
-            <h2 style={{ fontSize: "clamp(30px, 4vw, 46px)", fontWeight: 700, letterSpacing: "-1px", lineHeight: 1.15, color: "#fff" }}>
+            <h2 style={{ fontSize: 46, fontWeight: 800, color: "#fff", lineHeight: 1.1, margin: 0, letterSpacing: -1.2 }}>
               Stop Guessing. Start Planning.
             </h2>
-            <p style={{ marginTop: 18, fontSize: 17, color: "rgba(255,255,255,0.9)", lineHeight: 1.7, maxWidth: 480 }}>
+            <p style={{ color: "rgba(255,255,255,.85)", fontSize: 17, lineHeight: 1.7, marginTop: 18, maxWidth: 520 }}>
               Join thousands of students discovering their right career path with WorthScope.
             </p>
-            <button
-              onClick={() => navigate("/onboarding")}
-              className="ws-cta-btn"
-              style={{
-                marginTop: 30, background: "#fff", color: ACCENT, border: "none",
-                borderRadius: 8, padding: "14px 28px", fontSize: 15, fontWeight: 600,
-                cursor: "pointer", fontFamily: FONT, transition: "all 0.2s ease",
-              }}
-            >
+            <button onClick={() => navigate("/onboarding")} className="ws-btn-primary" style={{ marginTop: 30, background: "#fff", color: ACCENT, border: "none", padding: "16px 30px", borderRadius: 14, fontWeight: 700, fontSize: 16, cursor: "pointer", fontFamily: FONT, display: "inline-flex", alignItems: "center", gap: 10 }}>
               Start Your Career Assessment
+              <I d="<path d='M5 12h14M13 5l7 7-7 7'/>" size={18} stroke={ACCENT} />
             </button>
           </div>
 
           <div className="ws-reveal">
-            <CtaPath />
+            <RoadmapPath />
           </div>
         </div>
       </section>
 
-      {/* FOOTER */}
-      <footer style={{ background: "#111111", color: "#fff", padding: "64px 40px 32px" }}>
-        <div style={{ maxWidth: 1200, margin: "0 auto", display: "grid", gridTemplateColumns: "1.5fr 1fr 1fr 1fr", gap: 40 }} className="ws-footer-grid">
-          <div>
-            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-              <img src={logo} alt="WorthScope" style={{ height: 36, width: "auto", filter: "brightness(0) invert(1)" }} />
+      {/* ───────────── FOOTER ───────────── */}
+      <footer style={{ background: "#111111", color: "#9CA3AF", padding: "70px 0 30px" }}>
+        <div style={{ maxWidth: 1200, margin: "0 auto", padding: "0 24px" }}>
+          <div style={{ display: "grid", gridTemplateColumns: "1.4fr 1fr 1fr 1fr", gap: 40 }}>
+            <div>
+              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                <img src={logo} alt="WorthScope" style={{ height: 32, width: "auto", filter: "brightness(0) invert(1)" }} />
+                <span style={{ color: "#fff", fontWeight: 700, fontSize: 18 }}>WorthScope</span>
+              </div>
+              <p style={{ marginTop: 14, fontSize: 14, lineHeight: 1.7, maxWidth: 320 }}>
+                See your worth. Build your future. AI-powered career guidance for the next generation of students.
+              </p>
             </div>
-            <p style={{ marginTop: 16, fontSize: 14, color: "rgba(255,255,255,0.45)", lineHeight: 1.6 }}>
-              Clarity for every student.
-            </p>
+            {[
+              { h: "Company", l: ["About", "Careers", "Press", "Contact"] },
+              { h: "Support", l: ["Help Center", "Privacy", "Terms", "Status"] },
+              { h: "Social", l: ["Twitter", "LinkedIn", "Instagram", "YouTube"] },
+            ].map((c) => (
+              <div key={c.h}>
+                <div style={{ color: "#fff", fontWeight: 600, fontSize: 14, marginBottom: 16 }}>{c.h}</div>
+                <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "grid", gap: 10 }}>
+                  {c.l.map((i) => (
+                    <li key={i}><a href="#" style={{ color: "#9CA3AF", textDecoration: "none", fontSize: 14, transition: "color .2s" }} onMouseEnter={(e) => (e.currentTarget.style.color = "#fff")} onMouseLeave={(e) => (e.currentTarget.style.color = "#9CA3AF")}>{i}</a></li>
+                  ))}
+                </ul>
+              </div>
+            ))}
           </div>
-
-          {[
-            { h: "Company", links: ["About", "Services", "Blog"] },
-            { h: "Support", links: ["Contact", "FAQ", "Privacy Policy"] },
-            { h: "Follow Us", links: ["Twitter / X", "Instagram", "LinkedIn", "TikTok", "Facebook"] },
-          ].map((col) => (
-            <div key={col.h}>
-              <div style={{ fontSize: 13, fontWeight: 600, color: "#fff", textTransform: "uppercase", letterSpacing: 1 }}>{col.h}</div>
-              <ul style={{ marginTop: 16, padding: 0, listStyle: "none", display: "flex", flexDirection: "column", gap: 10 }}>
-                {col.links.map((l) => (
-                  <li key={l}>
-                    <a href="#" style={{ fontSize: 14, color: "rgba(255,255,255,0.6)", textDecoration: "none", transition: "color 0.2s" }}
-                      onMouseEnter={(e) => (e.currentTarget.style.color = "#fff")}
-                      onMouseLeave={(e) => (e.currentTarget.style.color = "rgba(255,255,255,0.6)")}>
-                      {l}
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))}
-        </div>
-        <div style={{ marginTop: 56, paddingTop: 24, borderTop: "1px solid rgba(255,255,255,0.08)", textAlign: "center", fontSize: 13, color: "rgba(255,255,255,0.3)" }}>
-          © 2026 WorthScope. All rights reserved.
+          <div style={{ marginTop: 50, paddingTop: 24, borderTop: "1px solid rgba(255,255,255,.08)", fontSize: 13, color: "#6B7280", textAlign: "center" }}>
+            © 2026 WorthScope. All rights reserved.
+          </div>
         </div>
       </footer>
-
-      <style>{`
-        html { scroll-behavior: smooth; }
-        body { margin: 0; }
-        @keyframes ws-fade-up { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-        @keyframes ws-pulse { 0%,100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.4); opacity: 0.5; } }
-        @keyframes ws-float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
-        @keyframes ws-glow { 0%,100% { box-shadow: 0 0 16px rgba(52,152,219,0.4); } 50% { box-shadow: 0 0 28px rgba(52,152,219,0.7); } }
-        @keyframes ws-draw { to { stroke-dashoffset: 0; } }
-        @keyframes ws-slide-down { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
-
-        .ws-reveal { opacity: 0; transform: translateY(24px); transition: opacity 0.7s ease, transform 0.7s ease; }
-        .ws-reveal.ws-in { opacity: 1; transform: translateY(0); }
-
-        .ws-nav-link:hover { background: rgba(52,152,219,0.08); color: ${ACCENT}; }
-        .ws-signin-btn:hover { background: ${ACCENT_DARK}; box-shadow: 0 0 0 4px rgba(52,152,219,0.2); transform: translateY(-1px); }
-        .ws-btn-primary:hover { background: ${ACCENT_DARK}; box-shadow: 0 8px 24px rgba(52,152,219,0.4); transform: translateY(-2px); }
-        .ws-btn-secondary:hover { border-color: ${ACCENT}; color: ${ACCENT}; }
-        .ws-btn-primary:active, .ws-btn-secondary:active, .ws-cta-btn:active, .ws-signin-btn:active { transform: translateY(0); }
-        .ws-cta-btn:hover { opacity: 0.92; transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.15); }
-
-        .ws-step-card:hover, .ws-feature-card:hover {
-          transform: translateY(-4px);
-          border-color: rgba(52,152,219,0.3) !important;
-          box-shadow: 0 12px 32px rgba(52,152,219,0.1);
-        }
-
-        .ws-net-node:hover circle { stroke: ${ACCENT} !important; stroke-width: 2 !important; }
-        .ws-net-node:hover text { fill: ${ACCENT} !important; }
-        .ws-net-node:hover ~ .ws-net-line { stroke: ${ACCENT}; stroke-opacity: 1; }
-
-        @media (max-width: 900px) {
-          .ws-nav-links, .ws-signin-btn { display: none !important; }
-          .ws-hamburger { display: block !important; }
-          .ws-hero-grid, .ws-2col, .ws-3col, .ws-footer-grid { grid-template-columns: 1fr !important; }
-          .ws-connector { display: none !important; }
-        }
-      `}</style>
     </div>
   );
 }
 
-/* ───── Journey diagram ───── */
-function JourneyDiagram() {
-  const nodes = [
-    { y: 30, label: "Lost & Unsure", sub: "No idea what career to pick", color: "#F3F4F6", border: BORDER, iconColor: TEXT3, icon: '<circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/>', size: 28 },
-    { y: 110, label: "Take the Assessment", sub: "10 quick questions", color: ACCENT_LIGHT, border: ACCENT, iconColor: ACCENT, icon: '<polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>', size: 28 },
-    { y: 190, label: "Profile Analyzed", sub: "AI maps your strengths & goals", color: ACCENT_LIGHT, border: ACCENT, iconColor: ACCENT, icon: '<path d="M9 3a3 3 0 0 0-3 3 3 3 0 0 0-3 3 3 3 0 0 0 1 2 3 3 0 0 0-1 2 3 3 0 0 0 3 3 3 3 0 0 0 3 3h6a3 3 0 0 0 3-3 3 3 0 0 0 3-3 3 3 0 0 0-1-2 3 3 0 0 0 1-2 3 3 0 0 0-3-3 3 3 0 0 0-3-3z"/>', size: 28, floatLabel: true },
-    { y: 280, label: "Career Path Unlocked", sub: "Top match + alternatives", color: ACCENT, border: ACCENT, iconColor: "#fff", icon: '<path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/>', size: 36, glow: true, here: true, floatLabel: true },
-    { y: 370, label: "You're on Your Way", sub: "Skills, courses, action plan", color: ACCENT, border: ACCENT, iconColor: "#fff", icon: '<polygon points="12 2 15 9 22 9.5 17 14 18.5 21 12 17.5 5.5 21 7 14 2 9.5 9 9 12 2"/>', size: 44, glow: true, gradient: true },
-  ];
+/* ───────────────────────────── COMPONENTS ───────────────────────────── */
 
+function JourneyDiagram({ active }: { active: number }) {
   return (
-    <div style={{ position: "relative", minHeight: 440, padding: "10px 0" }}>
-      <svg width="100%" height="430" viewBox="0 0 360 430" style={{ position: "absolute", left: 0, top: 0, pointerEvents: "none" }}>
+    <div style={{ position: "relative", height: "100%", width: "100%" }}>
+      {/* curved path */}
+      <svg viewBox="0 0 320 560" width="100%" height="100%" style={{ position: "absolute", inset: 0 }}>
+        <defs>
+          <linearGradient id="jpath" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor={ACCENT} stopOpacity="0.25" />
+            <stop offset="50%" stopColor={ACCENT} stopOpacity="0.85" />
+            <stop offset="100%" stopColor={ACCENT} stopOpacity="0.25" />
+          </linearGradient>
+        </defs>
         <path
-          d="M 60 40 Q 30 90 60 130 Q 90 170 60 210 Q 30 250 60 295 Q 90 340 60 385"
-          stroke={ACCENT} strokeWidth="2" fill="none" strokeDasharray="800" strokeDashoffset="800"
-          style={{ animation: "ws-draw 1.5s ease forwards" }}
+          d="M160,30 C 80,120 240,200 160,290 C 80,380 240,460 160,540"
+          fill="none"
+          stroke="url(#jpath)"
+          strokeWidth="2.5"
+          strokeDasharray="6 6"
+          style={{ animation: "ws-dash 2.5s linear infinite" }}
         />
       </svg>
 
-      {nodes.map((n, i) => (
-        <div
-          key={i}
-          style={{
-            position: "absolute", left: 60 - n.size / 2, top: n.y,
-            opacity: 0, animation: `ws-fade-up 0.5s ease ${0.5 + i * 0.3}s forwards`,
-          }}
-        >
-          {n.here && (
-            <div style={{
-              position: "absolute", left: n.size + 12, top: -22, fontSize: 9, fontWeight: 700,
-              color: ACCENT, letterSpacing: 1.2, textTransform: "uppercase", whiteSpace: "nowrap",
-            }}>
-              You Are Here
+      {/* nodes */}
+      {JOURNEY.map((n, i) => {
+        const ys = [40, 160, 280, 400, 520];
+        const xs = [160, 80, 240, 80, 160];
+        const isActive = i === active;
+        const isPast = i < active;
+        return (
+          <div
+            key={n.label}
+            style={{
+              position: "absolute",
+              top: ys[i] - 30,
+              left: `calc(${(xs[i] / 320) * 100}% - 30px)`,
+              animation: `ws-float ${3 + i * 0.4}s ease-in-out infinite`,
+              animationDelay: `${i * 0.2}s`,
+            }}
+          >
+            <div
+              style={{
+                width: 60, height: 60, borderRadius: "50%",
+                background: isActive ? ACCENT : isPast ? "rgba(59,130,246,.15)" : "#fff",
+                color: isActive ? "#fff" : isPast ? ACCENT : TEXT2,
+                border: `2px solid ${isActive || isPast ? ACCENT : BORDER}`,
+                display: "grid", placeItems: "center",
+                boxShadow: isActive ? "0 12px 28px -8px rgba(59,130,246,.55)" : "0 6px 18px -8px rgba(17,17,17,.15)",
+                animation: isActive ? "ws-pulse-ring 2s ease-in-out infinite" : undefined,
+                transition: "all .4s ease",
+              }}
+            >
+              <I d={n.icon} size={24} stroke={isActive ? "#fff" : isPast ? ACCENT : TEXT2} />
             </div>
-          )}
-          <div style={{
-            width: n.size, height: n.size, borderRadius: "50%",
-            background: n.gradient ? `linear-gradient(135deg, ${ACCENT}, ${ACCENT_DARK})` : n.color,
-            border: `2px solid ${n.border}`,
-            display: "grid", placeItems: "center",
-            animation: n.glow ? "ws-glow 2.5s ease-in-out infinite" : undefined,
-          }}>
-            <svg width={n.size * 0.5} height={n.size * 0.5} viewBox="0 0 24 24" fill="none" stroke={n.iconColor} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" dangerouslySetInnerHTML={{ __html: n.icon }} />
-          </div>
-          <div style={{
-            position: "absolute", left: n.size + 16, top: n.size / 2 - 18,
-            whiteSpace: "nowrap",
-          }}>
-            <div style={{ fontSize: 13, fontWeight: 600, color: TEXT }}>{n.label}</div>
-            <div style={{ fontSize: 11, color: TEXT3, marginTop: 2 }}>{n.sub}</div>
-          </div>
-
-          {n.floatLabel && (
-            <div style={{
-              position: "absolute", left: 200, top: n.size / 2 - 22,
-              background: "#fff", border: `1px solid ${BORDER}`, borderRadius: 10,
-              padding: "10px 14px", fontSize: 12, color: TEXT,
-              boxShadow: "0 4px 16px rgba(0,0,0,0.06)",
-              animation: "ws-float 3s ease-in-out infinite",
-              whiteSpace: "nowrap",
-            }}>
-              <div style={{ fontWeight: 600 }}>{n.label}</div>
-              <div style={{ fontSize: 11, color: TEXT3, marginTop: 2 }}>{n.sub}</div>
-            </div>
-          )}
-        </div>
-      ))}
-    </div>
-  );
-}
-
-/* ───── Network diagram (problem section) ───── */
-function NetworkDiagram() {
-  const cx = 200, cy = 200, r = 130;
-  const nodes = [
-    "Medicine", "Teaching", "Law", "Engineering", "Design", "Business", "Finance", "Tech",
-  ].map((label, i, arr) => {
-    const angle = (i / arr.length) * Math.PI * 2 - Math.PI / 2;
-    return { label, x: cx + Math.cos(angle) * r, y: cy + Math.sin(angle) * r };
-  });
-
-  return (
-    <div style={{
-      position: "relative", width: "100%", maxWidth: 420, height: 420, margin: "0 auto",
-      background: "radial-gradient(circle at center, rgba(52,152,219,0.05), transparent 70%)",
-      borderRadius: 20,
-    }}>
-      <svg viewBox="0 0 400 400" width="100%" height="100%">
-        {nodes.map((n, i) => (
-          <line key={i} className="ws-net-line" x1={cx} y1={cy} x2={n.x} y2={n.y}
-            stroke={BORDER} strokeWidth="1" strokeOpacity="0.8"
-            style={{ animation: `ws-fade-up 0.5s ease ${0.2 + i * 0.05}s both` }} />
-        ))}
-        <g>
-          <circle cx={cx} cy={cy} r="32" fill="#fff" stroke={ACCENT} strokeWidth="2" />
-          <text x={cx} y={cy + 4} textAnchor="middle" fontFamily={FONT} fontSize="13" fontWeight="700" fill={ACCENT}>You</text>
-        </g>
-        {nodes.map((n, i) => (
-          <g key={n.label} className="ws-net-node" style={{ cursor: "pointer", transformOrigin: `${n.x}px ${n.y}px`, animation: `ws-fade-up 0.5s ease ${0.3 + i * 0.07}s both` }}>
-            <circle cx={n.x} cy={n.y} r="26" fill="#fff" stroke={BORDER} strokeWidth="1.5" style={{ transition: "all 0.2s ease" }} />
-            <text x={n.x} y={n.y + 4} textAnchor="middle" fontFamily={FONT} fontSize="11" fontWeight="500" fill={TEXT2} style={{ transition: "all 0.2s ease" }}>{n.label}</text>
-          </g>
-        ))}
-      </svg>
-    </div>
-  );
-}
-
-/* ───── Result card (solution) ───── */
-function ResultCard() {
-  const [fill, setFill] = useState(0);
-  const ref = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    if (!ref.current) return;
-    const io = new IntersectionObserver((entries) => {
-      entries.forEach((e) => {
-        if (e.isIntersecting) {
-          setTimeout(() => setFill(87), 200);
-          io.disconnect();
-        }
-      });
-    }, { threshold: 0.3 });
-    io.observe(ref.current);
-    return () => io.disconnect();
-  }, []);
-
-  return (
-    <div ref={ref} style={{
-      background: "#fff", border: `1px solid ${BORDER}`, borderRadius: 14, padding: 28,
-      maxWidth: 420, marginLeft: "auto", boxShadow: "0 10px 30px rgba(0,0,0,0.06)",
-    }}>
-      <div style={{ fontSize: 10, fontWeight: 700, color: ACCENT, letterSpacing: 1.5, textTransform: "uppercase" }}>Career Result</div>
-      <div style={{ marginTop: 12, fontSize: 17, fontWeight: 700, color: TEXT }}>
-        Your top career match: Product Designer
-      </div>
-      <div style={{ marginTop: 22 }}>
-        <div style={{ display: "flex", justifyContent: "space-between", fontSize: 13 }}>
-          <span style={{ color: TEXT2, fontWeight: 500 }}>Skill Match</span>
-          <span style={{ color: ACCENT, fontWeight: 700 }}>87%</span>
-        </div>
-        <div style={{ marginTop: 8, height: 8, background: BORDER, borderRadius: 100, overflow: "hidden" }}>
-          <div style={{ width: `${fill}%`, height: "100%", background: ACCENT, borderRadius: 100, transition: "width 1.4s cubic-bezier(0.4,0,0.2,1)" }} />
-        </div>
-      </div>
-      <div style={{ marginTop: 18, fontSize: 13, color: TEXT2, display: "flex", alignItems: "center", gap: 6 }}>
-        <span style={{ width: 5, height: 5, background: ACCENT, borderRadius: "50%" }} />
-        30-day action plan ready
-      </div>
-    </div>
-  );
-}
-
-/* ───── CTA path illustration ───── */
-function CtaPath() {
-  return (
-    <div style={{ position: "relative", width: "100%", maxWidth: 360, height: 360, margin: "0 auto" }}>
-      <svg viewBox="0 0 300 360" width="100%" height="100%">
-        <path
-          d="M 150 340 Q 60 270 150 200 Q 240 130 150 60"
-          stroke="rgba(255,255,255,0.6)" strokeWidth="2" fill="none"
-          strokeDasharray="700" strokeDashoffset="700"
-          style={{ animation: "ws-draw 1.6s ease forwards 0.3s" }}
-        />
-        {[
-          { x: 150, y: 340, label: "START", r: 8 },
-          { x: 90, y: 250, label: "Discovery", r: 8, delay: 0.8 },
-          { x: 210, y: 160, label: "Skill Building", r: 8, delay: 1.1 },
-          { x: 150, y: 60, label: "YOUR GOAL", r: 12, delay: 1.4, big: true },
-        ].map((n, i) => (
-          <g key={i} style={{ opacity: 0, animation: `ws-fade-up 0.5s ease ${(n.delay ?? 0.5)}s forwards` }}>
-            <circle cx={n.x} cy={n.y} r={n.r} fill="#fff" />
-            {n.big && <circle cx={n.x} cy={n.y} r={n.r + 6} fill="none" stroke="#fff" strokeOpacity="0.5" />}
-            <text
-              x={n.x} y={n.y - n.r - 10} textAnchor="middle"
-              fontFamily={FONT} fontSize={n.big ? 13 : 12} fontWeight={n.big ? 700 : 500}
-              fill="#fff" letterSpacing={n.big ? 1 : 0}
+            <div
+              style={{
+                position: "absolute",
+                top: 68,
+                left: "50%",
+                transform: "translateX(-50%)",
+                whiteSpace: "nowrap",
+                fontSize: 12,
+                fontWeight: isActive ? 700 : 500,
+                color: isActive ? TEXT : TEXT2,
+                background: "#fff",
+                padding: "4px 10px",
+                borderRadius: 8,
+                border: `1px solid ${BORDER}`,
+                boxShadow: "0 4px 10px -4px rgba(17,17,17,.08)",
+              }}
             >
               {n.label}
-            </text>
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+function ConfusionDiagram() {
+  const fields = ["Medicine", "Engineering", "Business", "Design", "Tech", "Law", "Finance", "Arts"];
+  return (
+    <div style={{ position: "relative", height: 420, width: "100%" }}>
+      <svg viewBox="0 0 420 420" width="100%" height="100%" style={{ position: "absolute", inset: 0 }}>
+        {fields.map((_, i) => {
+          const angle = (i / fields.length) * Math.PI * 2;
+          const x = 210 + Math.cos(angle) * 160;
+          const y = 210 + Math.sin(angle) * 160;
+          return <line key={i} x1={210} y1={210} x2={x} y2={y} stroke={BORDER} strokeWidth="1" strokeDasharray="4 4" />;
+        })}
+      </svg>
+
+      {/* center user */}
+      <div style={{
+        position: "absolute", top: "50%", left: "50%", transform: "translate(-50%,-50%)",
+        width: 88, height: 88, borderRadius: "50%", background: "#fff", border: `2px solid ${ACCENT}`,
+        display: "grid", placeItems: "center", color: ACCENT,
+        boxShadow: "0 12px 28px -8px rgba(59,130,246,.4)",
+        animation: "ws-pulse-ring 2.4s ease-in-out infinite",
+      }}>
+        <I d="<circle cx='12' cy='8' r='4'/><path d='M4 21c0-4 4-7 8-7s8 3 8 7'/>" size={36} stroke={ACCENT} />
+      </div>
+
+      {/* field pills */}
+      {fields.map((f, i) => {
+        const angle = (i / fields.length) * Math.PI * 2;
+        const x = 50 + Math.cos(angle) * 38;
+        const y = 50 + Math.sin(angle) * 38;
+        return (
+          <div
+            key={f}
+            style={{
+              position: "absolute",
+              top: `${y}%`, left: `${x}%`,
+              transform: "translate(-50%,-50%)",
+              padding: "8px 14px",
+              background: "#fff",
+              border: `1px solid ${BORDER}`,
+              borderRadius: 999,
+              fontSize: 13,
+              fontWeight: 500,
+              color: TEXT,
+              boxShadow: "0 6px 16px -8px rgba(17,17,17,.15)",
+              animation: `ws-float ${3 + (i % 3)}s ease-in-out infinite`,
+              animationDelay: `${i * 0.15}s`,
+              whiteSpace: "nowrap",
+            }}
+          >
+            {f}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+function ResultPreviewCard() {
+  return (
+    <div
+      style={{
+        background: "#fff",
+        border: `1px solid ${BORDER}`,
+        borderRadius: 22,
+        padding: 28,
+        boxShadow: "0 30px 60px -30px rgba(17,17,17,.18)",
+        position: "relative",
+        overflow: "hidden",
+      }}
+    >
+      <div aria-hidden style={{ position: "absolute", top: -60, right: -60, width: 200, height: 200, borderRadius: "50%", background: "radial-gradient(circle, rgba(59,130,246,.18), transparent 70%)" }} />
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", position: "relative" }}>
+        <span style={{ fontSize: 12, fontWeight: 600, padding: "5px 10px", borderRadius: 999, background: "rgba(59,130,246,.1)", color: ACCENT }}>YOUR TOP MATCH</span>
+        <span style={{ fontSize: 12, color: TEXT2 }}>Updated today</span>
+      </div>
+      <h3 style={{ fontSize: 24, fontWeight: 700, marginTop: 18, marginBottom: 6, color: TEXT, letterSpacing: -0.5 }}>Product Designer</h3>
+      <p style={{ fontSize: 14, color: TEXT2, margin: 0 }}>Creative + analytical · Strong fit for your strengths</p>
+
+      <div style={{ marginTop: 22 }}>
+        <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8 }}>
+          <span style={{ fontSize: 13, color: TEXT2 }}>Match score</span>
+          <span style={{ fontSize: 13, fontWeight: 700, color: ACCENT }}>87%</span>
+        </div>
+        <div style={{ height: 8, background: BG2, borderRadius: 999, overflow: "hidden" }}>
+          <div style={{ width: "87%", height: "100%", background: `linear-gradient(90deg, ${ACCENT}, ${ACCENT_DARK})`, borderRadius: 999, animation: "ws-glow 3s ease-in-out infinite" }} />
+        </div>
+      </div>
+
+      <div style={{ marginTop: 22, padding: 14, borderRadius: 14, background: BG2, display: "flex", alignItems: "center", gap: 12 }}>
+        <div style={{ width: 36, height: 36, borderRadius: 10, background: "#fff", border: `1px solid ${BORDER}`, display: "grid", placeItems: "center", color: ACCENT }}>
+          <I d="<path d='M12 2l3 7h7l-5.5 4.5L18 21l-6-4-6 4 1.5-7.5L2 9h7z'/>" size={18} stroke={ACCENT} />
+        </div>
+        <div>
+          <div style={{ fontSize: 13.5, fontWeight: 600, color: TEXT }}>30-day action plan ready</div>
+          <div style={{ fontSize: 12, color: TEXT2 }}>Personalised for your strengths and goals</div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function RoadmapPath() {
+  return (
+    <div style={{ position: "relative", height: 380, background: "rgba(255,255,255,.08)", borderRadius: 22, padding: 24, border: "1px solid rgba(255,255,255,.15)", backdropFilter: "blur(10px)" }}>
+      <svg viewBox="0 0 360 340" width="100%" height="100%">
+        <defs>
+          <linearGradient id="rmp" x1="0" y1="1" x2="1" y2="0">
+            <stop offset="0%" stopColor="#fff" stopOpacity=".4" />
+            <stop offset="100%" stopColor="#fff" stopOpacity="1" />
+          </linearGradient>
+        </defs>
+        <path
+          d="M30,300 C 100,260 80,180 180,160 C 280,140 260,60 330,40"
+          fill="none"
+          stroke="url(#rmp)"
+          strokeWidth="3"
+          strokeDasharray="8 6"
+          style={{ animation: "ws-dash 3s linear infinite" }}
+        />
+        {[
+          { x: 30, y: 300, l: "START" },
+          { x: 130, y: 230, l: "Discovery" },
+          { x: 230, y: 130, l: "Skill Building" },
+          { x: 330, y: 40, l: "YOUR GOAL" },
+        ].map((n, i) => (
+          <g key={n.l}>
+            <circle cx={n.x} cy={n.y} r={i === 3 ? 14 : 10} fill="#fff" style={{ animation: `ws-float ${2.5 + i * 0.3}s ease-in-out infinite` }} />
+            {i === 3 && <circle cx={n.x} cy={n.y} r="22" fill="none" stroke="#fff" strokeOpacity=".5" strokeWidth="1.5" style={{ animation: "ws-pulse-ring 2s ease-in-out infinite" }} />}
+            <text x={n.x} y={n.y - 22} textAnchor="middle" fill="#fff" fontSize="12" fontWeight="600" fontFamily={FONT}>{n.l}</text>
           </g>
         ))}
       </svg>
