@@ -235,30 +235,20 @@ export default function Landing() {
               <span style={{ width: 6, height: 6, borderRadius: "50%", background: ACCENT, animation: "ws-float 1.6s ease-in-out infinite" }} />
               AI-Powered Career Intelligence
             </span>
-            <h1 style={{ fontSize: 60, lineHeight: 1.05, fontWeight: 800, margin: "20px 0 18px", letterSpacing: -1.5, color: TEXT }}>
-              Find the <span style={{ color: ACCENT }}>Right Career</span> Path for You
+            <h1 style={{ fontSize: 58, lineHeight: 1.08, fontWeight: 600, margin: "20px 0 18px", letterSpacing: -1.2, color: TEXT }}>
+              Find the <span style={{ color: ACCENT, fontWeight: 700 }}>Right Career</span> Path for You
             </h1>
-            <p style={{ fontSize: 18, lineHeight: 1.65, color: TEXT2, maxWidth: 540, margin: 0 }}>
+            <p style={{ fontSize: 17, lineHeight: 1.65, color: TEXT2, maxWidth: 540, margin: 0, fontWeight: 400 }}>
               WorthScope helps students discover the career path that fits their strengths, interests, and goals — then shows you exactly what to do next.
             </p>
             <div style={{ display: "flex", gap: 14, marginTop: 36, flexWrap: "wrap" }}>
-              <button onClick={() => navigate("/onboarding")} className="ws-btn-primary" style={{ background: ACCENT, color: "#fff", border: "none", padding: "16px 28px", borderRadius: 14, fontWeight: 600, fontSize: 16, cursor: "pointer", fontFamily: FONT, display: "inline-flex", alignItems: "center", gap: 10 }}>
+              <button onClick={() => navigate("/onboarding")} className="ws-btn-primary" style={{ background: ACCENT, color: "#fff", border: "none", padding: "16px 28px", borderRadius: 14, fontWeight: 500, fontSize: 15, cursor: "pointer", fontFamily: FONT, display: "inline-flex", alignItems: "center", gap: 10 }}>
                 Start Assessment
                 <I d="<path d='M5 12h14M13 5l7 7-7 7'/>" size={18} stroke="#fff" />
               </button>
-              <button onClick={() => scrollTo("how")} className="ws-btn-outline" style={{ background: "transparent", color: TEXT, border: `1.5px solid ${BORDER}`, padding: "16px 28px", borderRadius: 14, fontWeight: 600, fontSize: 16, cursor: "pointer", fontFamily: FONT }}>
+              <button onClick={() => scrollTo("how")} className="ws-btn-outline" style={{ background: "transparent", color: TEXT, border: `1.5px solid ${BORDER}`, padding: "16px 28px", borderRadius: 14, fontWeight: 500, fontSize: 15, cursor: "pointer", fontFamily: FONT }}>
                 See How It Works
               </button>
-            </div>
-
-            {/* Trust row */}
-            <div style={{ display: "flex", gap: 28, marginTop: 44, flexWrap: "wrap" }}>
-              {[{ n: "12k+", l: "Students" }, { n: "94%", l: "Clarity Rate" }, { n: "150+", l: "Career Paths" }].map((s) => (
-                <div key={s.l}>
-                  <div style={{ fontSize: 24, fontWeight: 800, color: TEXT, letterSpacing: -0.5 }}>{s.n}</div>
-                  <div style={{ fontSize: 13, color: TEXT2, marginTop: 2 }}>{s.l}</div>
-                </div>
-              ))}
             </div>
           </div>
 
