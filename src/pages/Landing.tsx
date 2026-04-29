@@ -157,18 +157,20 @@ export default function Landing() {
       </nav>
 
       {/* HERO */}
-      <section id="home" style={{ minHeight: "100vh", paddingTop: 64, padding: "104px 40px 80px" }}>
+      <section id="home" style={{ minHeight: "100vh", paddingTop: 76, padding: "116px 40px 80px" }}>
+        <div className="ws-hero-eyebrow-wrap" style={{ maxWidth: 1200, margin: "0 auto", textAlign: "center", marginBottom: 28 }}>
+          <div className="ws-eyebrow" style={{
+            display: "inline-flex", alignItems: "center", gap: 8,
+            background: ACCENT_LIGHT, border: `1px solid rgba(52,152,219,0.3)`,
+            borderRadius: 100, padding: "6px 14px", fontSize: 13, color: ACCENT, fontWeight: 500,
+            opacity: 0, animation: "ws-fade-up 0.5s ease 0.1s forwards",
+          }}>
+            <span style={{ width: 8, height: 8, borderRadius: "50%", background: ACCENT, animation: "ws-pulse 2s infinite" }} />
+            AI-Powered Career Intelligence
+          </div>
+        </div>
         <div style={{ maxWidth: 1200, margin: "0 auto", display: "grid", gridTemplateColumns: "55fr 45fr", gap: 56, alignItems: "center" }} className="ws-hero-grid">
           <div>
-            <div className="ws-eyebrow" style={{
-              display: "inline-flex", alignItems: "center", gap: 8,
-              background: ACCENT_LIGHT, border: `1px solid rgba(52,152,219,0.3)`,
-              borderRadius: 100, padding: "6px 14px", fontSize: 13, color: ACCENT, fontWeight: 500,
-              opacity: 0, animation: "ws-fade-up 0.5s ease 0.1s forwards",
-            }}>
-              <span style={{ width: 8, height: 8, borderRadius: "50%", background: ACCENT, animation: "ws-pulse 2s infinite" }} />
-              AI-Powered Career Intelligence
-            </div>
 
             <h1 style={{
               marginTop: 24, fontWeight: 700, fontSize: "clamp(40px, 5.5vw, 60px)",
