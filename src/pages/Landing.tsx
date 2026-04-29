@@ -152,10 +152,9 @@ export default function Landing() {
           transition: "all .25s ease",
         }}
       >
-        <div style={{ maxWidth: 1200, margin: "0 auto", padding: "0 24px", height: 72, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-          <button onClick={() => navigate("/")} style={{ display: "flex", alignItems: "center", gap: 10, background: "transparent", border: "none", cursor: "pointer" }}>
-            <img src={logo} alt="WorthScope" style={{ height: 36, width: "auto" }} />
-            <span style={{ fontWeight: 700, fontSize: 18, color: TEXT, letterSpacing: -0.3 }}>WorthScope</span>
+        <div style={{ maxWidth: 1200, margin: "0 auto", padding: "0 24px", height: 88, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+          <button onClick={() => navigate("/")} style={{ display: "flex", alignItems: "center", background: "transparent", border: "none", cursor: "pointer", padding: 0 }}>
+            <img src={logo} alt="WorthScope" style={{ height: 72, width: "auto", objectFit: "contain", display: "block" }} />
           </button>
 
           <nav style={{ display: "flex", gap: 36, alignItems: "center" }} className="ws-nav-center">
