@@ -432,80 +432,106 @@ export default function Landing() {
 /* ───────────────────────────── COMPONENTS ───────────────────────────── */
 
 function JourneyDiagram({ active }: { active: number }) {
+  // Center column for nodes; labels alternate left/right (off the path).
+  const CX = 50; // % center
+  const ys = [60, 170, 280, 390, 500];
   return (
     <div style={{ position: "relative", height: "100%", width: "100%" }}>
-      {/* curved path */}
-      <svg viewBox="0 0 320 560" width="100%" height="100%" style={{ position: "absolute", inset: 0 }}>
-        <defs>
-          <linearGradient id="jpath" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor={ACCENT} stopOpacity="0.25" />
-            <stop offset="50%" stopColor={ACCENT} stopOpacity="0.85" />
-            <stop offset="100%" stopColor={ACCENT} stopOpacity="0.25" />
-          </linearGradient>
-        </defs>
-        <path
-          d="M160,30 C 80,120 240,200 160,290 C 80,380 240,460 160,540"
-          fill="none"
-          stroke="url(#jpath)"
-          strokeWidth="2.5"
-          strokeDasharray="6 6"
-          style={{ animation: "ws-dash 2.5s linear infinite" }}
-        />
-      </svg>
+      {/* Section header */}
+      <div style={{ textAlign: "center", marginBottom: 14 }}>
+        <div style={{ fontSize: 12, fontWeight: 600, color: ACCENT, letterSpacing: 1.2, textTransform: "uppercase" }}>
+          Your Journey
+        </div>
+        <div style={{ fontSize: 18, fontWeight: 600, color: TEXT, marginTop: 4 }}>
+          From Confusion to Clarity
+        </div>
+      </div>
 
-      {/* nodes */}
-      {JOURNEY.map((n, i) => {
-        const ys = [40, 160, 280, 400, 520];
-        const xs = [160, 80, 240, 80, 160];
-        const isActive = i === active;
-        const isPast = i < active;
-        return (
-          <div
-            key={n.label}
-            style={{
-              position: "absolute",
-              top: ys[i] - 30,
-              left: `calc(${(xs[i] / 320) * 100}% - 30px)`,
-              animation: `ws-float ${3 + i * 0.4}s ease-in-out infinite`,
-              animationDelay: `${i * 0.2}s`,
-            }}
-          >
+      <div style={{ position: "relative", height: 560, width: "100%" }}>
+        {/* curved vertical path through the center */}
+        <svg viewBox="0 0 320 560" width="100%" height="100%" preserveAspectRatio="none" style={{ position: "absolute", inset: 0, pointerEvents: "none" }}>
+          <defs>
+            <linearGradient id="jpath" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor={ACCENT} stopOpacity="0.25" />
+              <stop offset="50%" stopColor={ACCENT} stopOpacity="0.85" />
+              <stop offset="100%" stopColor={ACCENT} stopOpacity="0.25" />
+            </linearGradient>
+          </defs>
+          <path
+            d="M160,40 C 120,140 200,200 160,290 C 120,380 200,440 160,540"
+            fill="none"
+            stroke="url(#jpath)"
+            strokeWidth="2.5"
+            strokeDasharray="6 6"
+            style={{ animation: "ws-dash 2.5s linear infinite" }}
+          />
+        </svg>
+
+        {/* nodes */}
+        {JOURNEY.map((n, i) => {
+          const isActive = i === active;
+          const isPast = i < active;
+          const labelOnRight = n.side === "right";
+          return (
             <div
-              style={{
-                width: 60, height: 60, borderRadius: "50%",
-                background: isActive ? ACCENT : isPast ? "rgba(59,130,246,.15)" : "#fff",
-                color: isActive ? "#fff" : isPast ? ACCENT : TEXT2,
-                border: `2px solid ${isActive || isPast ? ACCENT : BORDER}`,
-                display: "grid", placeItems: "center",
-                boxShadow: isActive ? "0 12px 28px -8px rgba(59,130,246,.55)" : "0 6px 18px -8px rgba(17,17,17,.15)",
-                animation: isActive ? "ws-pulse-ring 2s ease-in-out infinite" : undefined,
-                transition: "all .4s ease",
-              }}
-            >
-              <I d={n.icon} size={24} stroke={isActive ? "#fff" : isPast ? ACCENT : TEXT2} />
-            </div>
-            <div
+              key={n.label}
+              className="ws-jnode"
               style={{
                 position: "absolute",
-                top: 68,
-                left: "50%",
-                transform: "translateX(-50%)",
-                whiteSpace: "nowrap",
-                fontSize: 12,
-                fontWeight: isActive ? 700 : 500,
-                color: isActive ? TEXT : TEXT2,
-                background: "#fff",
-                padding: "4px 10px",
-                borderRadius: 8,
-                border: `1px solid ${BORDER}`,
-                boxShadow: "0 4px 10px -4px rgba(17,17,17,.08)",
+                top: ys[i] - 28,
+                left: `calc(${CX}% - 28px)`,
+                width: 56,
+                height: 56,
+                cursor: "pointer",
               }}
             >
-              {n.label}
+              <div
+                style={{
+                  width: 56, height: 56, borderRadius: "50%",
+                  background: isActive ? ACCENT : isPast ? "rgba(59,130,246,.15)" : "#fff",
+                  color: isActive ? "#fff" : isPast ? ACCENT : TEXT2,
+                  border: `2px solid ${isActive || isPast ? ACCENT : BORDER}`,
+                  display: "grid", placeItems: "center",
+                  boxShadow: isActive ? "0 12px 28px -8px rgba(59,130,246,.55)" : "0 6px 18px -8px rgba(17,17,17,.15)",
+                  animation: isActive ? "ws-pulse-ring 2s ease-in-out infinite" : `ws-float ${3 + i * 0.4}s ease-in-out infinite`,
+                  transition: "all .4s ease",
+                }}
+              >
+                <I d={n.icon} size={22} stroke={isActive ? "#fff" : isPast ? ACCENT : TEXT2} />
+              </div>
+
+              {/* Label off to the side, never on the path */}
+              <div
+                style={{
+                  position: "absolute",
+                  top: "50%",
+                  transform: "translateY(-50%)",
+                  ...(labelOnRight
+                    ? { left: 78, textAlign: "left" as const }
+                    : { right: 78, textAlign: "right" as const }),
+                  width: 150,
+                  pointerEvents: "none",
+                }}
+              >
+                <div
+                  style={{
+                    fontSize: 13,
+                    fontWeight: 600,
+                    color: isActive ? ACCENT : TEXT,
+                    lineHeight: 1.25,
+                    transition: "color .2s ease",
+                  }}
+                >
+                  {n.label}
+                </div>
+                <div style={{ fontSize: 11.5, color: TEXT2, marginTop: 3, lineHeight: 1.35, fontWeight: 400 }}>
+                  {n.sub}
+                </div>
+              </div>
             </div>
-          </div>
-        );
-      })}
+          );
+        })}
+      </div>
     </div>
   );
 }
