@@ -136,6 +136,10 @@ export default function Landing() {
         .ws-link:hover::after{width:100%}
         .ws-pill{transition:transform .2s ease,background .2s ease}
         .ws-pill:hover{transform:translateY(-2px);background:${ACCENT};color:#fff;border-color:${ACCENT}}
+        .ws-nav-link:hover{background:rgba(59,130,246,.08);color:${ACCENT}}
+        .ws-jnode{transition:transform .3s cubic-bezier(.2,.7,.3,1.3)}
+        .ws-jnode:hover{transform:scale(1.12)}
+        .ws-jnode:hover .ws-jlabel{opacity:1;transform:translateY(0)}
       `}</style>
 
       {/* ───────────── NAVBAR ───────────── */}
