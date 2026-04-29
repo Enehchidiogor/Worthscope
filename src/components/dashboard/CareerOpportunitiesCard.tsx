@@ -2,24 +2,34 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { IconLock } from "./icons";
 import { JOBS } from "@/components/career/jobsData";
+import { loadResults, type CareerResult } from "@/lib/recommendationEngine";
 
 /* Career Opportunities — dashboard card.
    Shows BOTH locked + unlocked variants, switched
-   by localStorage "worthscope_career_unlocked". */
+   by localStorage "worthscope_career_unlocked".
+   When the user has completed the assessment, the unlocked
+   variant surfaces their real top matches instead of mock jobs. */
 
 export const CareerOpportunitiesCard = () => {
   const [unlocked, setUnlocked] = useState(false);
   const [fill, setFill] = useState(0);
+  const [results, setResults] = useState<CareerResult[]>([]);
+  const [hasAssessment, setHasAssessment] = useState(false);
 
   useEffect(() => {
     setUnlocked(localStorage.getItem("worthscope_career_unlocked") === "true");
+    setHasAssessment(!!localStorage.getItem("worthscope_results"));
+    setResults(loadResults());
     const t = window.setTimeout(() => setFill(30), 200);
     return () => clearTimeout(t);
   }, []);
 
+
   // ===== UNLOCKED =====
   if (unlocked) {
-    const preview = JOBS.slice(0, 2);
+    // If user took assessment, show top 2 career matches; else fall back to mock jobs.
+    const preview = hasAssessment ? results.slice(0, 2) : null;
+
     return (
       <section
         className="ws-fade-up rounded-[20px] p-6 md:p-7"
@@ -32,58 +42,87 @@ export const CareerOpportunitiesCard = () => {
       >
         <div className="mb-4 flex items-center justify-between">
           <h3 style={{ fontWeight: 700, fontSize: 16, color: "#111111" }}>💼 Career Opportunities</h3>
-          <Link to="/career" style={{ fontWeight: 600, fontSize: 13, color: "#3498DB" }}>
-            4 roles matched →
+          <Link
+            to={hasAssessment ? "/career-results" : "/career"}
+            style={{ fontWeight: 600, fontSize: 13, color: "#3498DB" }}
+          >
+            {hasAssessment ? `${results.length} matches →` : `${JOBS.length} roles matched →`}
           </Link>
         </div>
 
         <div className="flex flex-col gap-2.5">
-          {preview.map((j) => (
-            <Link
-              key={j.id}
-              to="/career"
-              className="flex items-center justify-between"
-              style={{
-                background: "#F4F9FE",
-                border: "1px solid #E5E7EB",
-                borderRadius: 12,
-                padding: "12px 16px",
-                textDecoration: "none",
-                transition: "all 0.18s ease",
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.background = "#EBF5FB";
-                e.currentTarget.style.borderColor = "rgba(52,152,219,0.3)";
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.background = "#F4F9FE";
-                e.currentTarget.style.borderColor = "#E5E7EB";
-              }}
-            >
-              <div className="flex items-center gap-2.5">
-                <div
-                  className="grid place-items-center rounded-md"
-                  style={{ width: 28, height: 28, background: "#EBF5FB", color: "#3498DB", fontWeight: 700, fontSize: 13 }}
+          {preview
+            ? preview.map((r) => (
+                <Link
+                  key={r.title}
+                  to="/career-results"
+                  className="flex items-center justify-between"
+                  style={{
+                    background: "#F4F9FE",
+                    border: "1px solid #E5E7EB",
+                    borderRadius: 12,
+                    padding: "12px 16px",
+                    textDecoration: "none",
+                    transition: "all 0.18s ease",
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.background = "#EBF5FB";
+                    e.currentTarget.style.borderColor = "rgba(52,152,219,0.3)";
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.background = "#F4F9FE";
+                    e.currentTarget.style.borderColor = "#E5E7EB";
+                  }}
                 >
-                  {j.initial}
-                </div>
-                <div style={{ fontWeight: 600, fontSize: 13, color: "#111111" }}>{j.title}</div>
-              </div>
-              <div className="flex items-center gap-3">
-                <span style={{ fontWeight: 700, fontSize: 12, color: "#3498DB" }}>{j.match}%</span>
-                <span style={{ fontWeight: 600, fontSize: 12, color: "#3498DB" }}>Apply →</span>
-              </div>
-            </Link>
-          ))}
+                  <div className="flex items-center gap-2.5">
+                    <div
+                      className="grid place-items-center rounded-md"
+                      style={{ width: 28, height: 28, background: "#EBF5FB", color: "#3498DB", fontWeight: 700, fontSize: 13 }}
+                    >
+                      #{r.rank}
+                    </div>
+                    <div style={{ fontWeight: 600, fontSize: 13, color: "#111111" }}>{r.title}</div>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <span style={{ fontWeight: 700, fontSize: 12, color: "#3498DB" }}>{r.percentage}%</span>
+                    <span style={{ fontWeight: 600, fontSize: 12, color: "#3498DB" }}>View →</span>
+                  </div>
+                </Link>
+              ))
+            : JOBS.slice(0, 2).map((j) => (
+                <Link
+                  key={j.id}
+                  to="/career"
+                  className="flex items-center justify-between"
+                  style={{
+                    background: "#F4F9FE", border: "1px solid #E5E7EB", borderRadius: 12,
+                    padding: "12px 16px", textDecoration: "none", transition: "all 0.18s ease",
+                  }}
+                >
+                  <div className="flex items-center gap-2.5">
+                    <div
+                      className="grid place-items-center rounded-md"
+                      style={{ width: 28, height: 28, background: "#EBF5FB", color: "#3498DB", fontWeight: 700, fontSize: 13 }}
+                    >
+                      {j.initial}
+                    </div>
+                    <div style={{ fontWeight: 600, fontSize: 13, color: "#111111" }}>{j.title}</div>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <span style={{ fontWeight: 700, fontSize: 12, color: "#3498DB" }}>{j.match}%</span>
+                    <span style={{ fontWeight: 600, fontSize: 12, color: "#3498DB" }}>Apply →</span>
+                  </div>
+                </Link>
+              ))}
         </div>
 
         <div className="mt-4 text-center">
           <Link
-            to="/career"
+            to={hasAssessment ? "/career-results" : "/career"}
             style={{ fontWeight: 600, fontSize: 13, color: "#3498DB" }}
             className="hover:underline"
           >
-            View all 4 matched roles →
+            {hasAssessment ? "View all career matches →" : "View all matched roles →"}
           </Link>
         </div>
       </section>
