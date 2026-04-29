@@ -90,7 +90,7 @@ export const NotificationsBell = () => {
       message: "Keep it going! Come back tomorrow to reach 6 days and stay on track.",
       time: "2h ago",
       read: false,
-      action: () => navigate("/"),
+      action: () => navigate("/dashboard"),
     },
     {
       id: 3,
