@@ -1,0 +1,178 @@
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import logo from "@/assets/worthscope-logo.png";
+
+const ACCENT = "#3498DB";
+const ACCENT_DARK = "#217BBB";
+const TEXT = "#111111";
+const TEXT3 = "#9CA3AF";
+const BORDER = "#E5E7EB";
+const FONT = "'DM Sans', sans-serif";
+
+export default function SignIn() {
+  const navigate = useNavigate();
+  const [showPwd, setShowPwd] = useState(false);
+
+  const onSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    navigate("/dashboard");
+  };
+
+  return (
+    <div style={{ minHeight: "100vh", background: "#fff", fontFamily: FONT, color: TEXT, position: "relative" }}>
+      <div style={{ position: "absolute", top: 0, left: 0, padding: "20px 28px", opacity: 0, animation: "ws-logo 0.3s ease forwards" }}>
+        <Link to="/" style={{ display: "flex", alignItems: "center", textDecoration: "none" }}>
+          <img src={logo} alt="WorthScope" style={{ height: 44, width: "auto" }} />
+        </Link>
+        <div style={{ marginTop: 4, fontSize: 10, color: TEXT3 }}>See Your Worth. Build Your Future.</div>
+      </div>
+
+      <div style={{ minHeight: "100vh", display: "grid", placeItems: "center", padding: "100px 20px 40px" }}>
+        <form
+          onSubmit={onSubmit}
+          style={{
+            width: "100%", maxWidth: 480, padding: "48px 32px",
+            opacity: 0, animation: "ws-form-in 0.5s ease 0.1s forwards",
+          }}
+        >
+          <h1 style={{ fontSize: 48, fontWeight: 700, letterSpacing: "-1.5px", textAlign: "center", margin: 0, color: TEXT }}>
+            Welcome
+          </h1>
+          <p style={{ marginTop: 12, fontSize: 16, color: TEXT, textAlign: "center", marginBottom: 36 }}>
+            Continue your <span style={{ color: ACCENT }}>career Journey</span>
+          </p>
+
+          <Field label="Email Address">
+            <input type="email" required placeholder="Enter your email address" className="ws-input"
+              style={inputStyle()} />
+          </Field>
+
+          <div style={{ height: 20 }} />
+
+          <Field label="Password">
+            <div style={{ position: "relative" }}>
+              <input type={showPwd ? "text" : "password"} required placeholder="Create a password" className="ws-input"
+                style={{ ...inputStyle(), paddingRight: 48 }} />
+              <button type="button" aria-label="Toggle password" onClick={() => setShowPwd((v) => !v)}
+                style={eyeBtn()}>
+                <EyeIcon off={!showPwd} />
+              </button>
+            </div>
+          </Field>
+
+          <button
+            type="submit"
+            className="ws-submit"
+            style={{
+              marginTop: 28, width: "100%", height: 56, background: ACCENT, color: "#fff",
+              border: "none", borderRadius: 14, fontFamily: FONT, fontWeight: 700, fontSize: 17,
+              cursor: "pointer", transition: "all 0.2s ease",
+            }}
+          >
+            Sign In
+          </button>
+
+          <Divider />
+
+          <button type="button" className="ws-google" style={googleBtn()}>
+            <GoogleG />
+            <span>Sign in to Google</span>
+          </button>
+
+          <p style={{ marginTop: 24, textAlign: "center", fontSize: 14, color: TEXT }}>
+            Don't have an account?{" "}
+            <Link to="/signup" style={{ color: ACCENT, fontWeight: 600, textDecoration: "none" }}
+              onMouseEnter={(e) => (e.currentTarget.style.textDecoration = "underline")}
+              onMouseLeave={(e) => (e.currentTarget.style.textDecoration = "none")}>
+              Sign up
+            </Link>
+          </p>
+        </form>
+      </div>
+
+      <SharedAuthStyles />
+    </div>
+  );
+}
+
+export function Field({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <div>
+      <label style={{ display: "block", fontSize: 15, fontWeight: 500, color: TEXT, marginBottom: 8 }}>{label}</label>
+      {children}
+    </div>
+  );
+}
+
+export function inputStyle(): React.CSSProperties {
+  return {
+    width: "100%", height: 56, background: "#fff", border: `1.5px solid ${BORDER}`,
+    borderRadius: 12, padding: "0 18px", fontSize: 15, fontFamily: FONT, color: TEXT,
+    outline: "none", transition: "all 0.18s ease", boxSizing: "border-box",
+  };
+}
+
+export function eyeBtn(): React.CSSProperties {
+  return {
+    position: "absolute", right: 16, top: "50%", transform: "translateY(-50%)",
+    background: "transparent", border: "none", cursor: "pointer", padding: 4,
+    color: TEXT3, display: "grid", placeItems: "center",
+  };
+}
+
+export function googleBtn(): React.CSSProperties {
+  return {
+    width: "100%", height: 56, background: "#fff", border: `1.5px solid ${BORDER}`,
+    borderRadius: 14, display: "flex", alignItems: "center", justifyContent: "center", gap: 12,
+    fontFamily: FONT, fontWeight: 500, fontSize: 15, color: TEXT, cursor: "pointer",
+    transition: "all 0.18s ease",
+  };
+}
+
+export function Divider() {
+  return (
+    <div style={{ display: "flex", alignItems: "center", gap: 12, margin: "24px 0" }}>
+      <div style={{ flex: 1, height: 1, background: BORDER }} />
+      <span style={{ fontSize: 13, color: TEXT3 }}>or continue with</span>
+      <div style={{ flex: 1, height: 1, background: BORDER }} />
+    </div>
+  );
+}
+
+export function EyeIcon({ off }: { off: boolean }) {
+  return off ? (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" />
+      <line x1="1" y1="1" x2="23" y2="23" />
+    </svg>
+  ) : (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+      <circle cx="12" cy="12" r="3" />
+    </svg>
+  );
+}
+
+export function GoogleG() {
+  return (
+    <svg width="22" height="22" viewBox="0 0 48 48" aria-hidden="true">
+      <path fill="#FFC107" d="M43.611 20.083H42V20H24v8h11.303c-1.649 4.657-6.08 8-11.303 8-6.627 0-12-5.373-12-12s5.373-12 12-12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4 12.955 4 4 12.955 4 24s8.955 20 20 20 20-8.955 20-20c0-1.341-.138-2.65-.389-3.917z" />
+      <path fill="#FF3D00" d="M6.306 14.691l6.571 4.819C14.655 15.108 18.961 12 24 12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4 16.318 4 9.656 8.337 6.306 14.691z" />
+      <path fill="#4CAF50" d="M24 44c5.166 0 9.86-1.977 13.409-5.192l-6.19-5.238C29.211 35.091 26.715 36 24 36c-5.202 0-9.619-3.317-11.283-7.946l-6.522 5.025C9.505 39.556 16.227 44 24 44z" />
+      <path fill="#1976D2" d="M43.611 20.083H42V20H24v8h11.303c-.792 2.237-2.231 4.166-4.087 5.571l6.19 5.238C36.971 39.205 44 34 44 24c0-1.341-.138-2.65-.389-3.917z" />
+    </svg>
+  );
+}
+
+export function SharedAuthStyles() {
+  return (
+    <style>{`
+      @keyframes ws-form-in { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+      @keyframes ws-logo { from { opacity: 0; } to { opacity: 1; } }
+      .ws-input:focus { border-color: ${ACCENT} !important; box-shadow: 0 0 0 4px rgba(52,152,219,0.1); }
+      .ws-submit:hover { background: ${ACCENT_DARK} !important; box-shadow: 0 8px 24px rgba(52,152,219,0.35); transform: translateY(-1px); }
+      .ws-submit:active { transform: translateY(0); }
+      .ws-google:hover { background: #F9FAFB !important; border-color: #D1D5DB !important; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+    `}</style>
+  );
+}
