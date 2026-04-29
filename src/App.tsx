@@ -4,6 +4,9 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import Index from "./pages/Index.tsx";
+import Landing from "./pages/Landing.tsx";
+import SignIn from "./pages/SignIn.tsx";
+import SignUp from "./pages/SignUp.tsx";
 import Roadmap from "./pages/Roadmap.tsx";
 import Mission from "./pages/Mission.tsx";
 import Skills from "./pages/Skills.tsx";
@@ -23,7 +26,10 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<Index />} />
+          <Route path="/" element={<Landing />} />
+          <Route path="/signin" element={<SignIn />} />
+          <Route path="/signup" element={<SignUp />} />
+          <Route path="/dashboard" element={<Index />} />
           <Route path="/roadmap" element={<Roadmap />} />
           <Route path="/mission" element={<Mission />} />
           <Route path="/missions" element={<Mission />} />
