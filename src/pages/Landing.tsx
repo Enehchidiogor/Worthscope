@@ -263,7 +263,7 @@ export default function Landing() {
       <section id="problem" style={{ background: BG2, padding: "100px 0", borderTop: `1px solid ${BORDER}`, borderBottom: `1px solid ${BORDER}` }}>
         <div style={{ maxWidth: 1200, margin: "0 auto", padding: "0 24px", display: "grid", gridTemplateColumns: "1fr 1fr", gap: 64, alignItems: "center" }}>
           <div className="ws-reveal">
-            <h2 style={{ fontSize: 42, fontWeight: 700, lineHeight: 1.15, margin: 0, color: TEXT, letterSpacing: -1 }}>
+            <h2 style={{ fontSize: 42, fontWeight: 600, lineHeight: 1.15, margin: 0, color: TEXT, letterSpacing: -1 }}>
               Most Students <span style={{ color: ACCENT }}>Guess</span> Their Future
             </h2>
             <p style={{ fontSize: 17, lineHeight: 1.7, color: TEXT2, marginTop: 20 }}>
@@ -288,7 +288,7 @@ export default function Landing() {
       <section id="solution" style={{ padding: "110px 0", background: "#fff" }}>
         <div style={{ maxWidth: 1200, margin: "0 auto", padding: "0 24px", display: "grid", gridTemplateColumns: "1fr 1fr", gap: 64, alignItems: "center" }}>
           <div className="ws-reveal">
-            <h2 style={{ fontSize: 42, fontWeight: 700, lineHeight: 1.15, margin: 0, color: TEXT, letterSpacing: -1 }}>
+            <h2 style={{ fontSize: 42, fontWeight: 600, lineHeight: 1.15, margin: 0, color: TEXT, letterSpacing: -1 }}>
               WorthScope Gives You <span style={{ color: ACCENT }}>Clarity</span>
             </h2>
             <p style={{ fontSize: 17, lineHeight: 1.7, color: TEXT2, marginTop: 20 }}>
@@ -316,7 +316,7 @@ export default function Landing() {
       <section id="how" style={{ padding: "110px 0", background: BG2, borderTop: `1px solid ${BORDER}`, borderBottom: `1px solid ${BORDER}` }}>
         <div style={{ maxWidth: 1200, margin: "0 auto", padding: "0 24px" }}>
           <div className="ws-reveal" style={{ textAlign: "center", maxWidth: 720, margin: "0 auto 60px" }}>
-            <h2 style={{ fontSize: 42, fontWeight: 700, margin: 0, letterSpacing: -1, color: TEXT }}>How It Works</h2>
+            <h2 style={{ fontSize: 42, fontWeight: 600, margin: 0, letterSpacing: -0.6, color: TEXT }}>How It Works</h2>
             <p style={{ fontSize: 17, color: TEXT2, marginTop: 14 }}>Three simple steps to your career blueprint.</p>
           </div>
 
@@ -347,7 +347,7 @@ export default function Landing() {
       <section id="features" style={{ padding: "110px 0", background: "#fff" }}>
         <div style={{ maxWidth: 1200, margin: "0 auto", padding: "0 24px" }}>
           <div className="ws-reveal" style={{ textAlign: "center", maxWidth: 760, margin: "0 auto 56px" }}>
-            <h2 style={{ fontSize: 42, fontWeight: 700, margin: 0, letterSpacing: -1, color: TEXT }}>
+            <h2 style={{ fontSize: 42, fontWeight: 600, margin: 0, letterSpacing: -0.6, color: TEXT }}>
               Everything You Need to Plan Your Future
             </h2>
             <p style={{ fontSize: 17, color: TEXT2, marginTop: 14 }}>
@@ -374,7 +374,7 @@ export default function Landing() {
         <div aria-hidden style={{ position: "absolute", inset: 0, background: "radial-gradient(circle at 80% 20%, rgba(255,255,255,.18), transparent 50%)" }} />
         <div style={{ maxWidth: 1200, margin: "0 auto", padding: "0 24px", display: "grid", gridTemplateColumns: "1.1fr .9fr", gap: 56, alignItems: "center", position: "relative" }}>
           <div className="ws-reveal">
-            <h2 style={{ fontSize: 46, fontWeight: 700, color: "#fff", lineHeight: 1.1, margin: 0, letterSpacing: -1.2 }}>
+            <h2 style={{ fontSize: 46, fontWeight: 600, color: "#fff", lineHeight: 1.1, margin: 0, letterSpacing: -1.2 }}>
               Stop Guessing. Start Planning.
             </h2>
             <p style={{ color: "rgba(255,255,255,.85)", fontSize: 17, lineHeight: 1.7, marginTop: 18, maxWidth: 520 }}>
