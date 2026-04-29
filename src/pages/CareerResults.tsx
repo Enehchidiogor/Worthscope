@@ -270,7 +270,7 @@ export default function CareerResults() {
           <button
             onClick={() => {
               localStorage.setItem("worthscope_career_unlocked", "true");
-              navigate("/");
+              navigate("/dashboard");
             }}
             style={{
               marginTop: 28, width: 280, height: 52, borderRadius: 14, border: "none",

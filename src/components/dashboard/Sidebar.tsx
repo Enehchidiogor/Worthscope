@@ -6,7 +6,7 @@ import logo from "@/assets/worthscope-logo.png";
 type Item = { label: string; Icon: ComponentType<{ className?: string }>; to: string };
 
 const items: Item[] = [
-  { label: "Dashboard", Icon: IconHome, to: "/" },
+  { label: "Dashboard", Icon: IconHome, to: "/dashboard" },
   { label: "My Roadmap", Icon: IconMap, to: "/roadmap" },
   { label: "Missions", Icon: IconTarget, to: "/missions" },
   { label: "Skill Progress", Icon: IconChart, to: "/skills" },
