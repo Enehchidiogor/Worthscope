@@ -2,278 +2,351 @@ import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import logo from "@/assets/worthscope-logo.png";
 
+/* WorthScope — Stage 1: User Setup Screen
+   Collects identity context ONCE: name, age, education level, class/level.
+   Saves to localStorage as worthscope_user_profile. */
+
 const ACCENT = "#3498DB";
 const ACCENT_DARK = "#217BBB";
 const ACCENT_LIGHT = "#EBF5FB";
+const BG = "#F4F9FE";
+const BORDER = "#E5E7EB";
 const TEXT = "#111111";
 const TEXT2 = "#6B7280";
 const TEXT3 = "#9CA3AF";
-const BORDER = "#E5E7EB";
-const BG2 = "#F8FAFC";
-const FONT = "'DM Sans', sans-serif";
+const SUCCESS = "#22C55E";
+const FONT = "'Poppins', sans-serif";
 
+const STORAGE_KEY = "worthscope_user_profile";
+
+type EducationLevel = "secondary" | "university" | "";
 type Profile = {
-  name: string;
-  level: "Secondary" | "University" | "";
-  year: string;
+  fullName: string;
+  firstName: string;
+  age: number | "";
+  educationLevel: EducationLevel;
+  classOrLevel: string;
 };
-
-const STORAGE_KEY = "worthscope_profile";
 
 function loadProfile(): Profile {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    if (raw) return { name: "", level: "", year: "", ...JSON.parse(raw) };
+    if (raw) {
+      const p = JSON.parse(raw);
+      return {
+        fullName: p.fullName || "",
+        firstName: p.firstName || "",
+        age: typeof p.age === "number" ? p.age : "",
+        educationLevel: (p.educationLevel as EducationLevel) || "",
+        classOrLevel: p.classOrLevel || "",
+      };
+    }
   } catch {}
-  return { name: "", level: "", year: "" };
+  return { fullName: "", firstName: "", age: "", educationLevel: "", classOrLevel: "" };
 }
 
-const SLIDES = [
-  {
-    eyebrow: "Welcome",
-    title: "Welcome to WorthScope",
-    body: "Your guided journey from confusion to a clear, personalized career direction starts here.",
-    icon: '<path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/>',
-  },
-  {
-    eyebrow: "How it works",
-    title: "Three simple steps",
-    body: "Answer a short assessment, let our system analyze your strengths, and unlock your personalized career blueprint.",
-    icon: '<polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>',
-  },
-  {
-    eyebrow: "Almost ready",
-    title: "Tell us a little about you",
-    body: "Just a couple of details so we can tailor your assessment and results.",
-    icon: '<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>',
-  },
-];
+const SECONDARY_OPTS = ["SS1", "SS2", "SS3"];
+const UNI_OPTS = ["100 Level", "200 Level", "300 Level", "400 Level", "500 Level"];
 
 export default function Onboarding() {
   const navigate = useNavigate();
-  const [step, setStep] = useState(0);
-  const [profile, setProfile] = useState<Profile>(() => loadProfile());
-  const total = SLIDES.length;
+  const [p, setP] = useState<Profile>(() => loadProfile());
+  const [submitting, setSubmitting] = useState(false);
+  const [showGreeting, setShowGreeting] = useState(false);
 
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "ArrowRight") next();
-      if (e.key === "ArrowLeft") back();
+  const ageNum = typeof p.age === "number" ? p.age : NaN;
+  const validName = p.fullName.trim().length >= 2;
+  const validAge = !Number.isNaN(ageNum) && ageNum >= 12 && ageNum <= 35;
+  const validLevel = p.educationLevel !== "";
+  const validClass = p.classOrLevel.trim().length > 0;
+  const canContinue = validName && validAge && validLevel && validClass && !submitting;
+
+  const yearOptions = useMemo(
+    () => (p.educationLevel === "secondary" ? SECONDARY_OPTS : p.educationLevel === "university" ? UNI_OPTS : []),
+    [p.educationLevel],
+  );
+
+  function handleSelectLevel(level: EducationLevel) {
+    setP((prev) => ({ ...prev, educationLevel: level, classOrLevel: "" }));
+  }
+
+  function handleContinue() {
+    if (!canContinue) return;
+    setSubmitting(true);
+    const firstName = p.fullName.trim().split(/\s+/)[0] || "";
+    const profile = {
+      fullName: p.fullName.trim(),
+      firstName,
+      age: ageNum,
+      educationLevel: p.educationLevel,
+      classOrLevel: p.classOrLevel,
     };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [step, profile]);
-
-  const isLast = step === total - 1;
-  const canContinue = useMemo(() => {
-    if (!isLast) return true;
-    return profile.name.trim().length > 0 && profile.level !== "" && profile.year.trim().length > 0;
-  }, [isLast, profile]);
-
-  function next() {
-    if (!isLast) {
-      setStep((s) => Math.min(total - 1, s + 1));
-    } else if (canContinue) {
-      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(profile)); } catch {}
-      navigate("/assessment");
-    }
-  }
-  function back() {
-    if (step > 0) setStep((s) => s - 1);
-    else navigate("/");
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(profile)); } catch {}
+    window.setTimeout(() => {
+      setShowGreeting(true);
+      window.setTimeout(() => navigate("/assessment"), 1800);
+    }, 800);
   }
 
-  const slide = SLIDES[step];
-  const yearOptions =
-    profile.level === "University"
-      ? ["Year 1", "Year 2", "Year 3", "Year 4+"]
-      : ["Form 1-3", "Form 4", "Form 5", "Form 6 / A-Levels"];
+  if (showGreeting) {
+    const firstName = p.fullName.trim().split(/\s+/)[0] || "there";
+    return (
+      <div style={{ minHeight: "100vh", background: BG, fontFamily: FONT, display: "grid", placeItems: "center", padding: 24 }}>
+        <div style={{ textAlign: "center", animation: "ws-fade-up 0.5s ease both" }}>
+          <div style={{ fontSize: 56, animation: "ws-wave 1.6s ease-in-out infinite", display: "inline-block", transformOrigin: "70% 70%" }}>
+            👋
+          </div>
+          <h1 style={{ marginTop: 14, fontWeight: 700, fontSize: 28, color: TEXT, letterSpacing: -0.6 }}>
+            Nice to meet you, {firstName}
+          </h1>
+          <p style={{ marginTop: 10, fontWeight: 400, fontSize: 16, color: TEXT2 }}>
+            Let's find your perfect career path.
+          </p>
+        </div>
+        <style>{`
+          @keyframes ws-fade-up { from {opacity:0; transform:translateY(12px)} to {opacity:1; transform:translateY(0)} }
+          @keyframes ws-wave { 0%,60%,100%{transform:rotate(0)} 20%{transform:rotate(18deg)} 40%{transform:rotate(-12deg)} }
+        `}</style>
+      </div>
+    );
+  }
 
   return (
-    <div style={{ minHeight: "100vh", background: "#fff", fontFamily: FONT, color: TEXT, position: "relative", display: "flex", flexDirection: "column" }}>
+    <div style={{ minHeight: "100vh", background: BG, fontFamily: FONT, color: TEXT, display: "flex", flexDirection: "column" }}>
       {/* Top bar */}
-      <header style={{ height: 76, padding: "0 36px", display: "flex", alignItems: "center", justifyContent: "space-between", borderBottom: `1px solid ${BORDER}` }}>
-        <Link to="/" style={{ display: "flex", flexDirection: "column", textDecoration: "none", lineHeight: 1 }}>
-          <img src={logo} alt="WorthScope" style={{ height: 36, width: "auto" }} />
-          <span style={{ marginTop: 2, fontSize: 9, color: TEXT3 }}>See Your Worth. Build Your Future.</span>
+      <header
+        style={{
+          height: 60, padding: "0 24px",
+          background: "rgba(255,255,255,0.85)", backdropFilter: "blur(14px)",
+          borderBottom: "1px solid rgba(52,152,219,0.08)",
+          display: "flex", alignItems: "center", justifyContent: "space-between",
+          position: "sticky", top: 0, zIndex: 10,
+        }}
+      >
+        <Link to="/" style={{ textDecoration: "none", display: "flex", alignItems: "center" }}>
+          <img src={logo} alt="WorthScope" style={{ height: 64, width: "auto", objectFit: "contain", display: "block" }} />
         </Link>
-        <button
-          onClick={() => navigate("/")}
-          style={{
-            background: "transparent", border: "none", color: TEXT2, fontSize: 14, fontWeight: 500,
-            cursor: "pointer", fontFamily: FONT, padding: "8px 12px", borderRadius: 8,
-          }}
-          onMouseEnter={(e) => (e.currentTarget.style.color = TEXT)}
-          onMouseLeave={(e) => (e.currentTarget.style.color = TEXT2)}
-        >
-          Skip
-        </button>
       </header>
 
-      {/* Progress */}
-      <div style={{ padding: "20px 36px 0" }}>
-        <div style={{ maxWidth: 720, margin: "0 auto", display: "flex", gap: 8 }}>
-          {SLIDES.map((_, i) => (
-            <div key={i} style={{ flex: 1, height: 4, borderRadius: 100, background: BORDER, overflow: "hidden" }}>
-              <div
-                style={{
-                  height: "100%",
-                  width: i <= step ? "100%" : "0%",
-                  background: ACCENT,
-                  transition: "width 0.4s ease",
-                }}
-              />
-            </div>
-          ))}
+      <main style={{ flex: 1, width: "100%", maxWidth: 560, margin: "0 auto", padding: "48px 32px" }} className="ws-setup-main">
+        {/* Step pills */}
+        <div style={{ display: "flex", justifyContent: "center", gap: 8, marginBottom: 14, flexWrap: "wrap" }}>
+          <Pill state="active">1 — Tell us about yourself</Pill>
+          <Pill state="upcoming">2 — Answer 10 questions</Pill>
+          <Pill state="upcoming">3 — Get your career path</Pill>
         </div>
-      </div>
+        <p style={{ textAlign: "center", fontWeight: 400, fontSize: 13, color: TEXT3, marginBottom: 36 }}>
+          3 simple steps to your personalised career blueprint
+        </p>
 
-      {/* Body */}
-      <main style={{ flex: 1, display: "grid", placeItems: "center", padding: "32px 24px" }}>
-        <div
-          key={step}
-          style={{
-            width: "100%", maxWidth: 560, textAlign: "center",
-            animation: "ws-onb-in 0.45s ease",
-          }}
-        >
+        {/* Header */}
+        <h1 style={{ textAlign: "center", fontWeight: 700, fontSize: 30, letterSpacing: -0.8, color: TEXT, margin: 0 }}>
+          Let's Get You Started
+        </h1>
+        <p style={{ textAlign: "center", fontWeight: 400, fontSize: 15, color: TEXT2, maxWidth: 400, margin: "8px auto 36px" }}>
+          We'll personalize your career path in just a few steps.
+        </p>
+
+        {/* Form */}
+        <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+          {/* Full Name */}
+          <Field label="Full Name" highlight={validName}>
+            <input
+              type="text"
+              value={p.fullName}
+              onChange={(e) => setP({ ...p, fullName: e.target.value })}
+              placeholder="Enter your full name"
+              className="ws-input"
+              style={inputStyle()}
+            />
+          </Field>
+
+          {/* Age + Education Level row */}
+          <div className="ws-row" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+            <Field label="Age" highlight={validAge}>
+              <input
+                type="number"
+                inputMode="numeric"
+                min={12}
+                max={35}
+                value={p.age === "" ? "" : p.age}
+                onChange={(e) => {
+                  const v = e.target.value;
+                  setP({ ...p, age: v === "" ? "" : Number(v) });
+                }}
+                placeholder="Enter your age"
+                className="ws-input"
+                style={inputStyle()}
+              />
+            </Field>
+
+            <Field label="Education Level" highlight={validLevel}>
+              <div style={{ display: "flex", gap: 8 }}>
+                {(["secondary", "university"] as const).map((opt) => {
+                  const active = p.educationLevel === opt;
+                  return (
+                    <button
+                      key={opt}
+                      type="button"
+                      onClick={() => handleSelectLevel(opt)}
+                      style={{
+                        flex: 1, height: 52, borderRadius: 12,
+                        border: `1.5px solid ${active ? ACCENT : BORDER}`,
+                        background: active ? ACCENT_LIGHT : "#fff",
+                        color: active ? ACCENT : TEXT,
+                        fontFamily: FONT, fontWeight: 500, fontSize: 14,
+                        cursor: "pointer", transition: "all 0.2s ease",
+                      }}
+                    >
+                      {opt === "secondary" ? "🎒 Secondary" : "🎓 University"}
+                    </button>
+                  );
+                })}
+              </div>
+            </Field>
+          </div>
+
+          {/* Conditional class/level */}
           <div
             style={{
-              width: 72, height: 72, borderRadius: 20, margin: "0 auto",
-              background: ACCENT_LIGHT, display: "grid", placeItems: "center",
-              boxShadow: "0 10px 30px rgba(52,152,219,0.18)",
+              overflow: "hidden",
+              maxHeight: p.educationLevel ? 200 : 0,
+              opacity: p.educationLevel ? 1 : 0,
+              transition: "max-height 0.3s ease, opacity 0.3s ease",
             }}
           >
-            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke={ACCENT} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" dangerouslySetInnerHTML={{ __html: slide.icon }} />
-          </div>
-          <div style={{ marginTop: 24, fontSize: 12, fontWeight: 600, color: ACCENT, letterSpacing: 1.5, textTransform: "uppercase" }}>
-            {slide.eyebrow}
-          </div>
-          <h1 style={{ marginTop: 10, fontSize: "clamp(28px, 4vw, 40px)", fontWeight: 700, letterSpacing: "-0.8px", lineHeight: 1.15, color: TEXT }}>
-            {slide.title}
-          </h1>
-          <p style={{ marginTop: 14, fontSize: 16, color: TEXT2, lineHeight: 1.65 }}>
-            {slide.body}
-          </p>
-
-          {isLast && (
-            <div style={{ marginTop: 28, textAlign: "left", display: "flex", flexDirection: "column", gap: 16 }}>
-              <Field label="Your name">
-                <input
-                  type="text"
-                  value={profile.name}
-                  onChange={(e) => setProfile({ ...profile, name: e.target.value })}
-                  placeholder="e.g. Amani"
-                  className="ws-onb-input"
-                  style={inputStyle()}
-                />
-              </Field>
-
-              <Field label="I'm currently in">
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
-                  {(["Secondary", "University"] as const).map((opt) => {
-                    const active = profile.level === opt;
+            {p.educationLevel && (
+              <Field
+                label={p.educationLevel === "secondary" ? "What class are you in?" : "What level are you in?"}
+                highlight={validClass}
+              >
+                <div
+                  style={{
+                    display: "grid",
+                    gridTemplateColumns: p.educationLevel === "secondary" ? "repeat(3, 1fr)" : "repeat(5, 1fr)",
+                    gap: 8,
+                  }}
+                  className="ws-class-grid"
+                >
+                  {yearOptions.map((y) => {
+                    const active = p.classOrLevel === y;
                     return (
                       <button
-                        key={opt}
+                        key={y}
                         type="button"
-                        onClick={() => setProfile({ ...profile, level: opt, year: "" })}
+                        onClick={() => setP({ ...p, classOrLevel: y })}
                         style={{
-                          height: 52, borderRadius: 12, fontFamily: FONT, fontSize: 14, fontWeight: 600,
-                          cursor: "pointer", transition: "all 0.18s ease",
+                          position: "relative",
+                          height: 44, borderRadius: 12,
+                          border: `1.5px solid ${active ? ACCENT : BORDER}`,
                           background: active ? ACCENT_LIGHT : "#fff",
                           color: active ? ACCENT : TEXT,
-                          border: `1.5px solid ${active ? ACCENT : BORDER}`,
+                          fontFamily: FONT, fontWeight: 500, fontSize: 13,
+                          cursor: "pointer", transition: "all 0.18s ease",
                         }}
                       >
-                        {opt}
+                        {y}
+                        {active && (
+                          <span style={{
+                            position: "absolute", top: 4, right: 6,
+                            fontSize: 11, color: ACCENT, fontWeight: 700,
+                          }}>✓</span>
+                        )}
                       </button>
                     );
                   })}
                 </div>
               </Field>
+            )}
+          </div>
 
-              {profile.level && (
-                <Field label="Current year / level">
-                  <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 10 }}>
-                    {yearOptions.map((y) => {
-                      const active = profile.year === y;
-                      return (
-                        <button
-                          key={y}
-                          type="button"
-                          onClick={() => setProfile({ ...profile, year: y })}
-                          style={{
-                            height: 46, borderRadius: 10, fontFamily: FONT, fontSize: 13, fontWeight: 600,
-                            cursor: "pointer", transition: "all 0.18s ease",
-                            background: active ? ACCENT_LIGHT : "#fff",
-                            color: active ? ACCENT : TEXT,
-                            border: `1.5px solid ${active ? ACCENT : BORDER}`,
-                          }}
-                        >
-                          {y}
-                        </button>
-                      );
-                    })}
-                  </div>
-                </Field>
-              )}
-            </div>
-          )}
+          {/* Continue */}
+          <button
+            disabled={!canContinue}
+            onClick={handleContinue}
+            style={{
+              marginTop: 12,
+              width: "100%", height: 54, borderRadius: 14, border: "none",
+              background: canContinue ? ACCENT : BORDER,
+              color: canContinue ? "#fff" : TEXT3,
+              fontFamily: FONT, fontWeight: 600, fontSize: 16,
+              cursor: canContinue ? "pointer" : "not-allowed",
+              transition: "background 0.3s, box-shadow 0.2s, transform 0.18s",
+            }}
+            onMouseEnter={(e) => {
+              if (!canContinue) return;
+              e.currentTarget.style.background = ACCENT_DARK;
+              e.currentTarget.style.boxShadow = "0 8px 24px rgba(52,152,219,0.35)";
+              e.currentTarget.style.transform = "translateY(-1px)";
+            }}
+            onMouseLeave={(e) => {
+              if (!canContinue) return;
+              e.currentTarget.style.background = ACCENT;
+              e.currentTarget.style.boxShadow = "none";
+              e.currentTarget.style.transform = "translateY(0)";
+            }}
+          >
+            {submitting ? (
+              <span style={{ display: "inline-flex", alignItems: "center", gap: 10 }}>
+                <span style={{
+                  width: 16, height: 16, borderRadius: "50%",
+                  border: "2px solid rgba(255,255,255,0.4)", borderTopColor: "#fff",
+                  display: "inline-block", animation: "ws-spin 0.8s linear infinite",
+                }} />
+                Setting up...
+              </span>
+            ) : "Continue →"}
+          </button>
         </div>
       </main>
 
-      {/* Footer nav */}
-      <footer style={{ padding: "20px 24px 28px", borderTop: `1px solid ${BORDER}`, background: BG2 }}>
-        <div style={{ maxWidth: 560, margin: "0 auto", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16 }}>
-          <button
-            onClick={back}
-            style={{
-              height: 48, padding: "0 22px", borderRadius: 10, fontFamily: FONT, fontSize: 14, fontWeight: 600,
-              background: "transparent", color: TEXT, border: `1.5px solid ${BORDER}`, cursor: "pointer",
-              transition: "all 0.2s ease",
-            }}
-            onMouseEnter={(e) => { e.currentTarget.style.borderColor = ACCENT; e.currentTarget.style.color = ACCENT; }}
-            onMouseLeave={(e) => { e.currentTarget.style.borderColor = BORDER; e.currentTarget.style.color = TEXT; }}
-          >
-            {step === 0 ? "Back to home" : "Back"}
-          </button>
-
-          <div style={{ fontSize: 13, color: TEXT3, fontWeight: 500 }}>
-            Step {step + 1} of {total}
-          </div>
-
-          <button
-            onClick={next}
-            disabled={!canContinue}
-            style={{
-              height: 48, padding: "0 26px", borderRadius: 10, fontFamily: FONT, fontSize: 14, fontWeight: 700,
-              background: canContinue ? ACCENT : "#BFD9EE", color: "#fff", border: "none",
-              cursor: canContinue ? "pointer" : "not-allowed",
-              transition: "all 0.2s ease",
-              boxShadow: canContinue ? "0 6px 18px rgba(52,152,219,0.35)" : "none",
-            }}
-            onMouseEnter={(e) => { if (canContinue) { e.currentTarget.style.background = ACCENT_DARK; e.currentTarget.style.transform = "translateY(-1px)"; } }}
-            onMouseLeave={(e) => { if (canContinue) { e.currentTarget.style.background = ACCENT; e.currentTarget.style.transform = "translateY(0)"; } }}
-          >
-            {isLast ? "Start Assessment" : "Continue"}
-          </button>
-        </div>
-      </footer>
-
       <style>{`
-        @keyframes ws-onb-in { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
-        .ws-onb-input:focus { outline: none; border-color: ${ACCENT} !important; box-shadow: 0 0 0 4px rgba(52,152,219,0.15); }
+        @keyframes ws-spin { to { transform: rotate(360deg) } }
+        .ws-input:focus {
+          outline: none;
+          border-color: ${ACCENT} !important;
+          box-shadow: 0 0 0 4px rgba(52,152,219,0.1) !important;
+        }
+        @media (max-width: 640px) {
+          .ws-setup-main { padding: 28px 20px !important; }
+          .ws-row { grid-template-columns: 1fr !important; }
+          .ws-class-grid { grid-template-columns: repeat(2, 1fr) !important; }
+        }
       `}</style>
     </div>
   );
 }
 
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
+function Pill({ state, children }: { state: "active" | "upcoming" | "completed"; children: React.ReactNode }) {
+  const styles: Record<string, React.CSSProperties> = {
+    active: { background: ACCENT, color: "#fff", border: "1px solid transparent" },
+    upcoming: { background: BG, color: TEXT3, border: `1px solid ${BORDER}` },
+    completed: { background: "rgba(34,197,94,0.1)", color: SUCCESS, border: "1px solid rgba(34,197,94,0.2)" },
+  };
+  return (
+    <span
+      style={{
+        ...styles[state],
+        padding: "6px 16px", borderRadius: 100,
+        fontFamily: FONT, fontWeight: 600, fontSize: 11,
+        whiteSpace: "nowrap",
+      }}
+    >
+      {state === "completed" && "✓ "}
+      {children}
+    </span>
+  );
+}
+
+function Field({ label, highlight, children }: { label: string; highlight?: boolean; children: React.ReactNode }) {
   return (
     <label style={{ display: "block" }}>
-      <span style={{ display: "block", fontSize: 13, fontWeight: 600, color: TEXT, marginBottom: 8 }}>{label}</span>
+      <span style={{
+        display: "block", fontFamily: FONT, fontWeight: 600, fontSize: 13,
+        color: highlight ? ACCENT : TEXT, marginBottom: 8, transition: "color 0.2s ease",
+      }}>
+        {label}
+      </span>
       {children}
     </label>
   );
@@ -281,9 +354,10 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 
 function inputStyle(): React.CSSProperties {
   return {
-    width: "100%", height: 52, padding: "0 16px", borderRadius: 12,
+    width: "100%", height: 52, padding: "0 18px", borderRadius: 12,
     border: `1.5px solid ${BORDER}`, background: "#fff",
-    fontFamily: FONT, fontSize: 15, color: TEXT,
-    transition: "all 0.18s ease", boxSizing: "border-box",
+    fontFamily: FONT, fontSize: 15, fontWeight: 400, color: TEXT,
+    transition: "border-color 0.2s ease, box-shadow 0.2s ease",
+    boxSizing: "border-box",
   };
 }
