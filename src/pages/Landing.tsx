@@ -253,7 +253,7 @@ export default function Landing() {
           </div>
 
           {/* RIGHT — Animated journey */}
-          <div className="ws-reveal" style={{ position: "relative", height: 560 }}>
+          <div className="ws-reveal" style={{ position: "relative", height: 620 }}>
             <JourneyDiagram active={activeNode} />
           </div>
         </div>
