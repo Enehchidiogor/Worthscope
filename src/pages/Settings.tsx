@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Sidebar } from "@/components/dashboard/Sidebar";
 import { TopBar } from "@/components/dashboard/TopBar";
 import { MobileTabBar } from "@/components/dashboard/MobileTabBar";
+import { InviteParentModal } from "@/components/parent/InviteParentModal";
 
 /* WorthScope — Settings Page
    5 grouped white cards on a soft-blue page bg.
@@ -217,6 +218,7 @@ const Settings = () => {
   const [dataModal, setDataModal] = useState(false);
   const [deleteModal, setDeleteModal] = useState(false);
   const [logoutModal, setLogoutModal] = useState(false);
+  const [inviteOpen, setInviteOpen] = useState(false);
 
   // Password form
   const [showPw, setShowPw] = useState(false);
@@ -475,8 +477,51 @@ const Settings = () => {
               />
             </div>
           </section>
+
+          {/* ───── Group 6: Family Access ───── */}
+          <section className="ws-fade-up mb-5" style={{ animationDelay: "0.6s" }}>
+            <GroupLabel>Family Access</GroupLabel>
+            <div className="overflow-hidden rounded-[18px] border border-[#E5E7EB]" style={{ background: cardBg, boxShadow: "0 2px 12px rgba(0,0,0,0.04)" }}>
+              <Row
+                icon={
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#3498DB" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+                    <circle cx="9" cy="7" r="4" />
+                    <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+                    <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                  </svg>
+                }
+                label="Parent / Guardian Access"
+                sub="Invite someone to view your career progress"
+                onClick={() => setInviteOpen(true)}
+                hasBorder={false}
+                right={
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setInviteOpen(true);
+                    }}
+                    className="rounded-[8px] font-medium transition-colors"
+                    style={{
+                      background: "#EBF5FB",
+                      border: "1px solid rgba(52,152,219,0.3)",
+                      color: "#3498DB",
+                      fontSize: 12,
+                      padding: "6px 14px",
+                    }}
+                    onMouseEnter={(e) => (e.currentTarget.style.background = "rgba(52,152,219,0.15)")}
+                    onMouseLeave={(e) => (e.currentTarget.style.background = "#EBF5FB")}
+                  >
+                    Invite
+                  </button>
+                }
+              />
+            </div>
+          </section>
         </main>
       </div>
+
+      <InviteParentModal open={inviteOpen} onClose={() => setInviteOpen(false)} />
 
       <MobileTabBar />
 
