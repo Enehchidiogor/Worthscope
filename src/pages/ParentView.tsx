@@ -181,7 +181,7 @@ const ParentView = () => {
 
       <main
         className="mx-auto"
-        style={{ maxWidth: 900, padding: "40px 32px" }}
+        style={{ maxWidth: 900, padding: "120px 32px 40px" }}
       >
         {/* ───── SECTION 1 — WELCOME ───── */}
         <section className="ws-fade-up" style={{ animationDelay: "0.1s", marginBottom: 32 }}>
