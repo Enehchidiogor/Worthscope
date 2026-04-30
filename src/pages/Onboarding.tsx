@@ -116,15 +116,14 @@ export default function Onboarding() {
       {/* Top bar */}
       <header
         style={{
-          height: 60, padding: "0 24px",
-          background: "rgba(255,255,255,0.85)", backdropFilter: "blur(14px)",
-          borderBottom: "1px solid rgba(52,152,219,0.08)",
+          height: 80, padding: "0 24px",
+          background: "transparent",
           display: "flex", alignItems: "center", justifyContent: "space-between",
-          position: "sticky", top: 0, zIndex: 10,
+          position: "absolute", top: 0, left: 0, right: 0, zIndex: 10,
         }}
       >
         <Link to="/" style={{ textDecoration: "none", display: "flex", alignItems: "center" }}>
-          <img src={logo} alt="WorthScope" style={{ height: 64, width: "auto", objectFit: "contain", display: "block" }} />
+          <img src={logo} alt="WorthScope" style={{ height: 72, width: "auto", objectFit: "contain", display: "block" }} />
         </Link>
       </header>
 
