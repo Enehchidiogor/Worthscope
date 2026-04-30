@@ -12,7 +12,7 @@ type CareerResult = {
   icon?: string;
 };
 
-type Profile = {
+type SkillLevel = "Beginner" | "Intermediate" | "Advanced";
   firstName?: string;
   fullName?: string;
   age?: number | string;
