@@ -13,6 +13,8 @@ type CareerResult = {
 };
 
 type SkillLevel = "Beginner" | "Intermediate" | "Advanced";
+
+type Profile = {
   firstName?: string;
   fullName?: string;
   age?: number | string;
@@ -34,11 +36,11 @@ const PARENT = {
 };
 
 // Default skills (simulated)
-const DEFAULT_SKILLS = [
-  { name: "UI Design", progress: 40, level: "Intermediate" as const },
-  { name: "Problem Solving", progress: 65, level: "Intermediate" as const },
-  { name: "Communication", progress: 30, level: "Beginner" as const },
-  { name: "Research", progress: 20, level: "Beginner" as const },
+const DEFAULT_SKILLS: { name: string; progress: number; level: SkillLevel }[] = [
+  { name: "UI Design", progress: 40, level: "Intermediate" },
+  { name: "Problem Solving", progress: 65, level: "Intermediate" },
+  { name: "Communication", progress: 30, level: "Beginner" },
+  { name: "Research", progress: 20, level: "Beginner" },
 ];
 
 const DEFAULT_CAREERS: CareerResult[] = [
