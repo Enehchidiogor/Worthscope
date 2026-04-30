@@ -1,7 +1,9 @@
+import { useEffect, useState } from "react";
 import { IconHome, IconMap, IconTarget, IconChart, IconBriefcase, IconSettings } from "./icons";
 import type { ComponentType } from "react";
 import { Link } from "react-router-dom";
 import logo from "@/assets/worthscope-logo.png";
+import { getProfile } from "@/lib/userState";
 
 type Item = { label: string; Icon: ComponentType<{ className?: string }>; to: string };
 
@@ -15,6 +17,16 @@ const items: Item[] = [
 ];
 
 export const Sidebar = ({ activePath = "/" }: { activePath?: string }) => {
+  const [name, setName] = useState("Welcome");
+  const [initial, setInitial] = useState("U");
+  useEffect(() => {
+    const p = getProfile();
+    if (p?.firstName) {
+      setName(p.firstName);
+      setInitial(p.firstName[0].toUpperCase());
+    }
+  }, []);
+
   return (
     <aside className="hidden md:flex fixed left-0 top-0 z-40 h-screen w-[220px] flex-col border-r border-border bg-card px-4 py-6">
       <div className="mb-9 px-1">
@@ -42,13 +54,13 @@ export const Sidebar = ({ activePath = "/" }: { activePath?: string }) => {
         })}
       </nav>
 
-      <div className="mt-auto flex items-center gap-3 rounded-xl border border-border p-3">
-        <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-accent text-white font-semibold text-[13px]">U</div>
+      <Link to="/profile" className="mt-auto flex items-center gap-3 rounded-xl border border-border p-3 transition-colors hover:bg-bg-elevated">
+        <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-accent text-white font-semibold text-[13px]">{initial}</div>
         <div className="min-w-0">
-          <div className="truncate text-[13px] font-medium text-foreground">Udochukwu</div>
-          <a href="#" className="text-[11px] text-text2 hover:text-accent">View Profile</a>
+          <div className="truncate text-[13px] font-medium text-foreground">{name}</div>
+          <span className="text-[11px] text-text2 hover:text-accent">View Profile</span>
         </div>
-      </div>
+      </Link>
     </aside>
   );
 };

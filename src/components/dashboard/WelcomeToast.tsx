@@ -1,15 +1,20 @@
 import { useEffect, useState } from "react";
+import { getProfile, isFirstLogin } from "@/lib/userState";
 
 /* WorthScope — Welcome Toast
    Slides in from top-right on dashboard mount, auto-dismisses after 4s.
-   Includes a 4s progress bar and a manual × dismiss. */
+   Welcome (first time) vs Welcome back (returning) chosen via worthscope_first_login. */
 
 export const WelcomeToast = () => {
   const [show, setShow] = useState(false);
   const [closing, setClosing] = useState(false);
+  const [name, setName] = useState("");
+  const [first, setFirst] = useState(false);
 
   useEffect(() => {
-    // small delay so it slides in after content fades up
+    setName(getProfile()?.firstName || "");
+    setFirst(isFirstLogin());
+
     const inT = window.setTimeout(() => setShow(true), 300);
     const outT = window.setTimeout(() => setClosing(true), 4000);
     const removeT = window.setTimeout(() => setShow(false), 4300);
@@ -27,6 +32,8 @@ export const WelcomeToast = () => {
     setTimeout(() => setShow(false), 260);
   };
 
+  const greet = first ? `Welcome${name ? `, ${name}` : ""} 👋` : `Welcome back${name ? `, ${name}` : ""} 👋`;
+
   return (
     <div
       className="fixed right-6 top-20 z-[600] flex max-w-[320px] items-center gap-3 overflow-hidden rounded-[14px] border bg-card pl-4 pr-9 py-3.5 shadow-[0_8px_32px_rgba(0,0,0,0.10)]"
@@ -40,7 +47,6 @@ export const WelcomeToast = () => {
       role="status"
       aria-live="polite"
     >
-      {/* Avatar */}
       <div
         className="grid h-8 w-8 flex-shrink-0 place-items-center rounded-full text-[12px] font-bold text-white"
         style={{ background: "linear-gradient(135deg,#3498DB,#5DADE2)" }}
@@ -49,11 +55,10 @@ export const WelcomeToast = () => {
       </div>
 
       <div className="min-w-0">
-        <div className="text-[14px] font-semibold text-foreground">Welcome back 👋</div>
+        <div className="text-[14px] font-semibold text-foreground">{greet}</div>
         <div className="text-[13px] text-text2">Koko is here to guide you.</div>
       </div>
 
-      {/* Dismiss */}
       <button
         onClick={dismiss}
         aria-label="Dismiss"
@@ -64,7 +69,6 @@ export const WelcomeToast = () => {
         </svg>
       </button>
 
-      {/* Progress bar */}
       <span
         aria-hidden
         className="absolute bottom-0 left-0 h-[3px] bg-accent"
