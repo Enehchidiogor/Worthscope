@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { CareerIcon } from "@/components/career/CareerIcon";
 import { loadResults, type CareerResult } from "@/lib/recommendationEngine";
+import { setChosenCareer } from "@/lib/userState";
 import logo from "@/assets/worthscope-logo.png";
 
 const ACCENT = "#3498DB";
@@ -36,6 +37,17 @@ export default function CareerResults() {
 
   const top = results[0];
   const others = results.slice(1);
+
+  const choose = (r: CareerResult) => {
+    setChosenCareer({
+      title: r.title,
+      description: r.description,
+      icon: r.icon,
+      category: r.category,
+      percentage: r.percentage,
+    });
+    navigate("/dashboard");
+  };
 
   return (
     <div style={{ minHeight: "100vh", background: BG, fontFamily: "'Poppins', sans-serif", color: TEXT }}>
@@ -175,7 +187,7 @@ export default function CareerResults() {
             </div>
 
             <button
-              onClick={() => navigate("/career")}
+              onClick={() => choose(top)}
               style={{
                 marginTop: 22, width: "100%", height: 48, borderRadius: 10, border: "none",
                 background: "#FFFFFF", color: ACCENT,
@@ -185,7 +197,7 @@ export default function CareerResults() {
               onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(255,255,255,0.9)"; e.currentTarget.style.boxShadow = "0 4px 16px rgba(0,0,0,0.12)"; }}
               onMouseLeave={(e) => { e.currentTarget.style.background = "#FFFFFF"; e.currentTarget.style.boxShadow = "none"; }}
             >
-              Explore This Path →
+              Choose This Path →
             </button>
           </div>
         )}
@@ -200,9 +212,8 @@ export default function CareerResults() {
                 padding: "24px 28px", boxShadow: "0 4px 20px rgba(0,0,0,0.05)",
                 display: "flex", flexDirection: "row", gap: 20, alignItems: "stretch",
                 opacity: 0, animation: `ws-fade-up 0.5s ease ${0.75 + i * 0.15}s both`,
-                transition: "all 0.2s ease", cursor: "pointer",
+                transition: "all 0.2s ease",
               }}
-              onClick={() => navigate("/career")}
             >
               <div style={{ flexShrink: 0, display: "flex", flexDirection: "column", alignItems: "center" }}>
                 <div
@@ -236,15 +247,20 @@ export default function CareerResults() {
                   />
                 </div>
                 <div style={{ marginTop: 12, textAlign: "right" }}>
-                  <span
-                    className="ws-explore-link"
-                    style={{ fontWeight: 500, fontSize: 13, color: ACCENT, display: "inline-flex", alignItems: "center", gap: 4 }}
+                  <button
+                    onClick={() => choose(r)}
+                    style={{
+                      background: "transparent", border: "none", padding: 0, cursor: "pointer",
+                      fontFamily: "inherit",
+                      fontWeight: 600, fontSize: 13, color: ACCENT,
+                      display: "inline-flex", alignItems: "center", gap: 4,
+                    }}
                   >
-                    Explore
+                    Choose This Path
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={ACCENT} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
                       <line x1="5" y1="12" x2="19" y2="12" /><polyline points="12 5 19 12 12 19" />
                     </svg>
-                  </span>
+                  </button>
                 </div>
               </div>
             </div>
@@ -268,10 +284,7 @@ export default function CareerResults() {
             Your full Career Blueprint includes skill gaps, course recommendations, earning potential, and a 30-day action plan.
           </p>
           <button
-            onClick={() => {
-              localStorage.setItem("worthscope_career_unlocked", "true");
-              navigate("/dashboard");
-            }}
+            onClick={() => top && choose(top)}
             style={{
               marginTop: 28, width: 280, height: 52, borderRadius: 14, border: "none",
               background: ACCENT, color: "#FFFFFF",
@@ -289,7 +302,7 @@ export default function CareerResults() {
               e.currentTarget.style.transform = "translateY(0)";
             }}
           >
-            View My Full Blueprint
+            Choose Top Match → Dashboard
           </button>
           <button
             onClick={() => navigate("/assessment")}
