@@ -126,6 +126,10 @@ const ParentView = () => {
     [],
   );
 
+  if (gateBlocked) {
+    return <Navigate to={`/parent/${token}`} replace />;
+  }
+
   return (
     <div className="min-h-screen font-poppins" style={{ background: PARENT.bg, color: PARENT.text }}>
       {/* ───── TOP BAR ───── */}
