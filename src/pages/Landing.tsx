@@ -383,7 +383,7 @@ export default function Landing() {
             <p style={{ color: "rgba(255,255,255,.85)", fontSize: 17, lineHeight: 1.7, marginTop: 18, maxWidth: 520 }}>
               Join thousands of students discovering their right career path with WorthScope.
             </p>
-            <button onClick={() => navigate("/onboarding")} className="ws-btn-primary" style={{ marginTop: 30, background: "#fff", color: ACCENT, border: "none", padding: "16px 30px", borderRadius: 14, fontWeight: 700, fontSize: 16, cursor: "pointer", fontFamily: FONT, display: "inline-flex", alignItems: "center", gap: 10 }}>
+            <button onClick={goStart} className="ws-btn-primary" style={{ marginTop: 30, background: "#fff", color: ACCENT, border: "none", padding: "16px 30px", borderRadius: 14, fontWeight: 700, fontSize: 16, cursor: "pointer", fontFamily: FONT, display: "inline-flex", alignItems: "center", gap: 10 }}>
               Start Your Career Assessment
               <I d="<path d='M5 12h14M13 5l7 7-7 7'/>" size={18} stroke={ACCENT} />
             </button>

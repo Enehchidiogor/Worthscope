@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import logo from "@/assets/worthscope-logo.png";
+import { nextRouteFromState } from "@/lib/userState";
 
 const ACCENT = "#3498DB";
 const ACCENT_DARK = "#217BBB";
@@ -15,7 +16,8 @@ export default function SignIn() {
 
   const onSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    navigate("/onboarding");
+    // Returning users (with profile + results + chosen) go straight to dashboard.
+    navigate(nextRouteFromState());
   };
 
   return (

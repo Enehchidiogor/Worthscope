@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import logo from "@/assets/worthscope-logo.png";
 import { Field, inputStyle, eyeBtn, googleBtn, Divider, EyeIcon, GoogleG, SharedAuthStyles } from "./SignIn";
+import { nextRouteFromState } from "@/lib/userState";
 
 const ACCENT = "#3498DB";
 const TEXT = "#111111";
@@ -29,7 +30,7 @@ export default function SignUp() {
 
   const onSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    navigate("/onboarding");
+    navigate(nextRouteFromState());
   };
 
   const barColor = (idx: number) => (strength.level > idx ? strength.color : BORDER);
