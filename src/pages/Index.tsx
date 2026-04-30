@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { Navigate } from "react-router-dom";
 import { Sidebar } from "@/components/dashboard/Sidebar";
 import { TopBar } from "@/components/dashboard/TopBar";
 import { Greeting } from "@/components/dashboard/Greeting";
@@ -12,37 +13,41 @@ import { CareerOpportunitiesCard } from "@/components/dashboard/CareerOpportunit
 import { ShareProgressCard } from "@/components/dashboard/ShareProgressCard";
 import { MobileTabBar } from "@/components/dashboard/MobileTabBar";
 import { WelcomeToast } from "@/components/dashboard/WelcomeToast";
+import { getProfile, hasResults, isFirstLogin, markLoggedIn } from "@/lib/userState";
 
 const Index = () => {
-  /* On every dashboard mount: trigger Koko's "login" sequence
-     (toast, button pulse + tooltip). On the FIRST login only,
-     also auto-open the chat panel with intro messages. */
+  const profile = getProfile();
+  const results = hasResults();
+
   useEffect(() => {
-    const isFirstLogin = !localStorage.getItem("worthscope_first_login");
+    if (!profile || !results) return;
+    const first = isFirstLogin();
 
     // Always: signal floating Koko to do its strong-pulse + tooltip
     window.dispatchEvent(new CustomEvent("koko:login-pulse"));
 
-    if (isFirstLogin) {
-      // Auto-open the chat 2s after dashboard load with a guided intro
+    if (first) {
       const t = window.setTimeout(() => {
         window.dispatchEvent(new CustomEvent("koko:intro"));
       }, 2000);
-      localStorage.setItem("worthscope_first_login", "true");
+      // Mark logged in only after we've decided to play the intro
+      markLoggedIn();
       return () => clearTimeout(t);
     }
-  }, []);
+  }, [profile, results]);
+
+  if (!profile) return <Navigate to="/onboarding" replace />;
+  if (!results) return <Navigate to="/assessment" replace />;
 
   return (
     <div className="min-h-screen bg-background font-poppins text-foreground">
-      <Sidebar />
+      <Sidebar activePath="/dashboard" />
 
       <div className="md:ml-[220px]">
         <TopBar />
 
         <main className="mx-auto w-full max-w-[1100px] px-4 pb-24 pt-8 md:px-8 md:pb-12">
           <Greeting />
-          {/* KokoPanel removed — replaced by floating chat + welcome toast */}
           <Roadmap />
           <CurrentPhase />
 
@@ -62,12 +67,10 @@ const Index = () => {
             <CareerSummary />
           </section>
 
-          {/* Career Opportunities — locked or unlocked */}
           <div className="mt-6">
             <CareerOpportunitiesCard />
           </div>
 
-          {/* Share Your Progress — invite parent/guardian */}
           <ShareProgressCard />
         </main>
       </div>

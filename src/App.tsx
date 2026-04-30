@@ -17,6 +17,7 @@ import CareerResults from "./pages/CareerResults.tsx";
 import Settings from "./pages/Settings.tsx";
 import ParentView from "./pages/ParentView.tsx";
 import ParentAccess from "./pages/ParentAccess.tsx";
+import Profile from "./pages/Profile.tsx";
 import NotFound from "./pages/NotFound.tsx";
 import { KokoFloatingChat } from "@/components/koko/KokoFloatingChat";
 
@@ -42,6 +43,7 @@ const App = () => (
           <Route path="/assessment" element={<Assessment />} />
           <Route path="/career-results" element={<CareerResults />} />
           <Route path="/settings" element={<Settings />} />
+          <Route path="/profile" element={<Profile />} />
           <Route path="/parent/:token" element={<ParentAccess />} />
           <Route path="/parent-view/:token" element={<ParentView />} />
           <Route path="/parent-view" element={<ParentView />} />

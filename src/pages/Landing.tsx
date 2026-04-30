@@ -1,6 +1,7 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import logo from "@/assets/worthscope-logo.png";
+import { nextRouteFromState } from "@/lib/userState";
 
 /* WorthScope — Landing Page
    Modern, clean, highly interactive. Built per spec:
@@ -111,6 +112,8 @@ export default function Landing() {
     if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
     setMobileOpen(false);
   };
+
+  const goStart = useCallback(() => navigate(nextRouteFromState()), [navigate]);
 
   return (
     <div style={{ background: "#FFFFFF", color: TEXT, fontFamily: FONT, minHeight: "100vh" }}>
@@ -242,7 +245,7 @@ export default function Landing() {
               WorthScope helps students discover the career path that fits their strengths, interests, and goals — then shows you exactly what to do next.
             </p>
             <div style={{ display: "flex", gap: 14, marginTop: 36, flexWrap: "wrap" }}>
-              <button onClick={() => navigate("/onboarding")} className="ws-btn-primary" style={{ background: ACCENT, color: "#fff", border: "none", padding: "16px 28px", borderRadius: 14, fontWeight: 500, fontSize: 15, cursor: "pointer", fontFamily: FONT, display: "inline-flex", alignItems: "center", gap: 10 }}>
+              <button onClick={goStart} className="ws-btn-primary" style={{ background: ACCENT, color: "#fff", border: "none", padding: "16px 28px", borderRadius: 14, fontWeight: 500, fontSize: 15, cursor: "pointer", fontFamily: FONT, display: "inline-flex", alignItems: "center", gap: 10 }}>
                 Start Assessment
                 <I d="<path d='M5 12h14M13 5l7 7-7 7'/>" size={18} stroke="#fff" />
               </button>
@@ -380,7 +383,7 @@ export default function Landing() {
             <p style={{ color: "rgba(255,255,255,.85)", fontSize: 17, lineHeight: 1.7, marginTop: 18, maxWidth: 520 }}>
               Join thousands of students discovering their right career path with WorthScope.
             </p>
-            <button onClick={() => navigate("/onboarding")} className="ws-btn-primary" style={{ marginTop: 30, background: "#fff", color: ACCENT, border: "none", padding: "16px 30px", borderRadius: 14, fontWeight: 700, fontSize: 16, cursor: "pointer", fontFamily: FONT, display: "inline-flex", alignItems: "center", gap: 10 }}>
+            <button onClick={goStart} className="ws-btn-primary" style={{ marginTop: 30, background: "#fff", color: ACCENT, border: "none", padding: "16px 30px", borderRadius: 14, fontWeight: 700, fontSize: 16, cursor: "pointer", fontFamily: FONT, display: "inline-flex", alignItems: "center", gap: 10 }}>
               Start Your Career Assessment
               <I d="<path d='M5 12h14M13 5l7 7-7 7'/>" size={18} stroke={ACCENT} />
             </button>

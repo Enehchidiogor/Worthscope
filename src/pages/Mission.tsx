@@ -11,6 +11,17 @@ import { TaskContent } from "@/components/mission/TaskContent";
 import { SubmitContent } from "@/components/mission/SubmitContent";
 import { StickyCompleteBar } from "@/components/mission/StickyCompleteBar";
 import { IconArrowRight } from "@/components/dashboard/icons";
+import { completeMission, getChosenCareer } from "@/lib/userState";
+
+const skillsForCategory = (cat?: string): Record<string, number> => {
+  if (cat === "tech") return { "Problem Solving": 8, "Technical Tools": 10 };
+  if (cat === "creative") return { "UI Design": 10, "Problem Solving": 5 };
+  if (cat === "business") return { "Communication": 8, "Problem Solving": 6 };
+  if (cat === "science") return { "Research": 10, "Problem Solving": 6 };
+  if (cat === "people") return { "Communication": 10, "Research": 5 };
+  if (cat === "communication") return { "Communication": 10, "UI Design": 4 };
+  return { "UI Design": 8, "Problem Solving": 6 };
+};
 
 const Mission = () => {
   const navigate = useNavigate();
@@ -34,6 +45,8 @@ const Mission = () => {
   }, [sectionsDone]);
 
   const handleAllComplete = () => {
+    const cat = getChosenCareer()?.category;
+    completeMission(skillsForCategory(cat));
     navigate("/roadmap");
   };
 
