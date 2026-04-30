@@ -398,8 +398,7 @@ export default function Landing() {
           <div style={{ display: "grid", gridTemplateColumns: "1.4fr 1fr 1fr 1fr", gap: 40 }}>
             <div>
               <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                <img src={logo} alt="WorthScope" style={{ height: 32, width: "auto", filter: "brightness(0) invert(1)" }} />
-                <span style={{ color: "#fff", fontWeight: 700, fontSize: 18 }}>WorthScope</span>
+                <img src={logo} alt="WorthScope" style={{ height: 72, width: "auto", objectFit: "contain", display: "block" }} />
               </div>
               <p style={{ marginTop: 14, fontSize: 14, lineHeight: 1.7, maxWidth: 320 }}>
                 See your worth. Build your future. AI-powered career guidance for the next generation of students.
