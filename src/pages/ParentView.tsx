@@ -114,17 +114,16 @@ const ParentView = () => {
     <div className="min-h-screen font-poppins" style={{ background: PARENT.bg, color: PARENT.text }}>
       {/* ───── TOP BAR ───── */}
       <header
-        className="sticky top-0 z-[100] flex items-center justify-between"
+        className="absolute top-0 left-0 right-0 z-[100] flex items-center justify-between"
         style={{
-          height: 64,
-          background: PARENT.card,
-          borderBottom: `1px solid ${PARENT.border}`,
+          height: 80,
+          background: "transparent",
           padding: "0 32px",
           animation: "ws-fade 0.4s ease both",
         }}
       >
         <div className="flex items-center gap-2">
-          <img src={logo} alt="WorthScope" style={{ height: 36, width: "auto", objectFit: "contain" }} />
+          <img src={logo} alt="WorthScope" style={{ height: 72, width: "auto", objectFit: "contain" }} />
         </div>
 
         <div
