@@ -148,11 +148,11 @@ export default function Landing() {
           position: "fixed",
           top: 0, left: 0, right: 0,
           zIndex: 50,
-          background: scrolled ? "rgba(255,255,255,0.92)" : "rgba(255,255,255,0.65)",
-          backdropFilter: "saturate(180%) blur(16px)",
-          WebkitBackdropFilter: "saturate(180%) blur(16px)",
-          borderBottom: `1px solid ${scrolled ? "rgba(229,231,235,1)" : "rgba(229,231,235,.6)"}`,
-          boxShadow: scrolled ? "0 8px 24px -16px rgba(17,17,17,.15)" : "none",
+          background: "transparent",
+          backdropFilter: "none",
+          WebkitBackdropFilter: "none",
+          borderBottom: "none",
+          boxShadow: "none",
           transition: "all .25s ease",
         }}
       >
