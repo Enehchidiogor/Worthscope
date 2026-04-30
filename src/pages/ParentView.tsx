@@ -58,14 +58,12 @@ const ParentView = () => {
 
   const invite: ParentInvite | null = token ? getParentInvite(token) : null;
 
-  // Gate: if a token is in the URL, parent must have passed the access screen this session.
-  if (token && (!invite || !hasAccessGranted(token))) {
-    return <Navigate to={`/parent/${token}`} replace />;
-  }
-
   const [profile, setProfile] = useState<Profile>({});
   const [careers, setCareers] = useState<CareerResult[]>([]);
   const [animBars, setAnimBars] = useState(false);
+
+  // Gate: if a token is in the URL, parent must have passed the access screen this session.
+  const gateBlocked = !!token && (!invite || !hasAccessGranted(token));
 
   useEffect(() => {
     // Prefer invite-bound profile (for token links) so the parent always sees the right child
