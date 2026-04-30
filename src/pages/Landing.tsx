@@ -639,11 +639,12 @@ function ResultPreviewCard() {
 
 function RoadmapPath() {
   // Labels placed away from the path; anchor + dy chosen per node so text never overlaps the line.
+  // Coordinates computed to lie exactly on the bezier path below.
   const nodes = [
-    { x: 40, y: 300, l: "START", anchor: "middle", dy: 32, big: false, pulse: false },
-    { x: 140, y: 220, l: "Discovery", anchor: "start", dy: 4, dx: 18, big: false, pulse: false },
-    { x: 230, y: 130, l: "Skill Building", anchor: "end", dy: 4, dx: -18, big: false, pulse: false },
-    { x: 330, y: 50, l: "YOUR GOAL", anchor: "middle", dy: -22, big: true, pulse: true },
+    { x: 40, y: 300, l: "START", anchor: "start", dy: 22, dx: -4, big: false, pulse: false },
+    { x: 102.5, y: 223.75, l: "Discovery", anchor: "start", dy: 4, dx: 16, big: false, pulse: false },
+    { x: 258.75, y: 113.75, l: "Skill Building", anchor: "end", dy: 4, dx: -16, big: false, pulse: false },
+    { x: 330, y: 50, l: "YOUR GOAL", anchor: "end", dy: -16, dx: -4, big: true, pulse: true },
   ] as const;
 
   return (
