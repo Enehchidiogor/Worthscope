@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { Navigate, useParams, useSearchParams } from "react-router-dom";
 import logo from "@/assets/worthscope-logo.png";
+import { getParentInvite, hasAccessGranted, type ParentInvite } from "@/lib/parentInvite";
 
 /* WorthScope — Parent View
    Read-only, calm, informational dashboard for parents/guardians. */
@@ -51,18 +52,36 @@ const DEFAULT_CAREERS: CareerResult[] = [
 ];
 
 const ParentView = () => {
+  const { token } = useParams<{ token?: string }>();
   const [params] = useSearchParams();
   const isDemo = params.get("student") === "demo";
+
+  const invite: ParentInvite | null = token ? getParentInvite(token) : null;
+
+  // Gate: if a token is in the URL, parent must have passed the access screen this session.
+  if (token && (!invite || !hasAccessGranted(token))) {
+    return <Navigate to={`/parent/${token}`} replace />;
+  }
 
   const [profile, setProfile] = useState<Profile>({});
   const [careers, setCareers] = useState<CareerResult[]>([]);
   const [animBars, setAnimBars] = useState(false);
 
   useEffect(() => {
-    try {
-      const rawProfile = localStorage.getItem("worthscope_user_profile");
-      if (rawProfile) setProfile(JSON.parse(rawProfile));
-    } catch {/* noop */}
+    // Prefer invite-bound profile (for token links) so the parent always sees the right child
+    if (invite) {
+      setProfile({
+        firstName: invite.studentFirstName,
+        fullName: invite.studentFullName,
+        educationLevel: invite.educationLevel,
+        classOrLevel: invite.classOrLevel,
+      });
+    } else {
+      try {
+        const rawProfile = localStorage.getItem("worthscope_user_profile");
+        if (rawProfile) setProfile(JSON.parse(rawProfile));
+      } catch {/* noop */}
+    }
 
     try {
       const rawResults = localStorage.getItem("worthscope_results");
@@ -81,10 +100,9 @@ const ParentView = () => {
       }
     } catch {/* noop */}
 
-    // trigger bar animation after first paint
     const t = setTimeout(() => setAnimBars(true), 150);
     return () => clearTimeout(t);
-  }, []);
+  }, [invite?.token]);
 
   const careersList = careers.length ? careers : DEFAULT_CAREERS;
   const top = careersList[0];

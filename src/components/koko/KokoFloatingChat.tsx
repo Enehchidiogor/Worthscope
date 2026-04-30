@@ -45,7 +45,8 @@ export const KokoFloatingChat = () => {
     pathname.startsWith("/onboarding") ||
     pathname.startsWith("/assessment") ||
     pathname.startsWith("/parent-view") ||
-    pathname.startsWith("/parent-dashboard");
+    pathname.startsWith("/parent-dashboard") ||
+    pathname.startsWith("/parent/");
 
   const [open, setOpen] = useState(false);
   const [unread, setUnread] = useState(true);
