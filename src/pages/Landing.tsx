@@ -148,11 +148,11 @@ export default function Landing() {
           position: "fixed",
           top: 0, left: 0, right: 0,
           zIndex: 50,
-          background: scrolled ? "rgba(255,255,255,0.92)" : "rgba(255,255,255,0.65)",
-          backdropFilter: "saturate(180%) blur(16px)",
-          WebkitBackdropFilter: "saturate(180%) blur(16px)",
-          borderBottom: `1px solid ${scrolled ? "rgba(229,231,235,1)" : "rgba(229,231,235,.6)"}`,
-          boxShadow: scrolled ? "0 8px 24px -16px rgba(17,17,17,.15)" : "none",
+          background: "transparent",
+          backdropFilter: "none",
+          WebkitBackdropFilter: "none",
+          borderBottom: "none",
+          boxShadow: "none",
           transition: "all .25s ease",
         }}
       >
@@ -398,8 +398,7 @@ export default function Landing() {
           <div style={{ display: "grid", gridTemplateColumns: "1.4fr 1fr 1fr 1fr", gap: 40 }}>
             <div>
               <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                <img src={logo} alt="WorthScope" style={{ height: 32, width: "auto", filter: "brightness(0) invert(1)" }} />
-                <span style={{ color: "#fff", fontWeight: 700, fontSize: 18 }}>WorthScope</span>
+                <img src={logo} alt="WorthScope" style={{ height: 72, width: "auto", objectFit: "contain", display: "block" }} />
               </div>
               <p style={{ marginTop: 14, fontSize: 14, lineHeight: 1.7, maxWidth: 320 }}>
                 See your worth. Build your future. AI-powered career guidance for the next generation of students.
@@ -639,11 +638,12 @@ function ResultPreviewCard() {
 
 function RoadmapPath() {
   // Labels placed away from the path; anchor + dy chosen per node so text never overlaps the line.
+  // Coordinates computed to lie exactly on the bezier path below.
   const nodes = [
-    { x: 40, y: 300, l: "START", anchor: "middle", dy: 32, big: false, pulse: false },
-    { x: 140, y: 220, l: "Discovery", anchor: "start", dy: 4, dx: 18, big: false, pulse: false },
-    { x: 230, y: 130, l: "Skill Building", anchor: "end", dy: 4, dx: -18, big: false, pulse: false },
-    { x: 330, y: 50, l: "YOUR GOAL", anchor: "middle", dy: -22, big: true, pulse: true },
+    { x: 40, y: 300, l: "START", anchor: "start", dy: 22, dx: -4, big: false, pulse: false },
+    { x: 102.5, y: 223.75, l: "Discovery", anchor: "start", dy: 4, dx: 16, big: false, pulse: false },
+    { x: 258.75, y: 113.75, l: "Skill Building", anchor: "end", dy: 4, dx: -16, big: false, pulse: false },
+    { x: 330, y: 50, l: "YOUR GOAL", anchor: "end", dy: -16, dx: -4, big: true, pulse: true },
   ] as const;
 
   return (
