@@ -15,6 +15,7 @@ import Career from "./pages/Career.tsx";
 import Assessment from "./pages/Assessment.tsx";
 import CareerResults from "./pages/CareerResults.tsx";
 import Settings from "./pages/Settings.tsx";
+import ParentView from "./pages/ParentView.tsx";
 import NotFound from "./pages/NotFound.tsx";
 import { KokoFloatingChat } from "@/components/koko/KokoFloatingChat";
 
@@ -40,6 +41,8 @@ const App = () => (
           <Route path="/assessment" element={<Assessment />} />
           <Route path="/career-results" element={<CareerResults />} />
           <Route path="/settings" element={<Settings />} />
+          <Route path="/parent-view" element={<ParentView />} />
+          <Route path="/parent-dashboard" element={<ParentView />} />
           <Route path="/koko" element={<Index />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />

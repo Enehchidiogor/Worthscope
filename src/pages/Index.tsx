@@ -9,6 +9,7 @@ import { SkillProgress } from "@/components/dashboard/SkillProgress";
 import { StreakCard } from "@/components/dashboard/StreakCard";
 import { CareerSummary } from "@/components/dashboard/CareerSummary";
 import { CareerOpportunitiesCard } from "@/components/dashboard/CareerOpportunitiesCard";
+import { ShareProgressCard } from "@/components/dashboard/ShareProgressCard";
 import { MobileTabBar } from "@/components/dashboard/MobileTabBar";
 import { WelcomeToast } from "@/components/dashboard/WelcomeToast";
 
@@ -65,6 +66,9 @@ const Index = () => {
           <div className="mt-6">
             <CareerOpportunitiesCard />
           </div>
+
+          {/* Share Your Progress — invite parent/guardian */}
+          <ShareProgressCard />
         </main>
       </div>
 
