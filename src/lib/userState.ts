@@ -84,20 +84,106 @@ export function setChosenCareer(c: ChosenCareer) {
 export function defaultProgressForCareer(c?: ChosenCareer | null): Progress {
   const cat = c?.category;
   const skills =
-    cat === "tech"
-      ? { "Problem Solving": 0, "Technical Tools": 0, "Communication": 0, "Research": 0 }
-      : cat === "creative"
-      ? { "UI Design": 0, "Problem Solving": 0, "Communication": 0, "Research": 0, "Technical Tools": 0 }
+    cat === "creative"
+      ? { "UI Design": 0, "Design Thinking": 0, "Prototyping": 0, "User Research": 0 }
+      : cat === "tech"
+      ? { "Problem Solving": 0, "Technical Tools": 0, "Data Literacy": 0, "Systems Thinking": 0 }
       : cat === "business"
-      ? { "Communication": 0, "Problem Solving": 0, "Research": 0, "Technical Tools": 0 }
+      ? { "Strategic Thinking": 0, "Communication": 0, "Leadership": 0, "Business Analysis": 0 }
       : cat === "science"
-      ? { "Research": 0, "Problem Solving": 0, "Communication": 0, "Technical Tools": 0 }
+      ? { "Research": 0, "Analytical Thinking": 0, "Scientific Writing": 0, "Lab Skills": 0 }
       : cat === "people"
-      ? { "Communication": 0, "Problem Solving": 0, "Research": 0 }
+      ? { "Communication": 0, "Empathy": 0, "Active Listening": 0, "Case Analysis": 0 }
       : cat === "communication"
-      ? { "Communication": 0, "Research": 0, "Problem Solving": 0, "UI Design": 0 }
-      : { "UI Design": 0, "Problem Solving": 0, "Communication": 0, "Research": 0, "Technical Tools": 0 };
+      ? { "Writing": 0, "Storytelling": 0, "Media Strategy": 0, "Content Creation": 0 }
+      : { "UI Design": 0, "Problem Solving": 0, "Communication": 0, "Research": 0 };
   return {
+    overallPct: 0,
+    phase: 1,
+    missionsCompleted: 0,
+    totalMissions: 9,
+    skills,
+  };
+}
+
+/* ---------- Mission sets per career category ---------- */
+export type MissionItem = { id: string; title: string; sub: string };
+
+const MISSION_SETS: Record<string, (title: string) => MissionItem[]> = {
+  creative: (title) => [
+    { id: "m1", title: "Explore Your Career Matches", sub: "Review your top 4 paths" },
+    { id: "m2", title: `Understand What a ${title} Does Daily`, sub: "Day-in-the-life overview" },
+    { id: "m3", title: "Learn the Basics of Design Thinking", sub: "Foundational mindset" },
+    { id: "m4", title: "Build Your First Project Brief", sub: "Define a real problem" },
+    { id: "m5", title: "Explore Your Core Tool: Figma", sub: "Hands-on intro" },
+    { id: "m6", title: "Complete a Design Challenge", sub: "Apply what you learned" },
+    { id: "m7", title: "Build a Real Project", sub: "Portfolio piece" },
+    { id: "m8", title: "Get Feedback and Iterate", sub: "Refine your work" },
+    { id: "m9", title: "Career Blueprint Complete", sub: "You're ready" },
+  ],
+  tech: (title) => [
+    { id: "m1", title: "Explore Your Career Matches", sub: "Review your top 4 paths" },
+    { id: "m2", title: `Understand What a ${title} Does Daily`, sub: "Day-in-the-life overview" },
+    { id: "m3", title: "Learn the Fundamentals of Your Field", sub: "Core concepts" },
+    { id: "m4", title: "Write Your First Code / Query", sub: "Hands-on start" },
+    { id: "m5", title: "Build a Simple Working Project", sub: "From idea to running" },
+    { id: "m6", title: "Complete a Technical Challenge", sub: "Apply what you learned" },
+    { id: "m7", title: "Build a Portfolio Project", sub: "Showcase your skills" },
+    { id: "m8", title: "Review and Refine Your Work", sub: "Iterate on feedback" },
+    { id: "m9", title: "Career Blueprint Complete", sub: "You're ready" },
+  ],
+  business: (title) => [
+    { id: "m1", title: "Explore Your Career Matches", sub: "Review your top 4 paths" },
+    { id: "m2", title: `Understand What a ${title} Does Daily`, sub: "Day-in-the-life overview" },
+    { id: "m3", title: "Learn Business Fundamentals", sub: "Core concepts" },
+    { id: "m4", title: "Map a Simple Business Problem", sub: "Frame it clearly" },
+    { id: "m5", title: "Build a Strategy Framework", sub: "Structured thinking" },
+    { id: "m6", title: "Present Your Ideas Clearly", sub: "Communicate value" },
+    { id: "m7", title: "Complete a Business Challenge", sub: "Apply what you learned" },
+    { id: "m8", title: "Refine and Improve", sub: "Iterate on feedback" },
+    { id: "m9", title: "Career Blueprint Complete", sub: "You're ready" },
+  ],
+  science: (title) => [
+    { id: "m1", title: "Explore Your Career Matches", sub: "Review your top 4 paths" },
+    { id: "m2", title: `Understand What a ${title} Does Daily`, sub: "Day-in-the-life overview" },
+    { id: "m3", title: "Learn Core Scientific Principles", sub: "Foundations" },
+    { id: "m4", title: "Research Your Specialisation", sub: "Pick a focus" },
+    { id: "m5", title: "Explore Career Pathways in Your Field", sub: "Map your options" },
+    { id: "m6", title: "Complete a Research Summary", sub: "Apply what you learned" },
+    { id: "m7", title: "Build Your Academic Foundation Plan", sub: "Roadmap of study" },
+    { id: "m8", title: "Connect Skills to Career", sub: "Bridge the gap" },
+    { id: "m9", title: "Career Blueprint Complete", sub: "You're ready" },
+  ],
+  people: (title) => [
+    { id: "m1", title: "Explore Your Career Matches", sub: "Review your top 4 paths" },
+    { id: "m2", title: `Understand What a ${title} Does Daily`, sub: "Day-in-the-life overview" },
+    { id: "m3", title: "Learn Human Behaviour Fundamentals", sub: "Core concepts" },
+    { id: "m4", title: "Practice Active Listening", sub: "Real exercises" },
+    { id: "m5", title: "Study a Real-World Case", sub: "Learn from practice" },
+    { id: "m6", title: "Build Your Communication Skills", sub: "Hands-on" },
+    { id: "m7", title: "Complete a People Challenge", sub: "Apply what you learned" },
+    { id: "m8", title: "Reflect and Improve", sub: "Iterate on feedback" },
+    { id: "m9", title: "Career Blueprint Complete", sub: "You're ready" },
+  ],
+  communication: (title) => [
+    { id: "m1", title: "Explore Your Career Matches", sub: "Review your top 4 paths" },
+    { id: "m2", title: `Understand What a ${title} Does Daily`, sub: "Day-in-the-life overview" },
+    { id: "m3", title: "Learn Storytelling Fundamentals", sub: "The craft" },
+    { id: "m4", title: "Write Your First Piece", sub: "Hands-on start" },
+    { id: "m5", title: "Build Your Content Strategy", sub: "Plan your voice" },
+    { id: "m6", title: "Publish Something Real", sub: "Ship it" },
+    { id: "m7", title: "Build a Portfolio of Work", sub: "Showcase your skills" },
+    { id: "m8", title: "Get Feedback and Improve", sub: "Iterate" },
+    { id: "m9", title: "Career Blueprint Complete", sub: "You're ready" },
+  ],
+};
+
+export function getMissionsForCareer(c?: ChosenCareer | null): MissionItem[] {
+  const career = c ?? getChosenCareer();
+  const cat = career?.category || "creative";
+  const builder = MISSION_SETS[cat] || MISSION_SETS.creative;
+  return builder(career?.title || "Professional");
+}
     overallPct: 0,
     phase: 1,
     missionsCompleted: 0,
