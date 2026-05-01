@@ -606,20 +606,20 @@ function ConfusionDiagram() {
         style={{ display: "block", position: "relative", zIndex: 2 }}
         aria-label="Student surrounded by many career options"
       >
-        <ellipse cx="230" cy="400" rx="120" ry="10" fill={BORDER} opacity="0.5" />
+        <ellipse cx="230" cy="335" rx="70" ry="6" fill={BORDER} opacity="0.5" />
         {/* Question mark above head */}
         <g style={{ animation: "ws-float 2.4s ease-in-out infinite" }}>
-          <circle cx="230" cy="200" r="22" fill={ACCENT} opacity="0.12" />
-          <text x="230" y="209" textAnchor="middle" fontFamily={FONT} fontSize="26" fontWeight="700" fill={ACCENT}>?</text>
+          <circle cx="230" cy="180" r="16" fill={ACCENT} opacity="0.12" />
+          <text x="230" y="186" textAnchor="middle" fontFamily={FONT} fontSize="20" fontWeight="700" fill={ACCENT}>?</text>
         </g>
-        {/* Person */}
+        {/* Person — smaller, centered in viewBox */}
         <g>
-          <circle cx="230" cy="252" r="20" fill="#FFFFFF" stroke={ACCENT} strokeWidth="2.5" />
-          <path d="M210,290 Q230,278 250,290 L 256,360 Q 230,370 204,360 Z" fill={ACCENT} />
-          <path d="M212,298 Q 192,316 188,338" fill="none" stroke={ACCENT} strokeWidth="6" strokeLinecap="round" />
-          <path d="M248,298 Q 268,316 272,338" fill="none" stroke={ACCENT} strokeWidth="6" strokeLinecap="round" />
-          <path d="M218,362 L 214,396" fill="none" stroke={ACCENT} strokeWidth="7" strokeLinecap="round" />
-          <path d="M242,362 L 246,396" fill="none" stroke={ACCENT} strokeWidth="7" strokeLinecap="round" />
+          <circle cx="230" cy="222" r="14" fill="#FFFFFF" stroke={ACCENT} strokeWidth="2.2" />
+          <path d="M216,248 Q230,240 244,248 L 248,300 Q 230,308 212,300 Z" fill={ACCENT} />
+          <path d="M218,254 Q 204,268 201,286" fill="none" stroke={ACCENT} strokeWidth="4.5" strokeLinecap="round" />
+          <path d="M242,254 Q 256,268 259,286" fill="none" stroke={ACCENT} strokeWidth="4.5" strokeLinecap="round" />
+          <path d="M222,302 L 219,328" fill="none" stroke={ACCENT} strokeWidth="5" strokeLinecap="round" />
+          <path d="M238,302 L 241,328" fill="none" stroke={ACCENT} strokeWidth="5" strokeLinecap="round" />
         </g>
       </svg>
     </div>
