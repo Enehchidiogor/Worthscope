@@ -18,7 +18,7 @@ const useCountUp = (target: number, duration = 1200, start = true) => {
   return val;
 };
 
-export const OverallSummary = ({ percent = 35 }: { percent?: number }) => {
+export const OverallSummary = ({ percent = 1 }: { percent?: number }) => {
   const count = useCountUp(percent);
   const size = 120;
   const stroke = 10;
@@ -64,10 +64,12 @@ export const OverallSummary = ({ percent = 35 }: { percent?: number }) => {
               />
             </div>
 
-            <div className="mt-3 inline-flex items-center gap-1.5 rounded-full border border-success/20 bg-success/10 px-3 py-1">
-              <IconArrowUp className="h-3.5 w-3.5 text-success" />
-              <span className="text-[13px] font-semibold text-success">+10% this week</span>
-            </div>
+            {count > 1 && (
+              <div className="mt-3 inline-flex items-center gap-1.5 rounded-full border border-success/20 bg-success/10 px-3 py-1">
+                <IconArrowUp className="h-3.5 w-3.5 text-success" />
+                <span className="text-[13px] font-semibold text-success">Growing</span>
+              </div>
+            )}
           </div>
         </div>
 

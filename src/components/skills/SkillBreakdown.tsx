@@ -74,10 +74,12 @@ export const SkillBreakdown = ({ skills }: { skills: Skill[] }) => {
               {/* RIGHT */}
               <div className="flex items-center justify-between md:w-[140px] md:flex-shrink-0 md:flex-col md:items-end md:gap-0.5">
                 <div className="text-[18px] font-bold text-accent">{s.percent}%</div>
-                <div className="flex items-center gap-1 text-[11px] text-success">
-                  <IconArrowUp className="h-2.5 w-2.5" />
-                  +{s.growth}% this week
-                </div>
+                {s.growth > 0 && (
+                  <div className="flex items-center gap-1 text-[11px] text-success">
+                    <IconArrowUp className="h-2.5 w-2.5" />
+                    +{s.growth}% this week
+                  </div>
+                )}
                 <button
                   onClick={() => toast.success(`Opening ${s.name} mission...`)}
                   className="mt-0.5 text-[12px] font-medium text-accent hover:underline"

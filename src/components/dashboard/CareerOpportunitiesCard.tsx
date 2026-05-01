@@ -20,7 +20,10 @@ export const CareerOpportunitiesCard = () => {
     setUnlocked(localStorage.getItem("worthscope_career_unlocked") === "true");
     setHasAssessment(!!localStorage.getItem("worthscope_results"));
     setResults(loadResults());
-    const t = window.setTimeout(() => setFill(30), 200);
+    // Read real overall progress
+    const pr = JSON.parse(localStorage.getItem("worthscope_progress") || "{}");
+    const real = Math.max(1, Number(pr?.overallPct) || 1);
+    const t = window.setTimeout(() => setFill(real), 200);
     return () => clearTimeout(t);
   }, []);
 
@@ -173,7 +176,7 @@ export const CareerOpportunitiesCard = () => {
       <div className="mt-5">
         <div className="flex items-center justify-between" style={{ fontWeight: 500, fontSize: 12, color: "#6B7280" }}>
           <span>Roadmap Progress</span>
-          <span>30% / 70%</span>
+          <span>{fill}% / 70%</span>
         </div>
         <div className="mt-1.5" style={{ height: 6, background: "#E5E7EB", borderRadius: 100, overflow: "hidden" }}>
           <div

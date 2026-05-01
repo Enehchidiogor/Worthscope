@@ -218,7 +218,80 @@ export function completeMission(skillBoosts: Record<string, number> = {}): Progr
   if (overallPct >= 70) {
     localStorage.setItem("worthscope_career_unlocked", "true");
   }
+  recordActivity(1);
   return next;
+}
+
+/* ---------- Streak engine ---------- */
+const K_STREAK = "worthscope_streak";
+const K_SIGNUP = "worthscope_signup_date";
+const K_ACTIVITY = "worthscope_activity_log";
+
+const isoDate = (d = new Date()) => {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
+};
+
+const dayDiff = (a: string, b: string) => {
+  const da = new Date(a + "T00:00:00").getTime();
+  const db = new Date(b + "T00:00:00").getTime();
+  return Math.round((db - da) / 86400000);
+};
+
+export type Streak = { count: number; lastVisitDate: string };
+
+export function getSignupDate(): string {
+  if (typeof window === "undefined") return isoDate();
+  let d = localStorage.getItem(K_SIGNUP);
+  if (!d) {
+    d = isoDate();
+    localStorage.setItem(K_SIGNUP, d);
+  }
+  return d;
+}
+
+export function getStreak(): Streak {
+  if (typeof window === "undefined") return { count: 1, lastVisitDate: isoDate() };
+  const raw = safeParse<Streak>(localStorage.getItem(K_STREAK));
+  return raw || { count: 0, lastVisitDate: "" };
+}
+
+/** Call on every dashboard load — updates streak per spec. */
+export function tickStreak(): Streak {
+  if (typeof window === "undefined") return { count: 1, lastVisitDate: isoDate() };
+  getSignupDate(); // ensure signup is recorded
+  const today = isoDate();
+  const cur = getStreak();
+  let next: Streak;
+  if (!cur.lastVisitDate) {
+    next = { count: 1, lastVisitDate: today };
+  } else if (cur.lastVisitDate === today) {
+    next = cur;
+  } else {
+    const diff = dayDiff(cur.lastVisitDate, today);
+    if (diff === 1) next = { count: cur.count + 1, lastVisitDate: today };
+    else next = { count: 1, lastVisitDate: today };
+  }
+  localStorage.setItem(K_STREAK, JSON.stringify(next));
+  recordActivity();
+  window.dispatchEvent(new CustomEvent("worthscope:streak"));
+  return next;
+}
+
+export function getActivityLog(): Record<string, number> {
+  if (typeof window === "undefined") return {};
+  return safeParse<Record<string, number>>(localStorage.getItem(K_ACTIVITY)) || {};
+}
+
+export function recordActivity(amount = 1) {
+  if (typeof window === "undefined") return;
+  const log = getActivityLog();
+  const k = isoDate();
+  log[k] = (log[k] || 0) + amount;
+  localStorage.setItem(K_ACTIVITY, JSON.stringify(log));
+  window.dispatchEvent(new CustomEvent("worthscope:activity"));
 }
 
 /* ---------- First-login flag (controls Welcome vs Welcome back) ---------- */
