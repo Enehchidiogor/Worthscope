@@ -40,9 +40,8 @@ export default function SignUp() {
     <div style={{ minHeight: "100vh", background: "#fff", fontFamily: FONT, color: TEXT, position: "relative" }}>
       <div style={{ position: "absolute", top: 0, left: 0, padding: "20px 28px", opacity: 0, animation: "ws-logo 0.3s ease forwards" }}>
         <Link to="/" style={{ display: "flex", alignItems: "center", textDecoration: "none" }}>
-          <img src={logo} alt="WorthScope" style={{ height: 44, width: "auto" }} />
+          <img src={logo} alt="WorthScope" style={{ height: 72, width: "auto", objectFit: "contain", display: "block" }} />
         </Link>
-        <div style={{ marginTop: 4, fontSize: 10, color: TEXT3 }}>See Your Worth. Build Your Future.</div>
       </div>
 
       <div style={{ minHeight: "100vh", display: "grid", placeItems: "center", padding: "100px 20px 40px" }}>
