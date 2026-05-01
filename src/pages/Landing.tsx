@@ -207,8 +207,8 @@ export default function Landing() {
           </nav>
 
           <div style={{ justifySelf: "end", display: "flex", gap: 10, alignItems: "center" }}>
-            <button onClick={() => navigate("/signin")} className="ws-btn-primary" style={{ background: ACCENT, color: "#fff", border: "none", padding: "10px 22px", borderRadius: 999, fontWeight: 500, fontSize: 14, cursor: "pointer", fontFamily: FONT }}>
-              Sign In
+            <button onClick={goStart} className="ws-btn-primary" style={{ background: ACCENT, color: "#fff", border: "none", padding: "10px 22px", borderRadius: 999, fontWeight: 500, fontSize: 14, cursor: "pointer", fontFamily: FONT }}>
+              Sign Up
             </button>
             <button onClick={() => setMobileOpen((o) => !o)} aria-label="Menu" style={{ display: "none", background: "transparent", border: "none", cursor: "pointer" }} className="ws-mobile-btn">
               <I d="<path d='M4 6h16M4 12h16M4 18h16'/>" stroke={TEXT} />
