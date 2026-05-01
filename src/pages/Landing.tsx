@@ -437,6 +437,7 @@ function JourneyDiagram({ active }: { active: number }) {
   // Center column for nodes; labels alternate left/right (off the path).
   const CX = 50; // % center
   const ys = [60, 170, 280, 390, 500];
+  const pathD = "M160,40 C 120,140 200,200 160,290 C 120,380 200,440 160,540";
   return (
     <div style={{ position: "relative", height: "100%", width: "100%" }}>
       {/* Section header */}
@@ -450,7 +451,7 @@ function JourneyDiagram({ active }: { active: number }) {
       </div>
 
       <div style={{ position: "relative", height: 560, width: "100%" }}>
-        {/* curved vertical path through the center */}
+        {/* curved vertical path through the center — STATIC */}
         <svg viewBox="0 0 320 560" width="100%" height="100%" preserveAspectRatio="none" style={{ position: "absolute", inset: 0, pointerEvents: "none" }}>
           <defs>
             <linearGradient id="jpath" x1="0" y1="0" x2="0" y2="1">
@@ -458,48 +459,52 @@ function JourneyDiagram({ active }: { active: number }) {
               <stop offset="50%" stopColor={ACCENT} stopOpacity="0.85" />
               <stop offset="100%" stopColor={ACCENT} stopOpacity="0.25" />
             </linearGradient>
+            <path id="jpath-shape" d={pathD} />
           </defs>
           <path
-            d="M160,40 C 120,140 200,200 160,290 C 120,380 200,440 160,540"
+            d={pathD}
             fill="none"
             stroke="url(#jpath)"
             strokeWidth="2.5"
-            strokeDasharray="6 6"
-            style={{ animation: "ws-dash 2.5s linear infinite" }}
           />
+
+          {/* Traveling dots — only thing that animates */}
+          {[0, 1.6, 3.2].map((delay, i) => (
+            <circle key={i} r="5" fill={ACCENT} opacity="0.7">
+              <animateMotion dur="5s" repeatCount="indefinite" begin={`${delay}s`}>
+                <mpath href="#jpath-shape" />
+              </animateMotion>
+            </circle>
+          ))}
         </svg>
 
-        {/* nodes */}
+        {/* nodes — all solid white with blue stroke, no animation */}
         {JOURNEY.map((n, i) => {
           const isActive = i === active;
-          const isPast = i < active;
           const labelOnRight = n.side === "right";
+          const size = isActive ? 60 : 56;
           return (
             <div
               key={n.label}
-              className="ws-jnode"
               style={{
                 position: "absolute",
-                top: ys[i] - 28,
-                left: `calc(${CX}% - 28px)`,
-                width: 56,
-                height: 56,
-                cursor: "pointer",
+                top: ys[i] - size / 2,
+                left: `calc(${CX}% - ${size / 2}px)`,
+                width: size,
+                height: size,
               }}
             >
               <div
                 style={{
-                  width: 56, height: 56, borderRadius: "50%",
-                  background: isActive ? ACCENT : isPast ? "rgba(59,130,246,.15)" : "#fff",
-                  color: isActive ? "#fff" : isPast ? ACCENT : TEXT2,
-                  border: `2px solid ${isActive || isPast ? ACCENT : BORDER}`,
+                  width: size, height: size, borderRadius: "50%",
+                  background: "#FFFFFF",
+                  color: ACCENT,
+                  border: `2px solid ${ACCENT}`,
                   display: "grid", placeItems: "center",
-                  boxShadow: isActive ? "0 12px 28px -8px rgba(59,130,246,.55)" : "0 6px 18px -8px rgba(17,17,17,.15)",
-                  animation: isActive ? "ws-pulse-ring 2s ease-in-out infinite" : `ws-float ${3 + i * 0.4}s ease-in-out infinite`,
-                  transition: "all .4s ease",
+                  boxShadow: "0 6px 18px -8px rgba(17,17,17,.15)",
                 }}
               >
-                <I d={n.icon} size={22} stroke={isActive ? "#fff" : isPast ? ACCENT : TEXT2} />
+                <I d={n.icon} size={22} stroke={ACCENT} />
               </div>
 
               {/* Label off to the side, never on the path */}
@@ -521,7 +526,6 @@ function JourneyDiagram({ active }: { active: number }) {
                     fontWeight: 600,
                     color: isActive ? ACCENT : TEXT,
                     lineHeight: 1.25,
-                    transition: "color .2s ease",
                   }}
                 >
                   {n.label}
