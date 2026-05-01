@@ -76,7 +76,7 @@ const Roadmap = () => {
       <Sidebar activePath="/roadmap" />
 
       <div className="md:ml-[220px]">
-        <TopBar title="My Roadmap" progress={progress} />
+        <TopBar title={careerTitle ? `My Roadmap — ${careerTitle}` : "My Roadmap"} progress={progress} />
 
         <main className="mx-auto w-full max-w-[1180px] px-4 pb-24 pt-8 md:px-8 md:pb-12">
           <div className="grid grid-cols-1 gap-7 lg:grid-cols-[1fr_300px]">
