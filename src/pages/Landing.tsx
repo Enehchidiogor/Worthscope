@@ -438,10 +438,9 @@ function JourneyDiagram({ active }: { active: number }) {
   // perfectly with the curve regardless of how it sways left/right.
   const ys = [60, 170, 280, 390, 500];
   const pathD = "M160,40 C 120,140 200,200 160,290 C 120,380 200,440 160,540";
-  // x-coordinates sampled on the cubic path above at the y values used for nodes
-  // (kept in viewBox units of 320 wide). Since preserveAspectRatio="none" the
-  // SVG stretches horizontally — convert to a percentage of width.
-  const xsViewbox = [160, 138, 160, 182, 160];
+  // Exact x-coordinates on the cubic path at each node's y position.
+  // Kept in viewBox units; converted to a percentage because the SVG stretches.
+  const xsViewbox = [153.3945, 160.3227, 164.0056, 154.6826, 170.4222];
   const VBW = 320;
   return (
     <div style={{ position: "relative", height: "100%", width: "100%" }}>
