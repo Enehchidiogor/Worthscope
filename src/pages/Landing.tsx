@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import logo from "@/assets/worthscope-logo.png";
-import { nextRouteFromState } from "@/lib/userState";
+
 
 /* WorthScope — Landing Page
    Modern, clean, highly interactive. Built per spec:
