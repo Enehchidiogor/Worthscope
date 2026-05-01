@@ -4,6 +4,7 @@ import { MobileTabBar } from "@/components/dashboard/MobileTabBar";
 import { IconBell, IconLock } from "@/components/dashboard/icons";
 import { JobCard } from "@/components/career/JobCard";
 import { JOBS } from "@/components/career/jobsData";
+import { getChosenCareer } from "@/lib/userState";
 
 /* WorthScope — Career Opportunities Page
    Two complete states (locked / unlocked) toggleable via
@@ -55,9 +56,15 @@ const Career = () => {
     return () => clearTimeout(t);
   }, [unlocked]);
 
+  const chosenCategory = getChosenCareer()?.category;
+  const careerScopedJobs = useMemo(
+    () => (chosenCategory ? JOBS.filter((j) => j.category === chosenCategory) : JOBS),
+    [chosenCategory]
+  );
+
   const filteredJobs = useMemo(
-    () => JOBS.filter((j) => j.filters.includes(activeFilter)),
-    [activeFilter]
+    () => careerScopedJobs.filter((j) => j.filters.includes(activeFilter)),
+    [activeFilter, careerScopedJobs]
   );
 
   const toggleUnlock = () => {
