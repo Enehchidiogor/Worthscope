@@ -218,6 +218,7 @@ export function completeMission(skillBoosts: Record<string, number> = {}): Progr
   if (overallPct >= 70) {
     localStorage.setItem("worthscope_career_unlocked", "true");
   }
+  recordActivity(1);
   return next;
 }
 
