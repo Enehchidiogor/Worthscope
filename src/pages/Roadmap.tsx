@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { Sidebar } from "@/components/dashboard/Sidebar";
 import { TopBar } from "@/components/dashboard/TopBar";
@@ -8,21 +8,35 @@ import { PhaseLabel } from "@/components/roadmap/PhaseLabel";
 import { RoadmapNodeRow } from "@/components/roadmap/RoadmapNodeRow";
 import { MissionDrawer } from "@/components/roadmap/MissionDrawer";
 import { KokoSidePanel } from "@/components/roadmap/KokoSidePanel";
-import { ROADMAP_NODES, PHASES, type RoadmapNode } from "@/components/roadmap/nodesData";
+import { buildRoadmapForUser, type RoadmapNode } from "@/components/roadmap/nodesData";
+import { getChosenCareer } from "@/lib/userState";
 import { toast } from "@/hooks/use-toast";
 
 const Roadmap = () => {
-  const [nodes, setNodes] = useState<RoadmapNode[]>(ROADMAP_NODES);
+  const initial = buildRoadmapForUser();
+  const [nodes, setNodes] = useState<RoadmapNode[]>(initial.nodes);
+  const [phasesMeta, setPhasesMeta] = useState(initial.phases);
   const [openNode, setOpenNode] = useState<RoadmapNode | null>(null);
+  const careerTitle = getChosenCareer()?.title;
+
+  useEffect(() => {
+    const refresh = () => {
+      const r = buildRoadmapForUser();
+      setNodes(r.nodes);
+      setPhasesMeta(r.phases);
+    };
+    window.addEventListener("worthscope:progress", refresh);
+    return () => window.removeEventListener("worthscope:progress", refresh);
+  }, []);
 
   const progress = useMemo(() => {
+    if (!nodes.length) return 1;
     const completed = nodes.filter((n) => n.status === "completed").length;
-    return Math.round((completed / nodes.length) * 100);
+    return Math.max(1, Math.round((completed / nodes.length) * 100));
   }, [nodes]);
 
-  // For the vertical path: completed-line height as a fraction of the path.
-  // We treat completed + half of "current" as the visited portion.
   const visitedFraction = useMemo(() => {
+    if (!nodes.length) return 0;
     const completed = nodes.filter((n) => n.status === "completed").length;
     const hasCurrent = nodes.some((n) => n.status === "current");
     const visited = completed + (hasCurrent ? 0.5 : 0);
@@ -31,9 +45,7 @@ const Roadmap = () => {
 
   const handleNodeClick = (node: RoadmapNode) => {
     if (node.status === "locked") {
-      toast({
-        description: "🔒 Complete previous steps to unlock this mission",
-      });
+      toast({ description: "🔒 Complete previous steps to unlock this mission" });
       return;
     }
     setOpenNode(node);
@@ -45,23 +57,19 @@ const Roadmap = () => {
       if (idx < 0) return prev;
       const next = [...prev];
       next[idx] = { ...next[idx], status: "completed" };
-      // promote the next locked node to current
       const nextLocked = next.findIndex((n, i) => i > idx && n.status === "locked");
-      if (nextLocked > -1) {
-        next[nextLocked] = { ...next[nextLocked], status: "current" };
-      }
+      if (nextLocked > -1) next[nextLocked] = { ...next[nextLocked], status: "current" };
       return next;
     });
     setOpenNode(null);
   };
 
-  // Group nodes by phase so we can interleave phase labels.
   const grouped = useMemo(() => {
-    return PHASES.map((p) => ({
+    return phasesMeta.map((p) => ({
       ...p,
       items: nodes.filter((n) => n.phase === p.num),
     }));
-  }, [nodes]);
+  }, [nodes, phasesMeta]);
 
   return (
     <div className="min-h-screen bg-background font-poppins text-foreground">
