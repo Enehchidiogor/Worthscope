@@ -543,48 +543,77 @@ function JourneyDiagram({ active }: { active: number }) {
 }
 
 function ConfusionDiagram() {
-  // Person at a crossroads, three diverging paths, question mark above head.
+  // Person at center, surrounded by a wider cloud of career options.
+  const labels = [
+    { t: "Medicine 🩺", x: "8%", y: "8%" },
+    { t: "Technology 💻", x: "62%", y: "4%" },
+    { t: "Law ⚖️", x: "78%", y: "30%" },
+    { t: "Engineering ⚙️", x: "2%", y: "32%" },
+    { t: "Design 🎨", x: "38%", y: "0%" },
+    { t: "Business 📊", x: "82%", y: "62%" },
+    { t: "Finance 💰", x: "0%", y: "62%" },
+    { t: "Teaching 📚", x: "20%", y: "88%" },
+    { t: "Science 🔬", x: "70%", y: "88%" },
+    { t: "Media & Comms 📢", x: "44%", y: "94%" },
+  ];
   return (
-    <div style={{ position: "relative", width: "100%", maxWidth: 460, margin: "0 auto" }}>
-      <svg viewBox="0 0 460 420" width="100%" height="auto" style={{ display: "block" }} aria-label="Student standing at a career crossroads">
-        {/* Ground */}
-        <ellipse cx="230" cy="370" rx="180" ry="14" fill={BORDER} opacity="0.5" />
+    <div
+      style={{ position: "relative", width: "100%", maxWidth: 520, margin: "0 auto", aspectRatio: "1 / 1" }}
+    >
+      <style>{`
+        .ws-cloud-pill{transition:all .2s ease;cursor:default}
+        .ws-cloud-pill:hover{border-color:${ACCENT} !important;color:${ACCENT} !important}
+        .ws-cloud-float{animation:ws-float 3.6s ease-in-out infinite}
+      `}</style>
 
-        {/* Three diverging paths fanning behind the person */}
-        <g fill="none" stroke={BORDER} strokeWidth="14" strokeLinecap="round" strokeDasharray="2 14">
-          <path d="M230,360 C 200,280 120,230 60,150" />
-          <path d="M230,360 L 230,120" />
-          <path d="M230,360 C 260,280 340,230 400,150" />
-        </g>
+      {/* Floating career-option labels */}
+      {labels.map((l, i) => (
+        <span
+          key={l.t}
+          className="ws-cloud-pill ws-cloud-float"
+          style={{
+            position: "absolute",
+            left: l.x,
+            top: l.y,
+            background: "#F3F4F6",
+            border: "1px solid #E5E7EB",
+            color: "#6B7280",
+            fontFamily: FONT,
+            fontSize: 12,
+            fontWeight: 500,
+            padding: "5px 12px",
+            borderRadius: 100,
+            whiteSpace: "nowrap",
+            animationDelay: `${(i % 5) * 0.4}s`,
+            zIndex: 1,
+          }}
+        >
+          {l.t}
+        </span>
+      ))}
 
-        {/* Path end labels */}
-        <g fontFamily={FONT} fontSize="12" fontWeight="500" fill={TEXT2} textAnchor="middle">
-          <rect x="20" y="130" width="80" height="26" rx="13" fill="#F3F4F6" />
-          <text x="60" y="147">Engineering?</text>
-          <rect x="190" y="100" width="80" height="26" rx="13" fill="#F3F4F6" />
-          <text x="230" y="117">Design?</text>
-          <rect x="360" y="130" width="80" height="26" rx="13" fill="#F3F4F6" />
-          <text x="400" y="147">Business?</text>
-        </g>
-
+      {/* Person centered */}
+      <svg
+        viewBox="0 0 460 460"
+        width="100%"
+        height="100%"
+        style={{ display: "block", position: "relative", zIndex: 2 }}
+        aria-label="Student surrounded by many career options"
+      >
+        <ellipse cx="230" cy="400" rx="120" ry="10" fill={BORDER} opacity="0.5" />
         {/* Question mark above head */}
         <g style={{ animation: "ws-float 2.4s ease-in-out infinite" }}>
-          <circle cx="230" cy="180" r="20" fill={ACCENT} opacity="0.12" />
-          <text x="230" y="188" textAnchor="middle" fontFamily={FONT} fontSize="24" fontWeight="700" fill={ACCENT}>?</text>
+          <circle cx="230" cy="200" r="22" fill={ACCENT} opacity="0.12" />
+          <text x="230" y="209" textAnchor="middle" fontFamily={FONT} fontSize="26" fontWeight="700" fill={ACCENT}>?</text>
         </g>
-
-        {/* Person — simple stylised figure */}
+        {/* Person */}
         <g>
-          {/* Head */}
-          <circle cx="230" cy="232" r="18" fill="#FFFFFF" stroke={ACCENT} strokeWidth="2.5" />
-          {/* Body */}
-          <path d="M212,268 Q230,258 248,268 L 252,330 Q 230,338 208,330 Z" fill={ACCENT} />
-          {/* Arms slightly raised */}
-          <path d="M214,275 Q 195,290 192,310" fill="none" stroke={ACCENT} strokeWidth="6" strokeLinecap="round" />
-          <path d="M246,275 Q 265,290 268,310" fill="none" stroke={ACCENT} strokeWidth="6" strokeLinecap="round" />
-          {/* Legs */}
-          <path d="M218,332 L 214,366" fill="none" stroke={ACCENT} strokeWidth="7" strokeLinecap="round" />
-          <path d="M242,332 L 246,366" fill="none" stroke={ACCENT} strokeWidth="7" strokeLinecap="round" />
+          <circle cx="230" cy="252" r="20" fill="#FFFFFF" stroke={ACCENT} strokeWidth="2.5" />
+          <path d="M210,290 Q230,278 250,290 L 256,360 Q 230,370 204,360 Z" fill={ACCENT} />
+          <path d="M212,298 Q 192,316 188,338" fill="none" stroke={ACCENT} strokeWidth="6" strokeLinecap="round" />
+          <path d="M248,298 Q 268,316 272,338" fill="none" stroke={ACCENT} strokeWidth="6" strokeLinecap="round" />
+          <path d="M218,362 L 214,396" fill="none" stroke={ACCENT} strokeWidth="7" strokeLinecap="round" />
+          <path d="M242,362 L 246,396" fill="none" stroke={ACCENT} strokeWidth="7" strokeLinecap="round" />
         </g>
       </svg>
     </div>
