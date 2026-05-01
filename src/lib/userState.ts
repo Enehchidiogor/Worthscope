@@ -184,13 +184,7 @@ export function getMissionsForCareer(c?: ChosenCareer | null): MissionItem[] {
   const builder = MISSION_SETS[cat] || MISSION_SETS.creative;
   return builder(career?.title || "Professional");
 }
-    overallPct: 0,
-    phase: 1,
-    missionsCompleted: 0,
-    totalMissions: 9,
-    skills,
-  };
-}
+
 
 export function getProgress(): Progress {
   if (typeof window === "undefined") return defaultProgressForCareer();
