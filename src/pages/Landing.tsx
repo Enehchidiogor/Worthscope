@@ -113,7 +113,7 @@ export default function Landing() {
     setMobileOpen(false);
   };
 
-  const goStart = useCallback(() => navigate(nextRouteFromState()), [navigate]);
+  const goStart = useCallback(() => navigate("/signup"), [navigate]);
 
   return (
     <div style={{ background: "#FFFFFF", color: TEXT, fontFamily: FONT, minHeight: "100vh" }}>

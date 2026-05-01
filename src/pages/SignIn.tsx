@@ -16,8 +16,8 @@ export default function SignIn() {
 
   const onSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Returning users (with profile + results + chosen) go straight to dashboard.
-    navigate(nextRouteFromState());
+    // Returning users go straight to their dashboard.
+    navigate("/dashboard");
   };
 
   return (

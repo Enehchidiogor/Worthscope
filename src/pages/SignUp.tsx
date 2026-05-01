@@ -30,7 +30,8 @@ export default function SignUp() {
 
   const onSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    navigate(nextRouteFromState());
+    // New users always go through onboarding/setup first.
+    navigate("/onboarding");
   };
 
   const barColor = (idx: number) => (strength.level > idx ? strength.color : BORDER);
