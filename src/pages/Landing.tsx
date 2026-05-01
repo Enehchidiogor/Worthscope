@@ -543,58 +543,50 @@ function JourneyDiagram({ active }: { active: number }) {
 }
 
 function ConfusionDiagram() {
-  const fields = ["Medicine", "Engineering", "Business", "Design", "Tech", "Law", "Finance", "Arts"];
+  // Person at a crossroads, three diverging paths, question mark above head.
   return (
-    <div style={{ position: "relative", height: 420, width: "100%" }}>
-      <svg viewBox="0 0 420 420" width="100%" height="100%" style={{ position: "absolute", inset: 0 }}>
-        {fields.map((_, i) => {
-          const angle = (i / fields.length) * Math.PI * 2;
-          const x = 210 + Math.cos(angle) * 160;
-          const y = 210 + Math.sin(angle) * 160;
-          return <line key={i} x1={210} y1={210} x2={x} y2={y} stroke={BORDER} strokeWidth="1" strokeDasharray="4 4" />;
-        })}
+    <div style={{ position: "relative", width: "100%", maxWidth: 460, margin: "0 auto" }}>
+      <svg viewBox="0 0 460 420" width="100%" height="auto" style={{ display: "block" }} aria-label="Student standing at a career crossroads">
+        {/* Ground */}
+        <ellipse cx="230" cy="370" rx="180" ry="14" fill={BORDER} opacity="0.5" />
+
+        {/* Three diverging paths fanning behind the person */}
+        <g fill="none" stroke={BORDER} strokeWidth="14" strokeLinecap="round" strokeDasharray="2 14">
+          <path d="M230,360 C 200,280 120,230 60,150" />
+          <path d="M230,360 L 230,120" />
+          <path d="M230,360 C 260,280 340,230 400,150" />
+        </g>
+
+        {/* Path end labels */}
+        <g fontFamily={FONT} fontSize="12" fontWeight="500" fill={TEXT2} textAnchor="middle">
+          <rect x="20" y="130" width="80" height="26" rx="13" fill="#F3F4F6" />
+          <text x="60" y="147">Engineering?</text>
+          <rect x="190" y="100" width="80" height="26" rx="13" fill="#F3F4F6" />
+          <text x="230" y="117">Design?</text>
+          <rect x="360" y="130" width="80" height="26" rx="13" fill="#F3F4F6" />
+          <text x="400" y="147">Business?</text>
+        </g>
+
+        {/* Question mark above head */}
+        <g style={{ animation: "ws-float 2.4s ease-in-out infinite" }}>
+          <circle cx="230" cy="180" r="20" fill={ACCENT} opacity="0.12" />
+          <text x="230" y="188" textAnchor="middle" fontFamily={FONT} fontSize="24" fontWeight="700" fill={ACCENT}>?</text>
+        </g>
+
+        {/* Person — simple stylised figure */}
+        <g>
+          {/* Head */}
+          <circle cx="230" cy="232" r="18" fill="#FFFFFF" stroke={ACCENT} strokeWidth="2.5" />
+          {/* Body */}
+          <path d="M212,268 Q230,258 248,268 L 252,330 Q 230,338 208,330 Z" fill={ACCENT} />
+          {/* Arms slightly raised */}
+          <path d="M214,275 Q 195,290 192,310" fill="none" stroke={ACCENT} strokeWidth="6" strokeLinecap="round" />
+          <path d="M246,275 Q 265,290 268,310" fill="none" stroke={ACCENT} strokeWidth="6" strokeLinecap="round" />
+          {/* Legs */}
+          <path d="M218,332 L 214,366" fill="none" stroke={ACCENT} strokeWidth="7" strokeLinecap="round" />
+          <path d="M242,332 L 246,366" fill="none" stroke={ACCENT} strokeWidth="7" strokeLinecap="round" />
+        </g>
       </svg>
-
-      {/* center user */}
-      <div style={{
-        position: "absolute", top: "50%", left: "50%", transform: "translate(-50%,-50%)",
-        width: 88, height: 88, borderRadius: "50%", background: "#fff", border: `2px solid ${ACCENT}`,
-        display: "grid", placeItems: "center", color: ACCENT,
-        boxShadow: "0 12px 28px -8px rgba(59,130,246,.4)",
-        animation: "ws-pulse-ring 2.4s ease-in-out infinite",
-      }}>
-        <I d="<circle cx='12' cy='8' r='4'/><path d='M4 21c0-4 4-7 8-7s8 3 8 7'/>" size={36} stroke={ACCENT} />
-      </div>
-
-      {/* field pills */}
-      {fields.map((f, i) => {
-        const angle = (i / fields.length) * Math.PI * 2;
-        const x = 50 + Math.cos(angle) * 38;
-        const y = 50 + Math.sin(angle) * 38;
-        return (
-          <div
-            key={f}
-            style={{
-              position: "absolute",
-              top: `${y}%`, left: `${x}%`,
-              transform: "translate(-50%,-50%)",
-              padding: "8px 14px",
-              background: "#fff",
-              border: `1px solid ${BORDER}`,
-              borderRadius: 999,
-              fontSize: 13,
-              fontWeight: 500,
-              color: TEXT,
-              boxShadow: "0 6px 16px -8px rgba(17,17,17,.15)",
-              animation: `ws-float ${3 + (i % 3)}s ease-in-out infinite`,
-              animationDelay: `${i * 0.15}s`,
-              whiteSpace: "nowrap",
-            }}
-          >
-            {f}
-          </div>
-        );
-      })}
     </div>
   );
 }
