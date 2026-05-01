@@ -33,10 +33,17 @@ const Career = () => {
   // ---------- filter chips ----------
   const [activeFilter, setActiveFilter] = useState<string>("all");
 
-  // ---------- locked overall progress bar fill ----------
+  // ---------- live progress numbers ----------
+  const [overallPct, setOverallPct] = useState(1);
+  const [missionsDone, setMissionsDone] = useState(0);
   const [overallFill, setOverallFill] = useState(0);
   useEffect(() => {
-    const t = window.setTimeout(() => setOverallFill(15), 200);
+    const pr = JSON.parse(localStorage.getItem("worthscope_progress") || "{}");
+    const pct = Math.max(1, Number(pr?.overallPct) || 1);
+    const md = Number(pr?.missionsCompleted) || 0;
+    setOverallPct(pct);
+    setMissionsDone(md);
+    const t = window.setTimeout(() => setOverallFill(pct), 200);
     return () => clearTimeout(t);
   }, []);
 
@@ -353,8 +360,8 @@ const Career = () => {
                 <h3 style={{ fontWeight: 700, fontSize: 16, color: "#111111" }}>Your Progress to Unlock</h3>
 
                 <div className="mt-5 flex flex-col gap-4">
-                  <RequirementRow met={false} label="Roadmap Progress" sub="30% / 70% required" />
-                  <RequirementRow met={false} label="Missions Completed" sub="1 / 6 required" />
+                  <RequirementRow met={overallPct >= 70} label="Roadmap Progress" sub={`${overallPct}% / 70% required`} />
+                  <RequirementRow met={missionsDone >= 6} label="Missions Completed" sub={`${missionsDone} / 6 required`} />
                   <RequirementRow met={false} label="Project Submitted" sub="0 / 1 required" />
                 </div>
 
@@ -362,7 +369,7 @@ const Career = () => {
                 <div className="mt-6">
                   <div className="flex items-center justify-between" style={{ fontWeight: 500, fontSize: 13, color: "#111111" }}>
                     <span>Overall Readiness</span>
-                    <span>15%</span>
+                    <span>{overallPct}%</span>
                   </div>
                   <div className="mt-2" style={{ height: 8, background: "#E5E7EB", borderRadius: 100, overflow: "hidden" }}>
                     <div
