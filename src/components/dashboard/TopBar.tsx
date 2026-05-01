@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { NotificationsBell } from "@/components/notifications/NotificationsBell";
-import { getProfile } from "@/lib/userState";
+import { getProfile, getStreak } from "@/lib/userState";
 
 type Props = {
   title?: string;
@@ -11,11 +11,16 @@ type Props = {
 
 export const TopBar = ({ title = "Dashboard", progress }: Props) => {
   const [initials, setInitials] = useState("U");
+  const [streakCount, setStreakCount] = useState(1);
   useEffect(() => {
     const p = getProfile();
     if (p?.firstName) {
       setInitials((p.firstName[0] + (p.lastName?.[0] || "")).toUpperCase() || "U");
     }
+    const refresh = () => setStreakCount(getStreak().count || 1);
+    refresh();
+    window.addEventListener("worthscope:streak", refresh);
+    return () => window.removeEventListener("worthscope:streak", refresh);
   }, []);
 
   return (
@@ -30,7 +35,7 @@ export const TopBar = ({ title = "Dashboard", progress }: Props) => {
         ) : (
           <div className="flex items-center gap-1.5 rounded-full border border-streak/25 bg-streak/10 px-3 py-[5px]">
             <span className="inline-block animate-ws-flame text-[14px] leading-none">🔥</span>
-            <span className="text-[12px] font-semibold text-streak">5 Day Streak</span>
+            <span className="text-[12px] font-semibold text-streak">{streakCount} Day Streak</span>
           </div>
         )}
 
