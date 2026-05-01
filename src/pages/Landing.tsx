@@ -434,10 +434,15 @@ export default function Landing() {
 /* ───────────────────────────── COMPONENTS ───────────────────────────── */
 
 function JourneyDiagram({ active }: { active: number }) {
-  // Center column for nodes; labels alternate left/right (off the path).
-  const CX = 50; // % center
+  // Nodes sit ON the path. We sample the path at each node's y so they line up
+  // perfectly with the curve regardless of how it sways left/right.
   const ys = [60, 170, 280, 390, 500];
   const pathD = "M160,40 C 120,140 200,200 160,290 C 120,380 200,440 160,540";
+  // x-coordinates sampled on the cubic path above at the y values used for nodes
+  // (kept in viewBox units of 320 wide). Since preserveAspectRatio="none" the
+  // SVG stretches horizontally — convert to a percentage of width.
+  const xsViewbox = [160, 138, 160, 182, 160];
+  const VBW = 320;
   return (
     <div style={{ position: "relative", height: "100%", width: "100%" }}>
       {/* Section header */}
