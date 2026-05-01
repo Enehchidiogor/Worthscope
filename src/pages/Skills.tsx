@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { Sidebar } from "@/components/dashboard/Sidebar";
 import { MobileTabBar } from "@/components/dashboard/MobileTabBar";
 import { IconBell } from "@/components/dashboard/icons";
@@ -7,19 +8,53 @@ import { SkillBreakdown } from "@/components/skills/SkillBreakdown";
 import { WeeklyChart } from "@/components/skills/WeeklyChart";
 import { FocusNext } from "@/components/skills/FocusNext";
 import { RelatedMissions } from "@/components/skills/RelatedMissions";
-import { skills } from "@/components/skills/skillsData";
+import { iconForSkill, levelFor, type Skill } from "@/components/skills/skillsData";
+import { getProgress, getChosenCareer } from "@/lib/userState";
 
 const Skills = () => {
+  const [skills, setSkills] = useState<Skill[]>([]);
+  const [overall, setOverall] = useState(1);
+  const [careerTitle, setCareerTitle] = useState<string | null>(null);
+
+  useEffect(() => {
+    const refresh = () => {
+      const pr = getProgress();
+      const list = Object.entries(pr.skills).map(([name, value]) => ({
+        id: name.toLowerCase().replace(/\s+/g, "-"),
+        name,
+        percent: Math.max(1, value),
+        level: levelFor(value),
+        growth: 0,
+        icon: iconForSkill(name),
+        link: value > 0 ? "Continue →" : "Start here →",
+      }));
+      setSkills(list);
+      // Overall = avg of skill values, floored at 1
+      const avg = list.length ? Math.round(list.reduce((s, x) => s + x.percent, 0) / list.length) : 1;
+      setOverall(Math.max(1, avg));
+      setCareerTitle(getChosenCareer()?.title || null);
+    };
+    refresh();
+    window.addEventListener("worthscope:progress", refresh);
+    return () => window.removeEventListener("worthscope:progress", refresh);
+  }, []);
+
+  // Find strongest + weakest for Focus Next
+  const sorted = [...skills].sort((a, b) => b.percent - a.percent);
+  const strongest = sorted[0];
+  const weakest = sorted[sorted.length - 1];
+
   return (
     <div className="min-h-screen bg-background">
       <Sidebar activePath="/skills" />
 
-      {/* Top bar — flush to page edges, matches other pages */}
       <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-border bg-background/85 px-4 backdrop-blur-xl md:ml-[220px] md:px-8">
-        <h1 className="text-[18px] font-semibold text-foreground">Skill Progress</h1>
+        <h1 className="text-[18px] font-semibold text-foreground">
+          Skill Progress{careerTitle ? <span className="ml-2 text-[13px] font-medium text-text2">— {careerTitle}</span> : null}
+        </h1>
         <div className="flex items-center gap-4">
           <div className="rounded-full border border-accent/20 bg-accent/10 px-3.5 py-1.5">
-            <span className="text-[12px] font-semibold text-accent">Overall: 35%</span>
+            <span className="text-[12px] font-semibold text-accent">Overall: {overall}%</span>
           </div>
           <button className="relative text-text2 transition-colors hover:text-foreground" aria-label="Notifications">
             <IconBell className="h-5 w-5" />
@@ -31,14 +66,19 @@ const Skills = () => {
         </div>
       </header>
 
-      {/* Main — flex centers content block; max-width caps it */}
       <main className="flex flex-col items-center px-4 pb-24 pt-8 md:ml-[220px] md:px-12 md:pt-10">
         <div className="w-full max-w-[860px] space-y-6">
-          <OverallSummary percent={35} />
-          <KokoBanner message="Your strongest skill is Problem Solving. Focus on improving UI Design next to unlock better opportunities in Phase 2." />
+          <OverallSummary percent={overall} />
+          <KokoBanner
+            message={
+              strongest && strongest.percent > 1
+                ? `Your strongest skill is ${strongest.name}. Focus on improving ${weakest?.name || "another skill"} next.`
+                : "Complete your first mission to start building your skills."
+            }
+          />
           <SkillBreakdown skills={skills} />
           <WeeklyChart />
-          <FocusNext />
+          <FocusNext weakest={weakest} strongest={strongest} />
           <RelatedMissions />
         </div>
       </main>
