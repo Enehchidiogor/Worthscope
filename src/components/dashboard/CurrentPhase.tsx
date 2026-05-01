@@ -4,9 +4,9 @@ import { getChosenCareer, getProgress } from "@/lib/userState";
 const phaseTitle = (n: number, category?: string) => {
   if (category === "creative") return ["Basics", "Portfolio Building", "Professional"][n - 1];
   if (category === "business") return ["Foundation", "Strategy", "Leadership"][n - 1];
-  if (category === "science") return ["Foundation", "Specialisation", "Research"][n - 1];
-  if (category === "people") return ["Foundation", "Practice", "Leadership"][n - 1];
-  if (category === "communication") return ["Foundation", "Storytelling", "Influence"][n - 1];
+  if (category === "science") return ["Foundation", "Research", "Specialisation"][n - 1];
+  if (category === "people") return ["Foundation", "Practice", "Impact"][n - 1];
+  if (category === "communication") return ["Foundation", "Content Building", "Professional"][n - 1];
   return ["Foundation", "Exploration", "Mastery"][n - 1];
 };
 
