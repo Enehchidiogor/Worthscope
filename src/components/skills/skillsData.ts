@@ -10,26 +10,36 @@ export type Skill = {
   link: string;
 };
 
-export const skills: Skill[] = [
-  { id: "ui", name: "UI Design", percent: 40, level: "Intermediate", growth: 8, icon: "layers", link: "Continue learning →" },
-  { id: "ps", name: "Problem Solving", percent: 65, level: "Intermediate", growth: 5, icon: "bulb", link: "Keep going →" },
-  { id: "comm", name: "Communication", percent: 30, level: "Beginner", growth: 3, icon: "chat", link: "Start here →" },
-  { id: "research", name: "Research", percent: 20, level: "Beginner", growth: 2, icon: "search", link: "Start here →" },
-  { id: "tech", name: "Technical Tools", percent: 55, level: "Intermediate", growth: 10, icon: "wrench", link: "Continue →" },
-];
+export const levelFor = (pct: number): Level =>
+  pct >= 70 ? "Advanced" : pct >= 25 ? "Intermediate" : "Beginner";
 
-export const weeklyData = [
-  { day: "M", height: 45, active: true },
-  { day: "T", height: 60, active: true },
-  { day: "W", height: 35, active: true },
-  { day: "T", height: 70, active: true, today: true },
-  { day: "F", height: 0, active: false },
-  { day: "S", height: 0, active: false },
-  { day: "S", height: 0, active: false },
-];
+const ICON_FOR: Record<string, Skill["icon"]> = {
+  "UI Design": "layers",
+  "Design Thinking": "bulb",
+  "Prototyping": "wrench",
+  "User Research": "search",
+  "Problem Solving": "bulb",
+  "Technical Tools": "wrench",
+  "Data Literacy": "search",
+  "Systems Thinking": "bulb",
+  "Strategic Thinking": "bulb",
+  "Communication": "chat",
+  "Leadership": "bulb",
+  "Business Analysis": "search",
+  "Research": "search",
+  "Analytical Thinking": "bulb",
+  "Scientific Writing": "chat",
+  "Lab Skills": "wrench",
+  "Empathy": "chat",
+  "Active Listening": "chat",
+  "Case Analysis": "search",
+  "Writing": "chat",
+  "Storytelling": "chat",
+  "Media Strategy": "bulb",
+  "Content Creation": "layers",
+};
 
-export const relatedMissions = [
-  { id: "m1", tag: "UI Design", title: "Learn the Basics of Design Thinking", sub: "Phase 1 · Mission 3", locked: false },
-  { id: "m2", tag: "Research", title: "Explore Tools of the Trade", sub: "Phase 2 · Mission 6 · Locked", locked: true },
-  { id: "m3", tag: "Technical Tools", title: "Build Your First Project Brief", sub: "Phase 2 · Mission 4 · Locked", locked: true },
-];
+export const iconForSkill = (name: string): Skill["icon"] => ICON_FOR[name] || "bulb";
+
+// Legacy export kept for type compatibility — pages now compute skills dynamically
+export const skills: Skill[] = [];
