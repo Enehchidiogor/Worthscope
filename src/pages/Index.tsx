@@ -13,7 +13,7 @@ import { CareerOpportunitiesCard } from "@/components/dashboard/CareerOpportunit
 import { ShareProgressCard } from "@/components/dashboard/ShareProgressCard";
 import { MobileTabBar } from "@/components/dashboard/MobileTabBar";
 import { WelcomeToast } from "@/components/dashboard/WelcomeToast";
-import { getProfile, hasResults, isFirstLogin, markLoggedIn } from "@/lib/userState";
+import { getProfile, hasResults, isFirstLogin, markLoggedIn, tickStreak } from "@/lib/userState";
 
 const Index = () => {
   const profile = getProfile();
@@ -21,6 +21,8 @@ const Index = () => {
 
   useEffect(() => {
     if (!profile || !results) return;
+    // Real streak engine — increments per consecutive day, resets if missed
+    tickStreak();
     const first = isFirstLogin();
 
     // Always: signal floating Koko to do its strong-pulse + tooltip
