@@ -488,13 +488,14 @@ function JourneyDiagram({ active }: { active: number }) {
           const isActive = i === active;
           const labelOnRight = n.side === "right";
           const size = isActive ? 60 : 56;
+          const xPct = (xsViewbox[i] / VBW) * 100;
           return (
             <div
               key={n.label}
               style={{
                 position: "absolute",
                 top: ys[i] - size / 2,
-                left: `calc(${CX}% - ${size / 2}px)`,
+                left: `calc(${xPct}% - ${size / 2}px)`,
                 width: size,
                 height: size,
               }}
