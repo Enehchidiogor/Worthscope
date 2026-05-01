@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 import { Sidebar } from "@/components/dashboard/Sidebar";
 import { TopBar } from "@/components/dashboard/TopBar";
 import { MobileTabBar } from "@/components/dashboard/MobileTabBar";
 import { InviteParentModal } from "@/components/parent/InviteParentModal";
+import { getProfile } from "@/lib/userState";
 
 /* WorthScope — Settings Page
    5 grouped white cards on a soft-blue page bg.
@@ -186,28 +188,47 @@ const EditableRow = ({
 
 // ───────── Page ─────────
 const Settings = () => {
-  // Profile
-  const [name, setName] = useState("Udochukwu Emeka");
-  const [email, setEmail] = useState("udochukwu@email.com");
-  const [edu, setEdu] = useState("Secondary School · SS3");
+  // Profile — pulled from real user state
+  const profile = getProfile();
+  const initialName = profile ? `${profile.firstName}${profile.lastName ? " " + profile.lastName : ""}` : "";
+  const initialEdu = profile
+    ? profile.educationLevel === "secondary"
+      ? `Secondary School${profile.classOrLevel ? " · " + profile.classOrLevel : ""}`
+      : profile.educationLevel === "university"
+      ? `University${profile.classOrLevel ? " · " + profile.classOrLevel : ""}`
+      : ""
+    : "";
+  const [name, setName] = useState(initialName);
+  const [email, setEmail] = useState(profile?.email || "");
+  const [edu, setEdu] = useState(initialEdu);
 
-  // Appearance — synced with global <html class="dark">
-  const [dark, setDark] = useState<boolean>(() => {
-    if (typeof window === "undefined") return false;
-    return document.documentElement.classList.contains("dark");
-  });
+  // Appearance — Dark mode is "coming soon": always off, shows toast
+  const [dark, setDark] = useState(false);
   const [compact, setCompact] = useState(false);
 
+  // Ensure light mode is always applied
   useEffect(() => {
-    const root = document.documentElement;
-    if (dark) {
-      root.classList.add("dark");
-      localStorage.setItem("worthscope_theme", "dark");
-    } else {
-      root.classList.remove("dark");
-      localStorage.setItem("worthscope_theme", "light");
-    }
-  }, [dark]);
+    document.documentElement.classList.remove("dark");
+    localStorage.setItem("worthscope_theme", "light");
+  }, []);
+
+  const handleDarkToggle = () => {
+    // Briefly animate ON then snap back OFF
+    setDark(true);
+    toast("Dark mode is coming soon 🌙", {
+      style: {
+        background: "#1A1A2E",
+        color: "#FFFFFF",
+        fontWeight: 500,
+        fontSize: 13,
+        borderRadius: 10,
+        padding: "10px 20px",
+        border: "none",
+      },
+      duration: 3000,
+    });
+    window.setTimeout(() => setDark(false), 500);
+  };
 
   // Notifications
   const [missionRem, setMissionRem] = useState(true);
@@ -329,10 +350,10 @@ const Settings = () => {
                   </svg>
                 }
                 iconBg="#F3F4F6"
-                label="Dark Mode"
+                label="Dark Mode (Coming Soon)"
                 sub="Switch to a darker interface"
-                onClick={() => setDark((d) => !d)}
-                right={<Toggle on={dark} onChange={() => setDark((d) => !d)} />}
+                onClick={handleDarkToggle}
+                right={<Toggle on={dark} onChange={handleDarkToggle} />}
               />
               <Row
                 icon={
