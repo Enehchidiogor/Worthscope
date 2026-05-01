@@ -1,24 +1,24 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { IconCheck } from "./icons";
-import { getProgress } from "@/lib/userState";
-
-type Mission = { id: string; title: string; sub: string };
-
-const ALL: Mission[] = [
-  { id: "m1", title: "Explore your career matches", sub: "Review your top 4 career paths" },
-  { id: "m2", title: "Learn the basics of your field", sub: "Watch the intro lesson" },
-  { id: "m3", title: "Complete your first mission", sub: "Open Mission 3 from the roadmap" },
-];
+import { getProgress, getMissionsForCareer, type MissionItem } from "@/lib/userState";
 
 export const Missions = () => {
   const [done, setDone] = useState(0);
+  const [missions, setMissions] = useState<MissionItem[]>(() => getMissionsForCareer());
+
   useEffect(() => {
-    const refresh = () => setDone(getProgress().missionsCompleted);
+    const refresh = () => {
+      setDone(getProgress().missionsCompleted);
+      setMissions(getMissionsForCareer());
+    };
     refresh();
     window.addEventListener("worthscope:progress", refresh);
     return () => window.removeEventListener("worthscope:progress", refresh);
   }, []);
+
+  // Show first 3 missions on dashboard
+  const visible = missions.slice(0, 3);
 
   return (
     <div className="rounded-[20px] border border-border bg-card p-6 shadow-card">
@@ -26,11 +26,11 @@ export const Missions = () => {
         <h3 className="text-[16px] font-bold text-foreground">
           <span className="mr-1.5">🎯</span> Missions
         </h3>
-        <span className="text-[12px] font-medium text-text2">Phase 1 · {done}/{ALL.length} done</span>
+        <span className="text-[12px] font-medium text-text2">Phase 1 · {Math.min(done, visible.length)}/{visible.length} done</span>
       </div>
 
       <ul className="flex flex-col gap-2.5">
-        {ALL.map((m, idx) => {
+        {visible.map((m, idx) => {
           const isDone = idx < done;
           return (
             <li

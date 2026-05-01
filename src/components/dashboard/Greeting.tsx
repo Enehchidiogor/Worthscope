@@ -1,16 +1,14 @@
 import { useEffect, useState } from "react";
-import { getProfile, getProgress, isFirstLogin } from "@/lib/userState";
+import { getProfile, getProgress } from "@/lib/userState";
 
 export const Greeting = () => {
   const [name, setName] = useState("there");
   const [pct, setPct] = useState(0);
-  const [first, setFirst] = useState(false);
 
   useEffect(() => {
     const p = getProfile();
     setName(p?.firstName || "there");
     setPct(getProgress().overallPct);
-    setFirst(isFirstLogin());
     const onProgress = () => setPct(getProgress().overallPct);
     window.addEventListener("worthscope:progress", onProgress);
     return () => window.removeEventListener("worthscope:progress", onProgress);
@@ -20,7 +18,7 @@ export const Greeting = () => {
     <section className="ws-fade-up mb-7 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center" style={{ animationDelay: "0.1s" }}>
       <div>
         <h2 className="text-[26px] font-bold tracking-[-0.5px] text-foreground">
-          {first ? "Welcome" : "Welcome back"}, {name} <span aria-hidden>👋</span>
+          Welcome, {name} <span aria-hidden>👋</span>
         </h2>
         <p className="mt-1 text-[15px] text-text2">Let's continue your journey.</p>
       </div>
