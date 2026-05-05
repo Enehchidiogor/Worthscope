@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import { streamKokoChat, type KokoMsg } from "@/lib/kokoClient";
+import { getChosenCareer } from "@/lib/userState";
 
 /* WorthScope — Global Floating Koko Chat
    Lives on every product page. Floating button (bottom-right) opens a
