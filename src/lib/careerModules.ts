@@ -300,6 +300,156 @@ export const careerModules: Record<string, CareerModule> = {
       "Validation","Marketing","Finance Basics","Communication","Pitching",
     ].map((name) => ({ name, progress: 0, level: "Beginner" })),
   },
+
+  cybersecurity_analyst: {
+    id: "cybersecurity_analyst",
+    title: "Cybersecurity Analyst",
+    roadmapTitle: "Cybersecurity Analyst Roadmap",
+    category: "tech",
+    careerDescription: "Protect digital systems and data from threats and attacks.",
+    kokoMessage: "You're on your way to becoming a Cybersecurity Analyst. Let's start with how the internet actually works — your first mission is ready.",
+    phases: [
+      { id: "phase_1", title: "Phase 1: Foundation", subtitle: "Networking & IT basics", status: "active", missions: [
+        m("m1_1", "How the Internet Works", "Networking basics — packets, IPs, DNS, and protocols.", { Networking: 15, "Linux CLI": 3 }, "active", { videoTitle: "Networking 101 — 12 min", task: "Diagram what happens when you visit a website." }),
+        m("m1_2", "OS & Command Line", "Operating systems and using the Linux command line.", { "Linux CLI": 20, Networking: 5 }, "locked", { videoTitle: "Linux CLI Basics — 15 min", task: "Run 10 basic commands and screenshot the results." }),
+        m("m1_3", "Threats, Attacks & Defenses", "Common attack types and how defenders respond.", { "Security+": 15, Networking: 5 }, "locked", { videoTitle: "Cybersecurity Intro — 12 min", task: "Write a short summary of 3 common attack vectors." }),
+        m("m1_4", "Set Up a Security Lab", "Build a virtual machine lab for safe practice.", { "Linux CLI": 10, "Vulnerability Assessment": 8 }, "locked", { videoTitle: "VM Lab Setup — 10 min", task: "Install VirtualBox and a Kali VM." }),
+      ]},
+      { id: "phase_2", title: "Phase 2: Skill Building", subtitle: "Tools & techniques", status: "locked", missions: [
+        m("m2_1", "Security+ Core Concepts", "Cover key Security+ exam domains.", { "Security+": 20 }),
+        m("m2_2", "SIEM Tools", "Monitor and detect threats with SIEM platforms.", { SIEM: 25 }),
+        m("m2_3", "Ethical Hacking Basics", "Intro to penetration testing.", { "Penetration Testing": 25 }),
+        m("m2_4", "Incident Response", "Respond to and assess vulnerabilities.", { "Incident Response": 20, "Vulnerability Assessment": 12 }),
+      ]},
+      { id: "phase_3", title: "Phase 3: Portfolio & Industry", subtitle: "Get certified & hired", status: "locked", missions: [
+        m("m3_1", "CTF Challenges", "Practice with capture-the-flag challenges.", { "Penetration Testing": 15, "Vulnerability Assessment": 15 }),
+        m("m3_2", "Write a Security Audit Report", "Document findings clearly.", { "Incident Response": 10, "Security+": 10 }),
+        m("m3_3", "Path to Certification", "Plan your path to Security+, CEH, or eJPT.", { "Security+": 15 }),
+        m("m3_4", "Land Your First Role", "Build a security-focused portfolio.", { "Vulnerability Assessment": 10, "Incident Response": 10 }),
+      ]},
+    ],
+    skills: ["Networking","Linux CLI","SIEM","Penetration Testing","Incident Response","Vulnerability Assessment","Security+"].map((name) => ({ name, progress: 0, level: "Beginner" })),
+  },
+
+  digital_marketer: {
+    id: "digital_marketer",
+    title: "Digital Marketer",
+    roadmapTitle: "Digital Marketer Roadmap",
+    category: "communication",
+    careerDescription: "Grow brands and audiences through creative, data-driven online strategies.",
+    kokoMessage: "You're on your way to becoming a Digital Marketer. Let's start with how marketing actually works today — your first mission is ready.",
+    phases: [
+      { id: "phase_1", title: "Phase 1: Foundation", subtitle: "Channels & content", status: "active", missions: [
+        m("m1_1", "What is Digital Marketing?", "Channels and strategy overview.", { "Content Strategy": 10, SEO: 3 }, "active", { videoTitle: "Digital Marketing 101 — 10 min", task: "List 5 marketing channels and one example brand using each." }),
+        m("m1_2", "Content Strategy & Organic Growth", "How brands grow without paid ads.", { "Content Strategy": 20 }, "locked", { videoTitle: "Organic Growth — 12 min", task: "Outline a 1-month content plan for a fictional brand." }),
+        m("m1_3", "SEO Basics", "Get found on Google.", { SEO: 25 }, "locked", { videoTitle: "SEO for Beginners — 15 min", task: "Pick a keyword and write a 300-word SEO article around it." }),
+        m("m1_4", "Brand Content Calendar", "Plan a real content calendar.", { "Content Strategy": 10, "Campaign Management": 10 }, "locked", { videoTitle: "Content Calendars — 8 min", task: "Build a 30-day calendar in a spreadsheet." }),
+      ]},
+      { id: "phase_2", title: "Phase 2: Skill Building", subtitle: "Ads & analytics", status: "locked", missions: [
+        m("m2_1", "Google & Meta Ads Basics", "Run paid campaigns.", { "Google Ads": 20, "Meta Ads": 15 }),
+        m("m2_2", "Email Marketing & Automation", "Build email funnels.", { "Email Marketing": 25 }),
+        m("m2_3", "Analytics", "Read GA4 and Meta Insights.", { Analytics: 25 }),
+        m("m2_4", "Run a Full Campaign", "From brief to report.", { "Campaign Management": 20, Analytics: 8 }),
+      ]},
+      { id: "phase_3", title: "Phase 3: Portfolio & Industry", subtitle: "Land clients", status: "locked", missions: [
+        m("m3_1", "Influencer Marketing", "Partnerships and outreach.", { "Campaign Management": 12, "Content Strategy": 8 }),
+        m("m3_2", "CRM & Automation", "Email and CRM systems.", { "Email Marketing": 15 }),
+        m("m3_3", "Build Your Portfolio", "2-3 case studies.", { "Campaign Management": 15, Analytics: 10 }),
+        m("m3_4", "Get Clients or a Role", "Pitch and land work.", { "Content Strategy": 10, SEO: 10 }),
+      ]},
+    ],
+    skills: ["SEO","Google Ads","Meta Ads","Email Marketing","Analytics","Content Strategy","Campaign Management"].map((name) => ({ name, progress: 0, level: "Beginner" })),
+  },
+
+  financial_analyst: {
+    id: "financial_analyst",
+    title: "Financial Analyst",
+    roadmapTitle: "Financial Analyst Roadmap",
+    category: "business",
+    careerDescription: "Guide financial decisions with data-driven insight and clear analysis.",
+    kokoMessage: "You're on your way to becoming a Financial Analyst. Numbers tell stories — let's learn how to read them. Your first mission is ready.",
+    phases: [
+      { id: "phase_1", title: "Phase 1: Foundation", subtitle: "Financial literacy", status: "active", missions: [
+        m("m1_1", "Reading Financial Statements", "Balance sheet and income statement basics.", { "Ratio Analysis": 10, "Financial Reporting": 5 }, "active", { videoTitle: "Financial Statements — 12 min", task: "Pull a public company's financials and identify revenue and net income." }),
+        m("m1_2", "Excel for Finance", "Ratio analysis and modelling.", { "Excel Financial Modeling": 20, "Ratio Analysis": 10 }, "locked", { videoTitle: "Excel for Finance — 15 min", task: "Build a ratio table for one company." }),
+        m("m1_3", "Intro to Financial Markets", "How equities, bonds, and indices work.", { "Investment Analysis": 15 }, "locked", { videoTitle: "Markets 101 — 10 min", task: "Summarise the difference between equities and bonds." }),
+        m("m1_4", "Fundamental Analysis", "Evaluate a company's fundamentals.", { "Ratio Analysis": 10, "Financial Reporting": 10 }, "locked", { videoTitle: "Fundamental Analysis — 12 min", task: "Analyse 1 company and write a 1-page fundamentals report." }),
+      ]},
+      { id: "phase_2", title: "Phase 2: Skill Building", subtitle: "Modelling & valuation", status: "locked", missions: [
+        m("m2_1", "3-Statement Model", "Build a financial model from scratch.", { "Excel Financial Modeling": 25 }),
+        m("m2_2", "Valuation Methods", "DCF, comparables, asset-based.", { Valuation: 25 }),
+        m("m2_3", "Investment Analysis", "Equities and fixed income.", { "Investment Analysis": 25 }),
+        m("m2_4", "Full Valuation Report", "Build an end-to-end report.", { Valuation: 15, "Financial Reporting": 15 }),
+      ]},
+      { id: "phase_3", title: "Phase 3: Portfolio & Industry", subtitle: "Get certified & hired", status: "locked", missions: [
+        m("m3_1", "Risk & Portfolio Management", "Manage risk in portfolios.", { "Risk Assessment": 25 }),
+        m("m3_2", "Stakeholder Reporting", "Present financial data clearly.", { "Financial Reporting": 20 }),
+        m("m3_3", "CFA Level 1 Path", "Plan your certification.", { "Investment Analysis": 10, Valuation: 10 }),
+        m("m3_4", "Land Your First Role", "Position for finance roles.", { "Financial Reporting": 10, "Risk Assessment": 10 }),
+      ]},
+    ],
+    skills: ["Excel Financial Modeling","Ratio Analysis","Valuation","Investment Analysis","Risk Assessment","Financial Reporting"].map((name) => ({ name, progress: 0, level: "Beginner" })),
+  },
+
+  content_creator: {
+    id: "content_creator",
+    title: "Content Creator",
+    roadmapTitle: "Content Creator Roadmap",
+    category: "communication",
+    careerDescription: "Build audiences and brands through engaging, original digital content.",
+    kokoMessage: "You're on your way to becoming a Content Creator. Every great creator finds their angle first — your first mission is ready.",
+    phases: [
+      { id: "phase_1", title: "Phase 1: Foundation", subtitle: "Niche & craft", status: "active", missions: [
+        m("m1_1", "Find Your Niche", "Pick your angle and audience.", { "Platform Strategy": 10, Scripting: 3 }, "active", { videoTitle: "Find Your Niche — 10 min", task: "Write your niche statement in one sentence." }),
+        m("m1_2", "Storytelling & Scripting", "Write content that holds attention.", { Scripting: 25 }, "locked", { videoTitle: "Storytelling Basics — 12 min", task: "Write a 60-second video script." }),
+        m("m1_3", "Phone Video Production", "Filming, lighting, sound on a phone.", { "Video Production": 25 }, "locked", { videoTitle: "Phone Video Setup — 10 min", task: "Film and upload a 1-minute clip." }),
+        m("m1_4", "Basic Video Editing", "CapCut / DaVinci basics.", { Editing: 25 }, "locked", { videoTitle: "Editing Basics — 12 min", task: "Edit a 60-second video with cuts, music, and captions." }),
+      ]},
+      { id: "phase_2", title: "Phase 2: Skill Building", subtitle: "Grow an audience", status: "locked", missions: [
+        m("m2_1", "Platform Strategy", "YouTube, TikTok, Instagram, X.", { "Platform Strategy": 25 }),
+        m("m2_2", "SEO for Creators", "Titles, tags, thumbnails.", { "Platform Strategy": 15, Scripting: 5 }),
+        m("m2_3", "Audience Growth", "Consistency and community.", { "Audience Growth": 25 }),
+        m("m2_4", "Collaborations & Brand Deals", "Outreach to brands.", { "Audience Growth": 10, Monetization: 15 }),
+      ]},
+      { id: "phase_3", title: "Phase 3: Portfolio & Industry", subtitle: "Make it a business", status: "locked", missions: [
+        m("m3_1", "Monetization", "AdSense, sponsorships, products.", { Monetization: 25 }),
+        m("m3_2", "Build a Content Business", "Newsletter, courses, agency.", { Monetization: 15, "Audience Growth": 10 }),
+        m("m3_3", "Media Kit & Brand Pitches", "Land deals.", { Monetization: 10, "Platform Strategy": 10 }),
+        m("m3_4", "Turn Followers into Income", "Convert audience to revenue.", { Monetization: 15, "Audience Growth": 10 }),
+      ]},
+    ],
+    skills: ["Scripting","Video Production","Editing","Platform Strategy","Audience Growth","Monetization"].map((name) => ({ name, progress: 0, level: "Beginner" })),
+  },
+
+  mechanical_engineer: {
+    id: "mechanical_engineer",
+    title: "Mechanical Engineer",
+    roadmapTitle: "Mechanical Engineer Roadmap",
+    category: "science",
+    careerDescription: "Design, analyse, and build the physical systems that move the world.",
+    kokoMessage: "You're on your way to becoming a Mechanical Engineer. The physical world is your canvas — let's start with the fundamentals. Your first mission is ready.",
+    phases: [
+      { id: "phase_1", title: "Phase 1: Foundation", subtitle: "Physics & drawing", status: "active", missions: [
+        m("m1_1", "Engineering Fundamentals", "Physics, forces and materials.", { "Technical Drawing": 5, Thermodynamics: 3 }, "active", { videoTitle: "Engineering Fundamentals — 12 min", task: "Solve 5 basic force-balance problems." }),
+        m("m1_2", "Technical Drawing", "Engineering diagrams and projections.", { "Technical Drawing": 25 }, "locked", { videoTitle: "Engineering Drawings — 12 min", task: "Sketch a simple part with 3 views." }),
+        m("m1_3", "Intro to CAD", "AutoCAD / SolidWorks basics.", { "CAD (AutoCAD/SolidWorks)": 25 }, "locked", { videoTitle: "CAD Basics — 15 min", task: "Model a simple bracket in CAD." }),
+        m("m1_4", "Statics & Dynamics", "Forces in the real world.", { Thermodynamics: 10, "Materials Science": 10 }, "locked", { videoTitle: "Statics Intro — 12 min", task: "Solve a beam reaction problem." }),
+      ]},
+      { id: "phase_2", title: "Phase 2: Skill Building", subtitle: "3D modeling & analysis", status: "locked", missions: [
+        m("m2_1", "SolidWorks Intermediate", "3D modelling projects.", { "CAD (AutoCAD/SolidWorks)": 25 }),
+        m("m2_2", "FEA Basics", "Finite element analysis.", { FEA: 25 }),
+        m("m2_3", "Thermo & Fluids", "Heat and fluid mechanics.", { Thermodynamics: 20, "Fluid Mechanics": 20 }),
+        m("m2_4", "Design & Fabrication Project", "End-to-end simulation.", { "CAD (AutoCAD/SolidWorks)": 10, FEA: 10 }),
+      ]},
+      { id: "phase_3", title: "Phase 3: Portfolio & Industry", subtitle: "Become industry-ready", status: "locked", missions: [
+        m("m3_1", "Manufacturing & Materials", "Process and material selection.", { "Materials Science": 25 }),
+        m("m3_2", "System Design & Reports", "Engineering documentation.", { "Technical Drawing": 10, FEA: 10 }),
+        m("m3_3", "Build Your Portfolio", "CAD + project documentation.", { "CAD (AutoCAD/SolidWorks)": 15 }),
+        m("m3_4", "Internship Readiness", "Apply for industry placement.", { "Materials Science": 10, "Technical Drawing": 10 }),
+      ]},
+    ],
+    skills: ["CAD (AutoCAD/SolidWorks)","FEA","Technical Drawing","Thermodynamics","Fluid Mechanics","Materials Science"].map((name) => ({ name, progress: 0, level: "Beginner" })),
+  },
 };
 
 /* ---------- Resolution helpers ---------- */
@@ -313,30 +463,33 @@ const TITLE_TO_MODULE: Record<string, string> = {
   "software developer": "software_dev",
   "software engineer": "software_dev",
   "frontend developer": "software_dev",
-  "cybersecurity analyst": "software_dev",
   "data analyst": "data_analyst",
   "data scientist": "data_analyst",
   "business analyst": "data_analyst",
-  "financial analyst": "data_analyst",
   "graphic designer": "graphic_designer",
   "motion designer": "graphic_designer",
-  "content creator": "graphic_designer",
   "product manager": "product_manager",
-  "marketing strategist": "product_manager",
+  "marketing strategist": "digital_marketer",
   "human resource manager": "product_manager",
   "psychologist": "product_manager",
   "teacher / educator": "product_manager",
   "entrepreneur": "entrepreneur",
-  "digital marketer": "entrepreneur",
+  "entrepreneur / business builder": "entrepreneur",
+  "cybersecurity analyst": "cybersecurity_analyst",
+  "digital marketer": "digital_marketer",
+  "financial analyst": "financial_analyst",
+  "content creator": "content_creator",
+  "tech content creator": "content_creator",
+  "mechanical engineer": "mechanical_engineer",
 };
 
 const CATEGORY_FALLBACK: Record<string, string> = {
   creative: "ux_designer",
   tech: "software_dev",
   business: "product_manager",
-  science: "data_analyst",
+  science: "mechanical_engineer",
   people: "product_manager",
-  communication: "graphic_designer",
+  communication: "content_creator",
 };
 
 export function moduleIdFor(career?: { title?: string; category?: string } | null): string {
