@@ -10,6 +10,7 @@ import { FocusNext } from "@/components/skills/FocusNext";
 import { RelatedMissions } from "@/components/skills/RelatedMissions";
 import { iconForSkill, levelFor, type Skill } from "@/components/skills/skillsData";
 import { getProgress, getChosenCareer } from "@/lib/userState";
+import { getActiveModule, loadModuleForCareer } from "@/lib/careerModules";
 
 const Skills = () => {
   const [skills, setSkills] = useState<Skill[]>([]);
@@ -19,20 +20,23 @@ const Skills = () => {
   useEffect(() => {
     const refresh = () => {
       const pr = getProgress();
-      const list = Object.entries(pr.skills).map(([name, value]) => ({
-        id: name.toLowerCase().replace(/\s+/g, "-"),
-        name,
-        percent: Math.max(1, value),
-        level: levelFor(value),
-        growth: 0,
-        icon: iconForSkill(name),
-        link: value > 0 ? "Continue →" : "Start here →",
-      }));
+      const mod = getActiveModule() || loadModuleForCareer(getChosenCareer());
+      const list: Skill[] = mod.skills.map((s) => {
+        const value = Math.max(0, pr.skills[s.name] || 0);
+        return {
+          id: s.name.toLowerCase().replace(/\s+/g, "-"),
+          name: s.name,
+          percent: Math.max(1, value || 1),
+          level: levelFor(value),
+          growth: 0,
+          icon: iconForSkill(s.name),
+          link: value > 0 ? "Continue →" : "Start here →",
+        };
+      });
       setSkills(list);
-      // Overall = avg of skill values, floored at 1
       const avg = list.length ? Math.round(list.reduce((s, x) => s + x.percent, 0) / list.length) : 1;
       setOverall(Math.max(1, avg));
-      setCareerTitle(getChosenCareer()?.title || null);
+      setCareerTitle(getChosenCareer()?.title || mod.title || null);
     };
     refresh();
     window.addEventListener("worthscope:progress", refresh);
