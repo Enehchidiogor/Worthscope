@@ -10,8 +10,9 @@ import { StepsContent } from "@/components/mission/StepsContent";
 import { TaskContent } from "@/components/mission/TaskContent";
 import { SubmitContent } from "@/components/mission/SubmitContent";
 import { StickyCompleteBar } from "@/components/mission/StickyCompleteBar";
+import { KokoMissionPanel } from "@/components/mission/KokoMissionPanel";
 import { IconArrowRight } from "@/components/dashboard/icons";
-import { completeMission, getProgress } from "@/lib/userState";
+import { completeMission, getProgress, getChosenCareer } from "@/lib/userState";
 import { getActiveModule, loadModuleForCareer, flatMissions } from "@/lib/careerModules";
 
 const Mission = () => {
