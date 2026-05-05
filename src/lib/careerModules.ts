@@ -487,9 +487,9 @@ const CATEGORY_FALLBACK: Record<string, string> = {
   creative: "ux_designer",
   tech: "software_dev",
   business: "product_manager",
-  science: "data_analyst",
+  science: "mechanical_engineer",
   people: "product_manager",
-  communication: "graphic_designer",
+  communication: "content_creator",
 };
 
 export function moduleIdFor(career?: { title?: string; category?: string } | null): string {
