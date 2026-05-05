@@ -104,7 +104,11 @@ export const StickyCompleteBar = ({ sectionsDone, verified = false, onComplete }
               )}
             </button>
             {!allDone && (
-              <span className="text-[11px] text-text3">Complete all sections to unlock</span>
+              <span className="text-[11px] text-text3">
+                {!allSectionsDone
+                  ? "Complete all sections to unlock"
+                  : "Get verified by Koko to unlock"}
+              </span>
             )}
           </div>
         </div>
