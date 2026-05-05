@@ -43,6 +43,7 @@ const Mission = () => {
   // Section completion: [Learn, Steps, Task, Submit]
   const [sectionsDone, setSectionsDone] = useState<boolean[]>([false, false, false, false]);
   const [submitted, setSubmitted] = useState(false);
+  const [verified, setVerified] = useState(false);
 
   const setSection = (idx: number, value: boolean) =>
     setSectionsDone((prev) => prev.map((v, i) => (i === idx ? value : v)));
@@ -60,6 +61,15 @@ const Mission = () => {
   const handleAllComplete = () => {
     completeMission(current?.skillsGained || {});
     navigate("/roadmap");
+  };
+
+  const careerTitle = getChosenCareer()?.title || mod.title;
+  const videoQuery = `${current?.videoTitle || current?.title || "tutorial"} ${careerTitle}`.trim();
+  const kokoMission = {
+    title: current?.title,
+    description: current?.description,
+    career: careerTitle,
+    phase: phaseLabel,
   };
 
 
