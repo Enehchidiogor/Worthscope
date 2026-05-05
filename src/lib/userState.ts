@@ -191,6 +191,12 @@ const MISSION_SETS: Record<string, (title: string) => MissionItem[]> = {
 };
 
 export function getMissionsForCareer(c?: ChosenCareer | null): MissionItem[] {
+  // Prefer the active career module — single source of truth.
+  const mod = getActiveModule();
+  if (mod) {
+    return flatMissions(mod).map((m) => ({ id: m.id, title: m.title, sub: m.description }));
+  }
+  // Fallback to legacy category-based missions if no module is loaded yet.
   const career = c ?? getChosenCareer();
   const cat = career?.category || "creative";
   const builder = MISSION_SETS[cat] || MISSION_SETS.creative;
