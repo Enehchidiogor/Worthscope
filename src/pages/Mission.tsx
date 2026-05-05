@@ -78,17 +78,17 @@ const Mission = () => {
             Back to Roadmap
           </button>
           <div className="rounded-full border border-accent/20 bg-accent/10 px-3.5 py-1.5 text-[12px] font-semibold text-accent">
-            Phase 1 · Mission 3 of 9
+            {phasePill}
           </div>
         </header>
 
         <main className="mx-auto w-full max-w-[860px] px-4 pb-32 pt-8 md:px-8 md:pt-10">
           <MissionHeader
-            phase="Phase 1: Foundation"
+            phase={phaseLabel}
             time="30–45 mins"
-            title="Design Your First UI Screen"
-            subtitle="Learn the fundamentals of UI layout, then apply them by designing a real screen you can add to your portfolio."
-            progress={progress}
+            title={current?.title || "Mission"}
+            subtitle={current?.description || ""}
+            progress={sectionProgress}
           />
 
           <KokoBanner message="Focus on completing each section before moving forward. This mission builds the foundation for everything in Phase 2." />
