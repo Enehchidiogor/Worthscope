@@ -10,8 +10,9 @@ import { StepsContent } from "@/components/mission/StepsContent";
 import { TaskContent } from "@/components/mission/TaskContent";
 import { SubmitContent } from "@/components/mission/SubmitContent";
 import { StickyCompleteBar } from "@/components/mission/StickyCompleteBar";
+import { KokoMissionPanel } from "@/components/mission/KokoMissionPanel";
 import { IconArrowRight } from "@/components/dashboard/icons";
-import { completeMission, getProgress } from "@/lib/userState";
+import { completeMission, getProgress, getChosenCareer } from "@/lib/userState";
 import { getActiveModule, loadModuleForCareer, flatMissions } from "@/lib/careerModules";
 
 const Mission = () => {
@@ -42,6 +43,7 @@ const Mission = () => {
   // Section completion: [Learn, Steps, Task, Submit]
   const [sectionsDone, setSectionsDone] = useState<boolean[]>([false, false, false, false]);
   const [submitted, setSubmitted] = useState(false);
+  const [verified, setVerified] = useState(false);
 
   const setSection = (idx: number, value: boolean) =>
     setSectionsDone((prev) => prev.map((v, i) => (i === idx ? value : v)));
@@ -59,6 +61,15 @@ const Mission = () => {
   const handleAllComplete = () => {
     completeMission(current?.skillsGained || {});
     navigate("/roadmap");
+  };
+
+  const careerTitle = getChosenCareer()?.title || mod.title;
+  const videoQuery = `${current?.videoTitle || current?.title || "tutorial"} ${careerTitle}`.trim();
+  const kokoMission = {
+    title: current?.title,
+    description: current?.description,
+    career: careerTitle,
+    phase: phaseLabel,
   };
 
 
@@ -101,7 +112,7 @@ const Mission = () => {
             onToggle={() => setSection(0, !sectionsDone[0])}
             delay="0.35s"
           >
-            <LearnContent />
+            <LearnContent query={videoQuery} fallbackTitle={current?.videoTitle} />
           </SectionShell>
 
           <SectionShell
@@ -143,12 +154,18 @@ const Mission = () => {
           >
             <SubmitContent onSubmittedChange={onSubmittedChange} />
           </SectionShell>
+
+          <KokoMissionPanel mission={kokoMission} verified={verified} onVerified={() => setVerified(true)} />
         </main>
       </div>
 
       <MobileTabBar />
 
-      <StickyCompleteBar sectionsDone={sectionsDone} onComplete={handleAllComplete} />
+      <StickyCompleteBar
+        sectionsDone={sectionsDone}
+        verified={verified}
+        onComplete={handleAllComplete}
+      />
     </div>
   );
 };

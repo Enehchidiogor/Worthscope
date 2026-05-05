@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import { streamKokoChat, type KokoMsg } from "@/lib/kokoClient";
+import { getChosenCareer } from "@/lib/userState";
 
 /* WorthScope — Global Floating Koko Chat
    Lives on every product page. Floating button (bottom-right) opens a
@@ -16,24 +18,10 @@ type Msg = { id: number; role: "koko" | "user"; text: string; time: string };
 
 const QUICK_CHIPS = [
   "What should I do next?",
-  "Explain this task",
-  "Recommend skills",
+  "Explain my current mission",
+  "Recommend skills to focus on",
   "Help me choose a career",
 ];
-
-const KOKO_REPLIES: Record<string, string> = {
-  "What should I do next?":
-    "Head to your roadmap and complete Mission 3. It's the step that unlocks Phase 2 — you're close!",
-  "Explain this task":
-    "Mission 3 asks you to write a one-page project brief. Keep it tight — a real recruiter would read it in under a minute.",
-  "Recommend skills":
-    "Based on your roadmap, focus on UI Design next — it's your weakest skill and the one missions 4–6 lean on.",
-  "Help me choose a career":
-    "Tell me what energises you more: building products, designing them, or analysing how people use them — and I'll point you somewhere.",
-};
-
-const fallbackReply = (text: string) =>
-  `Good question. Here's the short version: ${text.replace(/\?$/, "").toLowerCase()} — finish your current mission first, and I'll guide you from there.`;
 
 export const KokoFloatingChat = () => {
   const { pathname } = useLocation();
@@ -169,22 +157,53 @@ export const KokoFloatingChat = () => {
     if (el) el.scrollTo({ top: el.scrollHeight, behavior: "smooth" });
   }, [messages, typing]);
 
-  const sendMessage = (raw: string) => {
+  const sendMessage = async (raw: string) => {
     const text = raw.trim();
     if (!text) return;
     const userMsg: Msg = { id: Date.now(), role: "user", text, time: "just now" };
+    const assistantId = Date.now() + 1;
     setMessages((m) => [...m, userMsg]);
     setInput("");
     setTyping(true);
 
-    const reply = KOKO_REPLIES[text] ?? fallbackReply(text);
-    window.setTimeout(() => {
-      setTyping(false);
-      setMessages((m) => [
-        ...m,
-        { id: Date.now() + 1, role: "koko", text: reply, time: "just now" },
-      ]);
-    }, 1100);
+    // Build conversation history for the model from local state
+    const history: KokoMsg[] = [...messages, userMsg]
+      .filter((m) => m.role === "koko" || m.role === "user")
+      .map((m) => ({ role: m.role === "koko" ? "assistant" : "user", content: m.text }));
+
+    const career = getChosenCareer()?.title;
+    const mission = career ? { career } : undefined;
+    let acc = "";
+    let started = false;
+
+    await streamKokoChat({
+      messages: history,
+      intent: "chat",
+      mission,
+      onDelta: (chunk) => {
+        acc += chunk;
+        if (!started) {
+          started = true;
+          setTyping(false);
+          setMessages((m) => [...m, { id: assistantId, role: "koko", text: acc, time: "just now" }]);
+        } else {
+          setMessages((m) => m.map((msg) => (msg.id === assistantId ? { ...msg, text: acc } : msg)));
+        }
+      },
+      onDone: () => {
+        setTyping(false);
+        if (!started) {
+          setMessages((m) => [...m, { id: assistantId, role: "koko", text: "(no response)", time: "just now" }]);
+        }
+      },
+      onError: (err) => {
+        setTyping(false);
+        setMessages((m) => [
+          ...m,
+          { id: assistantId, role: "koko", text: `Sorry — ${err.message}`, time: "just now" },
+        ]);
+      },
+    });
   };
 
   const handleChipClick = (chip: string) => {

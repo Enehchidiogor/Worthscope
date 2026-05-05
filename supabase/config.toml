@@ -1,1 +1,7 @@
 project_id = "iftqcqpbcioyzrhqvgvc"
+
+[functions.koko-chat]
+verify_jwt = false
+
+[functions.koko-youtube]
+verify_jwt = false

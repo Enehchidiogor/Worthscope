@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 
 type Props = {
   sectionsDone: boolean[]; // 4 booleans
+  verified?: boolean;       // Koko verification gate
   onComplete: () => void;
 };
 
@@ -12,13 +13,14 @@ const CONFETTI_COLORS = [
   "hsl(0 0% 100%)",
 ];
 
-export const StickyCompleteBar = ({ sectionsDone, onComplete }: Props) => {
+export const StickyCompleteBar = ({ sectionsDone, verified = false, onComplete }: Props) => {
   const [completing, setCompleting] = useState(false);
   const [done, setDone] = useState(false);
 
   const total = sectionsDone.length;
   const doneCount = sectionsDone.filter(Boolean).length;
-  const allDone = doneCount === total;
+  const allSectionsDone = doneCount === total;
+  const allDone = allSectionsDone && verified;
 
   const handleClick = () => {
     if (!allDone || completing) return;
@@ -102,7 +104,11 @@ export const StickyCompleteBar = ({ sectionsDone, onComplete }: Props) => {
               )}
             </button>
             {!allDone && (
-              <span className="text-[11px] text-text3">Complete all sections to unlock</span>
+              <span className="text-[11px] text-text3">
+                {!allSectionsDone
+                  ? "Complete all sections to unlock"
+                  : "Get verified by Koko to unlock"}
+              </span>
             )}
           </div>
         </div>
