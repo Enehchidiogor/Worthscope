@@ -450,6 +450,152 @@ export const careerModules: Record<string, CareerModule> = {
     ],
     skills: ["CAD (AutoCAD/SolidWorks)","FEA","Technical Drawing","Thermodynamics","Fluid Mechanics","Materials Science"].map((name) => ({ name, progress: 0, level: "Beginner" })),
   },
+
+  ai_ml_engineer: {
+    id: "ai_ml_engineer",
+    title: "AI / ML Engineer",
+    roadmapTitle: "AI / ML Engineer Roadmap",
+    category: "tech",
+    careerDescription: "Build intelligent systems that learn from data and make predictions.",
+    kokoMessage: "You're on your way to becoming an AI / ML Engineer. Let's start with the math and data foundations — your first mission is ready.",
+    phases: [
+      { id: "phase_1", title: "Phase 1: Foundation", subtitle: "Python, math & data", status: "active", missions: [
+        m("m1_1", "Python for AI", "Set up Python and learn the syntax used in every ML project.", { Python: 15, "Data Wrangling": 3 }, "active", { videoTitle: "Python in 30 min", task: "Write a Python script that loads a CSV and prints the first 5 rows." }),
+        m("m1_2", "The 24-Hour Dataset", "Track your own daily activities and visualise the data.", { Python: 10, "Data Wrangling": 15 }, "locked", { videoTitle: "Pandas Quickstart", task: "Use pandas to compute averages from a small dataset you collected." }),
+        m("m1_3", "Math for ML", "Vectors, matrices and probability — the bedrock of ML.", { "Linear Algebra": 20, Statistics: 10 }, "locked", { videoTitle: "Math for ML — 20 min", task: "Solve 5 vector / matrix problems by hand and in NumPy." }),
+        m("m1_4", "Your First Model", "Train a simple linear regression model from scratch.", { "Scikit-learn": 15, Statistics: 8 }, "locked", { videoTitle: "Linear Regression Walkthrough", task: "Train a regression model on a public dataset and report MSE." }),
+      ]},
+      { id: "phase_2", title: "Phase 2: Skill Building", subtitle: "Real ML projects", status: "locked", missions: [
+        m("m2_1", "The Spam Hunter", "Build a supervised classifier to detect spam.", { "Scikit-learn": 20, "Model Evaluation": 10 }),
+        m("m2_2", "Deep Learning Intro", "Train your first neural network with PyTorch / TF.", { "Deep Learning": 25 }),
+        m("m2_3", "Working with LLMs", "Use a hosted LLM API to build a small AI feature.", { "Prompt Engineering": 20, "LLM APIs": 10 }),
+        m("m2_4", "Ethics & Bias", "Identify hallucinations and dataset bias in a real model.", { "AI Ethics": 25 }),
+      ]},
+      { id: "phase_3", title: "Phase 3: Portfolio & Launch", subtitle: "Ship a real AI app", status: "locked", missions: [
+        m("m3_1", "End-to-End ML Project", "From data to deployed model.", { "Model Evaluation": 15, "Deep Learning": 10 }),
+        m("m3_2", "Deploy a Model API", "Serve predictions via a small backend.", { "LLM APIs": 15, Python: 10 }),
+        m("m3_3", "Build Your AI Portfolio", "Publish 2 projects on GitHub with write-ups.", { "Prompt Engineering": 10, "AI Ethics": 10 }),
+      ]},
+    ],
+    skills: ["Python","Linear Algebra","Statistics","Data Wrangling","Scikit-learn","Deep Learning","Prompt Engineering","LLM APIs","Model Evaluation","AI Ethics"].map((name) => ({ name, progress: 0, level: "Beginner" })),
+  },
+
+  cloud_engineer: {
+    id: "cloud_engineer",
+    title: "Cloud / DevOps Engineer",
+    roadmapTitle: "Cloud / DevOps Engineer Roadmap",
+    category: "tech",
+    careerDescription: "Architect and operate the scalable infrastructure that runs modern software.",
+    kokoMessage: "You're on your way to becoming a Cloud / DevOps Engineer. Let's start with how the cloud actually works — your first mission is ready.",
+    phases: [
+      { id: "phase_1", title: "Phase 1: Foundation", subtitle: "Linux, networking, cloud basics", status: "active", missions: [
+        m("m1_1", "Linux Essentials", "The shell, files, processes and permissions.", { "Linux CLI": 20, Networking: 3 }, "active", { videoTitle: "Linux in 20 min", task: "Run 15 essential Linux commands in a VM and screenshot." }),
+        m("m1_2", "Networking for Cloud", "How cloud networks, DNS and load balancers work.", { Networking: 20 }, "locked", { videoTitle: "Cloud Networking Basics", task: "Diagram what happens when a request hits a load balancer." }),
+        m("m1_3", "Intro to AWS", "Core services: EC2, S3, IAM, RDS.", { AWS: 25 }, "locked", { videoTitle: "AWS for Beginners", task: "Spin up a free-tier EC2 and host a static page on S3." }),
+        m("m1_4", "The Elastic Bookstore", "Deploy a small DB-backed app on AWS.", { AWS: 15, Networking: 5 }, "locked", { videoTitle: "RDS + EC2 Walkthrough", task: "Connect an EC2 app to an RDS database." }),
+      ]},
+      { id: "phase_2", title: "Phase 2: Skill Building", subtitle: "Containers, IaC, CI/CD", status: "locked", missions: [
+        m("m2_1", "Docker Basics", "Containerise an app.", { Docker: 25 }),
+        m("m2_2", "Kubernetes Intro", "Run multi-container apps with K8s.", { Kubernetes: 25 }),
+        m("m2_3", "Infrastructure as Code", "Use Terraform to provision cloud resources.", { Terraform: 25 }),
+        m("m2_4", "CI/CD Pipeline", "Automate testing and deployment.", { "CI/CD": 25 }),
+      ]},
+      { id: "phase_3", title: "Phase 3: Portfolio & Industry", subtitle: "Get certified & hired", status: "locked", missions: [
+        m("m3_1", "Multi-Cloud CI/CD", "Build an end-to-end deployment pipeline.", { "CI/CD": 15, Docker: 10 }),
+        m("m3_2", "Monitoring & Observability", "Set up logging, metrics and alerts.", { Observability: 25 }),
+        m("m3_3", "AWS Cloud Practitioner Path", "Plan your cert track.", { AWS: 15 }),
+        m("m3_4", "Land a Cloud Role", "Build a portfolio that proves it.", { Terraform: 10, AWS: 10 }),
+      ]},
+    ],
+    skills: ["Linux CLI","Networking","AWS","Docker","Kubernetes","Terraform","CI/CD","Observability"].map((name) => ({ name, progress: 0, level: "Beginner" })),
+  },
+
+  data_engineer: {
+    id: "data_engineer",
+    title: "Data Engineer",
+    roadmapTitle: "Data Engineer Roadmap",
+    category: "tech",
+    careerDescription: "Build the pipelines that move and prepare data for analytics and AI.",
+    kokoMessage: "You're on your way to becoming a Data Engineer. Pipelines power every data product — let's start. Your first mission is ready.",
+    phases: [
+      { id: "phase_1", title: "Phase 1: Foundation", subtitle: "SQL, Python, schemas", status: "active", missions: [
+        m("m1_1", "Advanced SQL", "Joins, window functions and CTEs.", { SQL: 20 }, "active", { videoTitle: "SQL Deep Dive", task: "Solve 10 SQL exercises on a public dataset." }),
+        m("m1_2", "Python for Data", "Pandas and data cleaning.", { Python: 20 }, "locked", { videoTitle: "Pandas Quickstart", task: "Clean a messy CSV and export the result." }),
+        m("m1_3", "Data Modelling", "Schemas, normalisation, star schemas.", { "Data Modelling": 20 }, "locked", { videoTitle: "Star Schemas", task: "Design a star schema for a small e-commerce dataset." }),
+        m("m1_4", "Your First ETL", "Extract, transform, load — by hand.", { ETL: 15, Python: 5 }, "locked", { videoTitle: "ETL Basics", task: "Write a Python script that extracts from CSV, transforms, loads to SQLite." }),
+      ]},
+      { id: "phase_2", title: "Phase 2: Skill Building", subtitle: "Pipelines & warehouses", status: "locked", missions: [
+        m("m2_1", "Airflow Basics", "Schedule a DAG.", { Airflow: 25 }),
+        m("m2_2", "dbt for Transformations", "Modern transformation workflows.", { dbt: 25 }),
+        m("m2_3", "Cloud Warehouses", "BigQuery / Snowflake fundamentals.", { "Cloud Warehouse": 25 }),
+        m("m2_4", "Streaming Intro", "Kafka and event-driven pipelines.", { Streaming: 25 }),
+      ]},
+      { id: "phase_3", title: "Phase 3: Portfolio & Industry", subtitle: "Build a real pipeline", status: "locked", missions: [
+        m("m3_1", "End-to-End Pipeline", "From source to dashboard.", { ETL: 15, Airflow: 10 }),
+        m("m3_2", "Data Quality & Testing", "Tests and observability.", { "Data Modelling": 10, dbt: 10 }),
+        m("m3_3", "Portfolio Case Study", "Document one pipeline end-to-end.", { "Cloud Warehouse": 10 }),
+      ]},
+    ],
+    skills: ["SQL","Python","Data Modelling","ETL","Airflow","dbt","Cloud Warehouse","Streaming"].map((name) => ({ name, progress: 0, level: "Beginner" })),
+  },
+
+  fintech_security: {
+    id: "fintech_security",
+    title: "FinTech Security Specialist",
+    roadmapTitle: "FinTech Security Specialist Roadmap",
+    category: "tech",
+    careerDescription: "Secure payment platforms and financial systems against modern threats.",
+    kokoMessage: "You're on your way to becoming a FinTech Security Specialist. Let's start with how money moves online — your first mission is ready.",
+    phases: [
+      { id: "phase_1", title: "Phase 1: Foundation", subtitle: "Security & finance basics", status: "active", missions: [
+        m("m1_1", "How Payments Work", "Card networks, switches and settlement.", { "Payment Systems": 15 }, "active", { videoTitle: "Payments 101", task: "Diagram the path of a card payment from POS to settlement." }),
+        m("m1_2", "Security Fundamentals", "CIA triad, threat modelling.", { "Security+": 20, Networking: 5 }, "locked", { videoTitle: "Security Basics", task: "Threat-model a simple wallet app." }),
+        m("m1_3", "KYC, AML & Compliance", "Regulatory basics for fintech in Nigeria.", { Compliance: 20 }, "locked", { videoTitle: "KYC / AML Explained", task: "Summarise the CBN KYC requirements in 1 page." }),
+        m("m1_4", "Fraud Patterns", "Common fraud vectors in mobile money.", { "Fraud Detection": 15 }, "locked", { videoTitle: "Fraud in Fintech", task: "List 5 fraud patterns and the controls that catch them." }),
+      ]},
+      { id: "phase_2", title: "Phase 2: Skill Building", subtitle: "Tools & techniques", status: "locked", missions: [
+        m("m2_1", "Application Security", "OWASP Top 10 for fintech APIs.", { AppSec: 25 }),
+        m("m2_2", "Cryptography for Payments", "TLS, tokenisation, HSMs.", { Cryptography: 25 }),
+        m("m2_3", "Fraud Detection Models", "Rules + ML for transaction monitoring.", { "Fraud Detection": 20, Compliance: 5 }),
+        m("m2_4", "Incident Response", "Run an IR drill on a fictional breach.", { "Incident Response": 25 }),
+      ]},
+      { id: "phase_3", title: "Phase 3: Portfolio & Industry", subtitle: "Get hired in fintech", status: "locked", missions: [
+        m("m3_1", "Security Audit of a Wallet App", "Write a full audit report.", { AppSec: 15, "Incident Response": 10 }),
+        m("m3_2", "PCI-DSS Overview", "What auditors look for.", { Compliance: 15 }),
+        m("m3_3", "Land a FinTech Security Role", "Tailor your portfolio for fintech.", { "Fraud Detection": 10, "Payment Systems": 10 }),
+      ]},
+    ],
+    skills: ["Payment Systems","Security+","Networking","Compliance","Fraud Detection","AppSec","Cryptography","Incident Response"].map((name) => ({ name, progress: 0, level: "Beginner" })),
+  },
+
+  health_data_analyst: {
+    id: "health_data_analyst",
+    title: "Health Data Analyst",
+    roadmapTitle: "Health Data Analyst Roadmap",
+    category: "tech",
+    careerDescription: "Use data to improve diagnostics, healthcare delivery, and patient outcomes.",
+    kokoMessage: "You're on your way to becoming a Health Data Analyst. Health data saves lives — let's start with the basics. Your first mission is ready.",
+    phases: [
+      { id: "phase_1", title: "Phase 1: Foundation", subtitle: "Health data basics", status: "active", missions: [
+        m("m1_1", "Intro to Health Data", "EHRs, claims, and clinical datasets.", { "Health Data Basics": 15, Excel: 5 }, "active", { videoTitle: "Health Data 101", task: "Describe 3 types of health data and where they come from." }),
+        m("m1_2", "Excel & SQL for Health", "Query a sample patient dataset.", { SQL: 20, Excel: 10 }, "locked", { videoTitle: "SQL on Health Data", task: "Write 5 SQL queries on a sample EHR dataset." }),
+        m("m1_3", "Privacy & Ethics", "HIPAA principles + Nigerian NDPR.", { "Privacy / NDPR": 20 }, "locked", { videoTitle: "Health Data Privacy", task: "Summarise NDPR rules that apply to patient data." }),
+        m("m1_4", "Visualising Health Trends", "Build a chart from a public dataset.", { "Data Visualisation": 15 }, "locked", { videoTitle: "Health Dashboards", task: "Create a chart of malaria trends from a public Nigerian dataset." }),
+      ]},
+      { id: "phase_2", title: "Phase 2: Skill Building", subtitle: "Real analyses", status: "locked", missions: [
+        m("m2_1", "Statistics for Health", "Confidence intervals, p-values.", { Statistics: 25 }),
+        m("m2_2", "Python for Analysis", "Pandas + matplotlib on patient data.", { Python: 25 }),
+        m("m2_3", "Build a Diagnostics Dashboard", "Hospital KPIs in a real tool.", { "Dashboard Building": 25 }),
+        m("m2_4", "Predictive Health Modelling", "Simple risk-scoring model.", { "Predictive Modelling": 25 }),
+      ]},
+      { id: "phase_3", title: "Phase 3: Portfolio & Industry", subtitle: "Real impact", status: "locked", missions: [
+        m("m3_1", "Hospital Case Study", "End-to-end analysis of a hospital problem.", { "Dashboard Building": 10, Statistics: 10 }),
+        m("m3_2", "Public Health Report", "Write a report from open Nigerian data.", { "Data Visualisation": 15 }),
+        m("m3_3", "Land a Health Tech Role", "Position for healthtech jobs.", { "Health Data Basics": 10, "Predictive Modelling": 10 }),
+      ]},
+    ],
+    skills: ["Health Data Basics","Excel","SQL","Privacy / NDPR","Data Visualisation","Statistics","Python","Dashboard Building","Predictive Modelling"].map((name) => ({ name, progress: 0, level: "Beginner" })),
+  },
 };
 
 /* ---------- Resolution helpers ---------- */
@@ -476,11 +622,23 @@ const TITLE_TO_MODULE: Record<string, string> = {
   "entrepreneur": "entrepreneur",
   "entrepreneur / business builder": "entrepreneur",
   "cybersecurity analyst": "cybersecurity_analyst",
+  "fintech security specialist": "fintech_security",
+  "fintech security": "fintech_security",
   "digital marketer": "digital_marketer",
   "financial analyst": "financial_analyst",
   "content creator": "content_creator",
   "tech content creator": "content_creator",
   "mechanical engineer": "mechanical_engineer",
+  "ai / ml engineer": "ai_ml_engineer",
+  "ai/ml engineer": "ai_ml_engineer",
+  "ai engineer": "ai_ml_engineer",
+  "ml engineer": "ai_ml_engineer",
+  "machine learning engineer": "ai_ml_engineer",
+  "cloud / devops engineer": "cloud_engineer",
+  "cloud engineer": "cloud_engineer",
+  "devops engineer": "cloud_engineer",
+  "data engineer": "data_engineer",
+  "health data analyst": "health_data_analyst",
 };
 
 const CATEGORY_FALLBACK: Record<string, string> = {

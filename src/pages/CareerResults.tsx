@@ -170,6 +170,38 @@ export default function CareerResults() {
               {top.matchReason}
             </p>
 
+            {/* Market Heat Index */}
+            <div
+              style={{
+                marginTop: 16,
+                background: "rgba(255,255,255,0.12)",
+                border: "1px solid rgba(255,255,255,0.2)",
+                borderRadius: 12,
+                padding: "10px 14px",
+                display: "flex",
+                justifyContent: "space-around",
+                gap: 8,
+                fontSize: 11,
+                color: "#FFFFFF",
+                textAlign: "center",
+              }}
+            >
+              <div>
+                <div style={{ fontWeight: 700, fontSize: 13 }}>{top.market.salaryEntryNGN}</div>
+                <div style={{ opacity: 0.75, marginTop: 2 }}>Entry</div>
+              </div>
+              <div style={{ width: 1, background: "rgba(255,255,255,0.25)" }} />
+              <div>
+                <div style={{ fontWeight: 700, fontSize: 13 }}>{top.market.salarySeniorNGN}</div>
+                <div style={{ opacity: 0.75, marginTop: 2 }}>Senior</div>
+              </div>
+              <div style={{ width: 1, background: "rgba(255,255,255,0.25)" }} />
+              <div>
+                <div style={{ fontWeight: 700, fontSize: 13 }}>{top.market.heatLabel}</div>
+                <div style={{ opacity: 0.75, marginTop: 2 }}>+{top.market.growthPct}% / yr</div>
+              </div>
+            </div>
+
             {/* Match bar */}
             <div style={{ marginTop: 20 }}>
               <div style={{ display: "flex", justifyContent: "space-between", fontWeight: 500, fontSize: 12, color: "#FFFFFF" }}>
@@ -237,6 +269,23 @@ export default function CareerResults() {
                 <p style={{ marginTop: 4, fontWeight: 400, fontSize: 12, color: TEXT3, fontStyle: "italic" }}>
                   {r.matchReason}
                 </p>
+                <div
+                  style={{
+                    marginTop: 10,
+                    display: "flex",
+                    flexWrap: "wrap",
+                    gap: 6,
+                    fontSize: 11,
+                    fontWeight: 500,
+                  }}
+                >
+                  <span style={{ background: ACCENT_LIGHT, color: ACCENT_DARK, padding: "3px 8px", borderRadius: 6 }}>
+                    {r.market.salaryEntryNGN}
+                  </span>
+                  <span style={{ background: "#FFF7E6", color: "#B45309", padding: "3px 8px", borderRadius: 6 }}>
+                    {r.market.heatLabel} · +{r.market.growthPct}%/yr
+                  </span>
+                </div>
                 <div style={{ marginTop: 14, height: 5, background: BORDER, borderRadius: 100, overflow: "hidden" }}>
                   <div
                     style={{

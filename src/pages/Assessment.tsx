@@ -70,10 +70,15 @@ const opts = (arr: string[]): Option[] =>
 
 const Q1_OPTS = opts([
   "📐 Mathematics",
-  "🔬 Sciences",
-  "💼 Business / Economics",
-  "🎨 Arts / Literature",
-  "💻 Technology / ICT",
+  "➕ Further Mathematics",
+  "⚛️ Physics",
+  "🧪 Chemistry",
+  "🧬 Biology",
+  "💻 Computer Studies / ICT",
+  "📊 Data Processing",
+  "📐 Technical Drawing",
+  "💼 Economics / Business",
+  "📚 Literature / Arts",
   "🌍 Social Sciences",
 ]);
 const Q2_OPTS = opts([
