@@ -3,7 +3,7 @@
    first-login flag. Every screen should read/write through these helpers
    instead of poking localStorage directly with strings. */
 
-export type UserProfile = {
+import { loadModuleForCareer, setActiveModule, totalMissionCount, getActiveModule, flatMissions } from "./careerModules";
   fullName: string;
   firstName: string;
   lastName?: string;
