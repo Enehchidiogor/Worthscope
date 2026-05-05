@@ -83,9 +83,7 @@ export const MissionDrawer = ({ node, onClose, onComplete }: Props) => {
         <div className="flex-1 overflow-y-auto px-7 pt-6">
           <Section label="Description">
             <p className="text-[14px] leading-[1.7] text-text2">
-              In this mission, you will get hands-on with Figma — the
-              industry-standard design tool. By the end, you'll have created
-              your first wireframe.
+              {node.sub}
             </p>
           </Section>
 
@@ -101,8 +99,7 @@ export const MissionDrawer = ({ node, onClose, onComplete }: Props) => {
 
           <Section label="Your Task" className="mt-6">
             <p className="text-[14px] leading-[1.65] text-text2">
-              Create a simple 3-screen wireframe for a mobile app of your
-              choice using Figma. Upload a screenshot when done.
+              Complete this mission's task, then submit your work below to mark it complete.
             </p>
           </Section>
 
