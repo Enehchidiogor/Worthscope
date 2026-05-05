@@ -154,12 +154,18 @@ const Mission = () => {
           >
             <SubmitContent onSubmittedChange={onSubmittedChange} />
           </SectionShell>
+
+          <KokoMissionPanel mission={kokoMission} verified={verified} onVerified={() => setVerified(true)} />
         </main>
       </div>
 
       <MobileTabBar />
 
-      <StickyCompleteBar sectionsDone={sectionsDone} onComplete={handleAllComplete} />
+      <StickyCompleteBar
+        sectionsDone={sectionsDone}
+        verified={verified}
+        onComplete={handleAllComplete}
+      />
     </div>
   );
 };
