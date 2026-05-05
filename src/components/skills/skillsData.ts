@@ -1,4 +1,4 @@
-export type Level = "Beginner" | "Intermediate" | "Advanced";
+export type Level = "Beginner" | "Developing" | "Intermediate" | "Advanced" | "Expert";
 
 export type Skill = {
   id: string;
@@ -11,7 +11,7 @@ export type Skill = {
 };
 
 export const levelFor = (pct: number): Level =>
-  pct >= 70 ? "Advanced" : pct >= 25 ? "Intermediate" : "Beginner";
+  pct >= 100 ? "Expert" : pct >= 75 ? "Advanced" : pct >= 50 ? "Intermediate" : pct >= 25 ? "Developing" : "Beginner";
 
 const ICON_FOR: Record<string, Skill["icon"]> = {
   "UI Design": "layers",
