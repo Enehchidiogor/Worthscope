@@ -112,7 +112,7 @@ const Mission = () => {
             onToggle={() => setSection(0, !sectionsDone[0])}
             delay="0.35s"
           >
-            <LearnContent />
+            <LearnContent query={videoQuery} fallbackTitle={current?.videoTitle} />
           </SectionShell>
 
           <SectionShell
