@@ -52,15 +52,16 @@ const Roadmap = () => {
   };
 
   const handleComplete = (id: string) => {
-    setNodes((prev) => {
-      const idx = prev.findIndex((n) => n.id === id);
-      if (idx < 0) return prev;
-      const next = [...prev];
-      next[idx] = { ...next[idx], status: "completed" };
-      const nextLocked = next.findIndex((n, i) => i > idx && n.status === "locked");
-      if (nextLocked > -1) next[nextLocked] = { ...next[nextLocked], status: "current" };
-      return next;
-    });
+    // Only the current node can be completed via the drawer.
+    const target = nodes.find((n) => n.id === id);
+    if (!target || target.status !== "current") {
+      setOpenNode(null);
+      return;
+    }
+    completeMission(); // pulls skillsGained from active module
+    const r = buildRoadmapForUser();
+    setNodes(r.nodes);
+    setPhasesMeta(r.phases);
     setOpenNode(null);
   };
 
