@@ -4,6 +4,8 @@
    instead of poking localStorage directly with strings. */
 
 import { loadModuleForCareer, setActiveModule, totalMissionCount, getActiveModule, flatMissions } from "./careerModules";
+
+export type UserProfile = {
   fullName: string;
   firstName: string;
   lastName?: string;
