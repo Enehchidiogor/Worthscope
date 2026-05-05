@@ -1,33 +1,30 @@
 import { useEffect, useState } from "react";
 import { getChosenCareer, getProgress } from "@/lib/userState";
-
-const phaseTitle = (n: number, category?: string) => {
-  if (category === "creative") return ["Basics", "Portfolio Building", "Professional"][n - 1];
-  if (category === "business") return ["Foundation", "Strategy", "Leadership"][n - 1];
-  if (category === "science") return ["Foundation", "Research", "Specialisation"][n - 1];
-  if (category === "people") return ["Foundation", "Practice", "Impact"][n - 1];
-  if (category === "communication") return ["Foundation", "Content Building", "Professional"][n - 1];
-  return ["Foundation", "Exploration", "Mastery"][n - 1];
-};
+import { getActiveModule, loadModuleForCareer } from "@/lib/careerModules";
 
 export const CurrentPhase = () => {
   const [pct, setPct] = useState(0);
   const [phase, setPhase] = useState(1);
   const [career, setCareer] = useState<{ title?: string; category?: string } | null>(null);
+  const [phaseTitle, setPhaseTitle] = useState<string>("Foundation");
 
   useEffect(() => {
     const refresh = () => {
       const pr = getProgress();
       setPct(pr.overallPct);
       setPhase(pr.phase);
-      setCareer(getChosenCareer());
+      const c = getChosenCareer();
+      setCareer(c);
+      const mod = getActiveModule() || loadModuleForCareer(c);
+      const p = mod.phases[pr.phase - 1] || mod.phases[0];
+      setPhaseTitle(p.title.replace(/^Phase \d+:\s*/, "").replace(/ 🔒$/, ""));
     };
     refresh();
     window.addEventListener("worthscope:progress", refresh);
     return () => window.removeEventListener("worthscope:progress", refresh);
   }, []);
 
-  const title = phaseTitle(phase, career?.category);
+  const title = phaseTitle;
 
   return (
     <section
