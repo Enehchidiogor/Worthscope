@@ -157,22 +157,53 @@ export const KokoFloatingChat = () => {
     if (el) el.scrollTo({ top: el.scrollHeight, behavior: "smooth" });
   }, [messages, typing]);
 
-  const sendMessage = (raw: string) => {
+  const sendMessage = async (raw: string) => {
     const text = raw.trim();
     if (!text) return;
     const userMsg: Msg = { id: Date.now(), role: "user", text, time: "just now" };
+    const assistantId = Date.now() + 1;
     setMessages((m) => [...m, userMsg]);
     setInput("");
     setTyping(true);
 
-    const reply = KOKO_REPLIES[text] ?? fallbackReply(text);
-    window.setTimeout(() => {
-      setTyping(false);
-      setMessages((m) => [
-        ...m,
-        { id: Date.now() + 1, role: "koko", text: reply, time: "just now" },
-      ]);
-    }, 1100);
+    // Build conversation history for the model from local state
+    const history: KokoMsg[] = [...messages, userMsg]
+      .filter((m) => m.role === "koko" || m.role === "user")
+      .map((m) => ({ role: m.role === "koko" ? "assistant" : "user", content: m.text }));
+
+    const career = getChosenCareer()?.title;
+    const mission = career ? { career } : undefined;
+    let acc = "";
+    let started = false;
+
+    await streamKokoChat({
+      messages: history,
+      intent: "chat",
+      mission,
+      onDelta: (chunk) => {
+        acc += chunk;
+        if (!started) {
+          started = true;
+          setTyping(false);
+          setMessages((m) => [...m, { id: assistantId, role: "koko", text: acc, time: "just now" }]);
+        } else {
+          setMessages((m) => m.map((msg) => (msg.id === assistantId ? { ...msg, text: acc } : msg)));
+        }
+      },
+      onDone: () => {
+        setTyping(false);
+        if (!started) {
+          setMessages((m) => [...m, { id: assistantId, role: "koko", text: "(no response)", time: "just now" }]);
+        }
+      },
+      onError: (err) => {
+        setTyping(false);
+        setMessages((m) => [
+          ...m,
+          { id: assistantId, role: "koko", text: `Sorry — ${err.message}`, time: "just now" },
+        ]);
+      },
+    });
   };
 
   const handleChipClick = (chip: string) => {
