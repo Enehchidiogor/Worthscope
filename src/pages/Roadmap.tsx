@@ -9,7 +9,7 @@ import { RoadmapNodeRow } from "@/components/roadmap/RoadmapNodeRow";
 import { MissionDrawer } from "@/components/roadmap/MissionDrawer";
 import { KokoSidePanel } from "@/components/roadmap/KokoSidePanel";
 import { buildRoadmapForUser, type RoadmapNode } from "@/components/roadmap/nodesData";
-import { getChosenCareer } from "@/lib/userState";
+import { getChosenCareer, completeMission } from "@/lib/userState";
 import { toast } from "@/hooks/use-toast";
 
 const Roadmap = () => {
