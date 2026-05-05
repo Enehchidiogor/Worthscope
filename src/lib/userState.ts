@@ -225,12 +225,42 @@ export function saveProgress(p: Progress) {
 export function completeMission(skillBoosts: Record<string, number> = {}): Progress {
   const cur = getProgress();
   const completed = Math.min(cur.totalMissions, cur.missionsCompleted + 1);
-  const overallPct = Math.round((completed / cur.totalMissions) * 100);
+  const overallPct = Math.max(1, Math.round((completed / cur.totalMissions) * 100));
   const phase: 1 | 2 | 3 = overallPct >= 67 ? 3 : overallPct >= 34 ? 2 : 1;
+
+  // If the caller didn't provide skill boosts, derive them from the active
+  // module's mission at the index we just completed.
+  let boosts = skillBoosts;
+  const mod = getActiveModule();
+  if (mod && Object.keys(boosts).length === 0) {
+    const all = flatMissions(mod);
+    const m = all[cur.missionsCompleted];
+    if (m) boosts = m.skillsGained || {};
+  }
+
   const skills = { ...cur.skills };
-  for (const [k, v] of Object.entries(skillBoosts)) {
+  for (const [k, v] of Object.entries(boosts)) {
     skills[k] = Math.min(100, (skills[k] || 0) + v);
   }
+
+  // Advance mission statuses inside the module so the roadmap reflects state.
+  if (mod) {
+    const all = flatMissions(mod);
+    if (all[cur.missionsCompleted]) all[cur.missionsCompleted].status = "completed";
+    if (all[completed]) all[completed].status = "active";
+    // Phase status sync
+    let cursor = 0;
+    for (const p of mod.phases) {
+      const phaseMissions = p.missions;
+      const phaseDone = phaseMissions.every((mm) => mm.status === "completed");
+      const phaseHasActive = phaseMissions.some((mm) => mm.status === "active");
+      if (phaseDone) p.status = "completed";
+      else if (phaseHasActive) p.status = "active";
+      cursor += phaseMissions.length;
+    }
+    setActiveModule(mod);
+  }
+
   const next: Progress = { ...cur, missionsCompleted: completed, overallPct, phase, skills };
   saveProgress(next);
   if (overallPct >= 70) {
