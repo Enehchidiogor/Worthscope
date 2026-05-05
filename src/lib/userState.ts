@@ -76,12 +76,9 @@ export function getChosenCareer(): ChosenCareer | null {
 
 export function setChosenCareer(c: ChosenCareer) {
   localStorage.setItem(K.chosen, JSON.stringify(c));
-  // Load the matching career module and (re)initialise progress every time the
-  // user picks a career. Switching careers should reset progress so the
-  // dashboard, roadmap, missions and skills always reflect the chosen path.
-  // Lazy import avoids a circular dep in non-browser contexts.
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
-  const { loadModuleForCareer, setActiveModule, totalMissionCount } = require("./careerModules");
+  // Load the matching career module and (re)initialise progress every time
+  // the user picks a career, so dashboard/roadmap/missions/skills all reflect
+  // the chosen path.
   const mod = loadModuleForCareer(c);
   setActiveModule(mod);
   const skills: Record<string, number> = {};
