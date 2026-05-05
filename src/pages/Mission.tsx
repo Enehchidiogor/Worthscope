@@ -11,20 +11,33 @@ import { TaskContent } from "@/components/mission/TaskContent";
 import { SubmitContent } from "@/components/mission/SubmitContent";
 import { StickyCompleteBar } from "@/components/mission/StickyCompleteBar";
 import { IconArrowRight } from "@/components/dashboard/icons";
-import { completeMission, getChosenCareer } from "@/lib/userState";
-
-const skillsForCategory = (cat?: string): Record<string, number> => {
-  if (cat === "tech") return { "Problem Solving": 8, "Technical Tools": 10 };
-  if (cat === "creative") return { "UI Design": 10, "Problem Solving": 5 };
-  if (cat === "business") return { "Communication": 8, "Problem Solving": 6 };
-  if (cat === "science") return { "Research": 10, "Problem Solving": 6 };
-  if (cat === "people") return { "Communication": 10, "Research": 5 };
-  if (cat === "communication") return { "Communication": 10, "UI Design": 4 };
-  return { "UI Design": 8, "Problem Solving": 6 };
-};
+import { completeMission, getProgress } from "@/lib/userState";
+import { getActiveModule, loadModuleForCareer, flatMissions } from "@/lib/careerModules";
 
 const Mission = () => {
   const navigate = useNavigate();
+
+  // Resolve the current mission from the active module + progress.
+  const mod = getActiveModule() || loadModuleForCareer(null);
+  const progress = getProgress();
+  const all = flatMissions(mod);
+  const currentIdx = Math.min(progress.missionsCompleted, all.length - 1);
+  const current = all[currentIdx];
+  // Find which phase this mission is in
+  let phaseNum = 1;
+  let inPhaseIdx = 0;
+  let cursor = 0;
+  for (let i = 0; i < mod.phases.length; i++) {
+    const len = mod.phases[i].missions.length;
+    if (currentIdx < cursor + len) {
+      phaseNum = i + 1;
+      inPhaseIdx = currentIdx - cursor;
+      break;
+    }
+    cursor += len;
+  }
+  const phaseLabel = `Phase ${phaseNum}: ${mod.phases[phaseNum - 1]?.title.replace(/^Phase \d+:\s*/, "") || ""}`;
+  const phasePill = `Phase ${phaseNum} · Mission ${inPhaseIdx + 1} of ${mod.phases[phaseNum - 1].missions.length}`;
 
   // Section completion: [Learn, Steps, Task, Submit]
   const [sectionsDone, setSectionsDone] = useState<boolean[]>([false, false, false, false]);
@@ -33,22 +46,21 @@ const Mission = () => {
   const setSection = (idx: number, value: boolean) =>
     setSectionsDone((prev) => prev.map((v, i) => (i === idx ? value : v)));
 
-  // Auto-mark Submit section when a file/link is provided
   const onSubmittedChange = (ok: boolean) => {
     setSubmitted(ok);
     setSection(3, ok);
   };
 
-  const progress = useMemo(() => {
+  const sectionProgress = useMemo(() => {
     const done = sectionsDone.filter(Boolean).length;
     return Math.round((done / sectionsDone.length) * 100);
   }, [sectionsDone]);
 
   const handleAllComplete = () => {
-    const cat = getChosenCareer()?.category;
-    completeMission(skillsForCategory(cat));
+    completeMission(current?.skillsGained || {});
     navigate("/roadmap");
   };
+
 
   return (
     <div className="min-h-screen bg-background font-poppins text-foreground">
