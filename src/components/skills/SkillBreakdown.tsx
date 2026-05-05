@@ -5,8 +5,10 @@ import { toast } from "sonner";
 
 const levelStyles: Record<Level, string> = {
   Beginner: "bg-destructive/10 text-destructive border-destructive/20",
+  Developing: "bg-[hsl(38_92%_50%/0.08)] text-[hsl(38_92%_50%)] border-[hsl(38_92%_50%/0.2)]",
   Intermediate: "bg-[hsl(38_92%_50%/0.08)] text-[hsl(38_92%_50%)] border-[hsl(38_92%_50%/0.2)]",
   Advanced: "bg-success/10 text-success border-success/20",
+  Expert: "bg-success/15 text-success border-success/30",
 };
 
 export const SkillBreakdown = ({ skills }: { skills: Skill[] }) => {

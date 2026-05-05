@@ -1,24 +1,18 @@
 import { useEffect, useState } from "react";
 import { IconCompass, IconLock, IconArrowRight } from "./icons";
 import { getChosenCareer, getProgress } from "@/lib/userState";
-
-const phaseNames = (category?: string): [string, string, string] => {
-  if (category === "creative") return ["Basics", "Portfolio Building", "Professional"];
-  if (category === "business") return ["Foundation", "Strategy", "Leadership"];
-  if (category === "science") return ["Foundation", "Research", "Specialisation"];
-  if (category === "people") return ["Foundation", "Practice", "Impact"];
-  if (category === "communication") return ["Foundation", "Content Building", "Professional"];
-  return ["Foundation", "Exploration", "Mastery"];
-};
+import { getActiveModule, loadModuleForCareer } from "@/lib/careerModules";
 
 export const Roadmap = () => {
-  const [category, setCategory] = useState<string | undefined>(undefined);
+  const [names, setNames] = useState<[string, string, string]>(["Foundation", "Exploration", "Mastery"]);
   const [pct, setPct] = useState(0);
   const [phase, setPhase] = useState<1 | 2 | 3>(1);
 
   useEffect(() => {
     const refresh = () => {
-      setCategory(getChosenCareer()?.category);
+      const mod = getActiveModule() || loadModuleForCareer(getChosenCareer());
+      const titles = mod.phases.map((p) => p.title.replace(/^Phase \d+:\s*/, "").replace(/ 🔒$/, "")) as string[];
+      setNames([titles[0] || "Foundation", titles[1] || "Exploration", titles[2] || "Mastery"]);
       const pr = getProgress();
       setPct(pr.overallPct);
       setPhase(pr.phase);
@@ -28,7 +22,7 @@ export const Roadmap = () => {
     return () => window.removeEventListener("worthscope:progress", refresh);
   }, []);
 
-  const [n1, n2, n3] = phaseNames(category);
+  const [n1, n2, n3] = names;
   // Per-phase pct (each phase covers ~33%)
   const phase1Pct = Math.min(100, Math.round((pct / 34) * 100));
 

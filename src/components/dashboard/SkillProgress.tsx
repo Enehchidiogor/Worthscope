@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { getProgress } from "@/lib/userState";
+import { getProgress, getChosenCareer } from "@/lib/userState";
+import { getActiveModule, loadModuleForCareer } from "@/lib/careerModules";
 
 export const SkillProgress = () => {
   const [skills, setSkills] = useState<{ name: string; value: number }[]>([]);
@@ -8,7 +9,10 @@ export const SkillProgress = () => {
   useEffect(() => {
     const refresh = () => {
       const pr = getProgress();
-      setSkills(Object.entries(pr.skills).slice(0, 5).map(([name, value]) => ({ name, value })));
+      const mod = getActiveModule() || loadModuleForCareer(getChosenCareer());
+      setSkills(
+        mod.skills.slice(0, 5).map((s) => ({ name: s.name, value: pr.skills[s.name] || 0 }))
+      );
     };
     refresh();
     window.addEventListener("worthscope:progress", refresh);

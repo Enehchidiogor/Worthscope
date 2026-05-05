@@ -3,6 +3,8 @@
    first-login flag. Every screen should read/write through these helpers
    instead of poking localStorage directly with strings. */
 
+import { loadModuleForCareer, setActiveModule, totalMissionCount, getActiveModule, flatMissions } from "./careerModules";
+
 export type UserProfile = {
   fullName: string;
   firstName: string;
@@ -74,10 +76,20 @@ export function getChosenCareer(): ChosenCareer | null {
 
 export function setChosenCareer(c: ChosenCareer) {
   localStorage.setItem(K.chosen, JSON.stringify(c));
-  // Initialise progress on first choice
-  if (!localStorage.getItem(K.progress)) {
-    saveProgress(defaultProgressForCareer(c));
-  }
+  // Load the matching career module and (re)initialise progress every time
+  // the user picks a career, so dashboard/roadmap/missions/skills all reflect
+  // the chosen path.
+  const mod = loadModuleForCareer(c);
+  setActiveModule(mod);
+  const skills: Record<string, number> = {};
+  for (const s of mod.skills) skills[s.name] = 0;
+  saveProgress({
+    overallPct: 1,
+    phase: 1,
+    missionsCompleted: 0,
+    totalMissions: totalMissionCount(mod),
+    skills,
+  });
 }
 
 /* ---------- Progress ---------- */
@@ -179,6 +191,12 @@ const MISSION_SETS: Record<string, (title: string) => MissionItem[]> = {
 };
 
 export function getMissionsForCareer(c?: ChosenCareer | null): MissionItem[] {
+  // Prefer the active career module — single source of truth.
+  const mod = getActiveModule();
+  if (mod) {
+    return flatMissions(mod).map((m) => ({ id: m.id, title: m.title, sub: m.description }));
+  }
+  // Fallback to legacy category-based missions if no module is loaded yet.
   const career = c ?? getChosenCareer();
   const cat = career?.category || "creative";
   const builder = MISSION_SETS[cat] || MISSION_SETS.creative;
@@ -207,12 +225,42 @@ export function saveProgress(p: Progress) {
 export function completeMission(skillBoosts: Record<string, number> = {}): Progress {
   const cur = getProgress();
   const completed = Math.min(cur.totalMissions, cur.missionsCompleted + 1);
-  const overallPct = Math.round((completed / cur.totalMissions) * 100);
+  const overallPct = Math.max(1, Math.round((completed / cur.totalMissions) * 100));
   const phase: 1 | 2 | 3 = overallPct >= 67 ? 3 : overallPct >= 34 ? 2 : 1;
+
+  // If the caller didn't provide skill boosts, derive them from the active
+  // module's mission at the index we just completed.
+  let boosts = skillBoosts;
+  const mod = getActiveModule();
+  if (mod && Object.keys(boosts).length === 0) {
+    const all = flatMissions(mod);
+    const m = all[cur.missionsCompleted];
+    if (m) boosts = m.skillsGained || {};
+  }
+
   const skills = { ...cur.skills };
-  for (const [k, v] of Object.entries(skillBoosts)) {
+  for (const [k, v] of Object.entries(boosts)) {
     skills[k] = Math.min(100, (skills[k] || 0) + v);
   }
+
+  // Advance mission statuses inside the module so the roadmap reflects state.
+  if (mod) {
+    const all = flatMissions(mod);
+    if (all[cur.missionsCompleted]) all[cur.missionsCompleted].status = "completed";
+    if (all[completed]) all[completed].status = "active";
+    // Phase status sync
+    let cursor = 0;
+    for (const p of mod.phases) {
+      const phaseMissions = p.missions;
+      const phaseDone = phaseMissions.every((mm) => mm.status === "completed");
+      const phaseHasActive = phaseMissions.some((mm) => mm.status === "active");
+      if (phaseDone) p.status = "completed";
+      else if (phaseHasActive) p.status = "active";
+      cursor += phaseMissions.length;
+    }
+    setActiveModule(mod);
+  }
+
   const next: Progress = { ...cur, missionsCompleted: completed, overallPct, phase, skills };
   saveProgress(next);
   if (overallPct >= 70) {
