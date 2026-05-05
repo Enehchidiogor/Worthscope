@@ -18,24 +18,10 @@ type Msg = { id: number; role: "koko" | "user"; text: string; time: string };
 
 const QUICK_CHIPS = [
   "What should I do next?",
-  "Explain this task",
-  "Recommend skills",
+  "Explain my current mission",
+  "Recommend skills to focus on",
   "Help me choose a career",
 ];
-
-const KOKO_REPLIES: Record<string, string> = {
-  "What should I do next?":
-    "Head to your roadmap and complete Mission 3. It's the step that unlocks Phase 2 — you're close!",
-  "Explain this task":
-    "Mission 3 asks you to write a one-page project brief. Keep it tight — a real recruiter would read it in under a minute.",
-  "Recommend skills":
-    "Based on your roadmap, focus on UI Design next — it's your weakest skill and the one missions 4–6 lean on.",
-  "Help me choose a career":
-    "Tell me what energises you more: building products, designing them, or analysing how people use them — and I'll point you somewhere.",
-};
-
-const fallbackReply = (text: string) =>
-  `Good question. Here's the short version: ${text.replace(/\?$/, "").toLowerCase()} — finish your current mission first, and I'll guide you from there.`;
 
 export const KokoFloatingChat = () => {
   const { pathname } = useLocation();
