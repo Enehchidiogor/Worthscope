@@ -58,6 +58,7 @@ const initialAnswers: Answers = {
   taskInterests: [],
   outputPreference: null,
   careerConfidence: null,
+  differentiation: null,
   goalOrConcern: "",
 };
 
