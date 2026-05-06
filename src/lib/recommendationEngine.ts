@@ -215,8 +215,19 @@ const Q6_SIGNALS: SigMap = {
   "Analyzing data":         { DATA: 4, FINTECH: 4, AIML: 3, DATAENG: 3, HEALTHDATA: 3 },
   "Growing brands":         { DIGIMKT: 4, CONTENT: 4, ENTREP: 1 },
   "Work with people":       { PM: 3, CONTENT: 3, ENTREP: 2 },
-  "Working with people":    { PM: 3, CONTENT: 3, ENTREP: 2 },
-  "Research, discover":     { DATA: 3, MECHENG: 2, CYBER: 1, AIML: 2, HEALTHDATA: 2 },
+  "Working with people":    { PM: 3, CONTENT: 3, ENTREP: 2, SALES: 3, OPS: 2 },
+  "Research, discover":     { DATA: 3, MECHENG: 2, CYBER: 1, AIML: 2, HEALTHDATA: 2, DATASCI: 3 },
+};
+
+// Q9 — DIFFERENTIATION (single-select, decisive)
+const Q9_SIGNALS: SigMap = {
+  "looks":                  { GRAPHD: 5, UIUX: 2, PRODDES: 2 },
+  "Design how something looks": { GRAPHD: 5, UIUX: 2, PRODDES: 2 },
+  "works":                  { UIUX: 5, PRODDES: 4 },
+  "Design how something works": { UIUX: 5, PRODDES: 4 },
+  "Build the system":       { SOFTDEV: 5, BACKEND: 4, FULLSTACK: 4, CLOUD: 3, DATAENG: 2, CYBER: 2, MECHENG: 2, ELECENG: 2, CIVILENG: 2 },
+  "Analyze and improve":    { DATA: 5, DATASCI: 4, AIML: 3, FINTECH: 3, HEALTHDATA: 3, BACKEND: 1 },
+  "Manage and organize":    { PM: 5, OPS: 4, ENTREP: 3, SALES: 2 },
 };
 
 // Q7 — daily tasks (15%)
