@@ -519,7 +519,8 @@ function applyIntentRules(
 }
 
 /* ============ MAIN SCORER ============ */
-const W = { q1: 0.15, q3: 0.20, q6: 0.25, q7: 0.15, q8: 0.15, stream: 1.0 };
+// Q9 (differentiation) is decisive — highest single-question weight.
+const W = { q1: 0.12, q3: 0.15, q6: 0.20, q7: 0.13, q8: 0.13, q9: 0.27, stream: 1.0 };
 
 export function generateCareerResults(a: Answers): CareerResult[] {
   const total: Record<string, number> = {};
@@ -531,6 +532,7 @@ export function generateCareerResults(a: Answers): CareerResult[] {
   const q6: Record<string, number> = {};
   const q7: Record<string, number> = {};
   const q8: Record<string, number> = {};
+  const q9: Record<string, number> = {};
 
   applyMulti(q1, a.strongSubjects, Q1_SIGNALS);
   applyMulti(q3, a.activities, Q3_SIGNALS);
@@ -540,6 +542,7 @@ export function generateCareerResults(a: Answers): CareerResult[] {
     ? a.outputPreferences
     : (a.outputPreference ? [a.outputPreference] : []);
   applyMulti(q8, q8List, Q8_SIGNALS);
+  if (a.differentiation) applySignals(q9, a.differentiation, Q9_SIGNALS);
 
   // Combine weighted question buckets
   for (const c of CAREERS) {
@@ -548,7 +551,8 @@ export function generateCareerResults(a: Answers): CareerResult[] {
       (q3[c.id] || 0) * W.q3 +
       (q6[c.id] || 0) * W.q6 +
       (q7[c.id] || 0) * W.q7 +
-      (q8[c.id] || 0) * W.q8;
+      (q8[c.id] || 0) * W.q8 +
+      (q9[c.id] || 0) * W.q9;
   }
 
   // Stream baseline (Nigerian curriculum)
