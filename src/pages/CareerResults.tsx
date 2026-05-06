@@ -114,6 +114,21 @@ export default function CareerResults() {
           </p>
         </div>
 
+        {top?.lowConfidence && (
+          <div
+            style={{
+              marginTop: 28, padding: "16px 20px", borderRadius: 14,
+              background: "#FFF8E6", border: "1px solid #F4D67A", color: "#8A5A00",
+              fontSize: 13.5, lineHeight: 1.55,
+              animation: "ws-fade-up 0.5s ease 0.4s both",
+            }}
+          >
+            <strong>Heads up — these matches are exploratory.</strong> Your answers didn't form
+            a strong single pattern yet. Consider retaking the assessment with more specific
+            interests in Q10 (the open-ended question) for sharper results.
+          </div>
+        )}
+
         <div
           style={{
             height: 1, margin: "32px 0",
