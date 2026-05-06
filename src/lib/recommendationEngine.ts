@@ -590,9 +590,15 @@ export function generateCareerResults(a: Answers): CareerResult[] {
   const second = sortedScores[1] || 0;
   const focused = top > 0 && (top - second) / top > 0.18;
 
+  // Refinement-loop signal: no strong pattern emerged.
+  // Fires when top score is very low or top vs second is essentially flat.
+  const lowConfidence = top < 8 || (top > 0 && (top - second) / top < 0.06);
+
   const bands = focused
     ? [[78, 92], [50, 68], [28, 45], [12, 26]]
-    : [[58, 70], [48, 60], [35, 50], [20, 35]];
+    : lowConfidence
+      ? [[42, 55], [38, 50], [30, 44], [20, 35]]
+      : [[58, 70], [48, 60], [35, 50], [20, 35]];
 
   const seed = Math.abs(hashStr(JSON.stringify(a))) || 1;
   const rand = seededRand(seed);
@@ -616,13 +622,14 @@ export function generateCareerResults(a: Answers): CareerResult[] {
     icon: c.icon,
     category: c.category,
     market: c.market,
+    lowConfidence,
   }));
 
   // Debug
   // eslint-disable-next-line no-console
-  console.log("=== WorthScope CRS v3 ===");
+  console.log("=== WorthScope CRS v4 ===");
   // eslint-disable-next-line no-console
-  console.log("Stream:", stream, "Triggered intents:", intent.triggered);
+  console.log("Stream:", stream, "Triggered intents:", intent.triggered, "lowConfidence:", lowConfidence);
   // eslint-disable-next-line no-console
   console.log("Totals:", Object.fromEntries(
     Object.entries(total).map(([k, v]) => [k, +v.toFixed(2)])
