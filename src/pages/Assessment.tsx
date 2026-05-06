@@ -409,15 +409,16 @@ export default function Assessment() {
     q9: (
       <QuestionScreen
         tag="STEP 9 OF 10  ·  CAREER DIRECTION"
-        title="How confident are you in the career direction you have in mind?"
+        title="Which would you rather do?"
+        sub="Pick the one that feels most like you"
       >
         {Q9_OPTS.map((o) => (
           <SingleOption
             key={o.label}
             option={o}
-            selected={answers.careerConfidence === o.label}
+            selected={answers.differentiation === o.label}
             onSelect={() => {
-              setAnswers((p) => ({ ...p, careerConfidence: o.label }));
+              setAnswers((p) => ({ ...p, differentiation: o.label, careerConfidence: o.label }));
               autoAdvance("q9");
             }}
           />
