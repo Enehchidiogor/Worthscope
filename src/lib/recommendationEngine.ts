@@ -33,6 +33,7 @@ export type Answers = {
   outputPreferences?: string[];
   careerConfidence?: string | null;  // Q9
   goalOrConcern: string;             // Q10 NLP
+  differentiation?: string | null;   // Q9 differentiation (UI/UX vs Graphic vs Build vs Analyse vs Manage)
 
   // Legacy fields for back-compat
   experienceItems?: string[];
@@ -63,6 +64,7 @@ export type CareerResult = {
   icon: string;
   category: CategoryKey;
   market: MarketData;
+  lowConfidence?: boolean; // refinement-loop flag (no strong pattern)
 };
 
 /* ============ CAREER PROFILES (16) ============ */
