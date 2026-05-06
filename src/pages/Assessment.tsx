@@ -132,16 +132,21 @@ const Q8_OPTS = opts([
   "🎨 A beautiful design or visual experience",
   "🏢 A business or product I built from scratch",
   "📊 A report or insight that drove a real decision",
+  "🛡️ A secured system that stops attacks",
+  "🔧 A physical machine or engineered structure",
   "❤️ A person or community I genuinely helped",
   "📰 Content or ideas I put out into the world",
 ]);
-// Q9 — DIFFERENTIATION (decisive single-select)
+// Q9 — DIFFERENTIATION (decisive single-select, Q8 in spec)
 const Q9_OPTS = opts([
   "🎨 Design how something looks",
   "✨ Design how something works",
   "🛠️ Build the system behind it",
   "📊 Analyze and improve performance",
   "📋 Manage and organize everything",
+  "📣 Grow and reach an audience",
+  "🛡️ Protect and secure systems",
+  "🔧 Design and build physical things",
 ]);
 
 export default function Assessment() {
