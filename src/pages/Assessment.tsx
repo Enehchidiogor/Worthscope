@@ -58,6 +58,7 @@ const initialAnswers: Answers = {
   taskInterests: [],
   outputPreference: null,
   careerConfidence: null,
+  differentiation: null,
   goalOrConcern: "",
 };
 
@@ -134,11 +135,13 @@ const Q8_OPTS = opts([
   "❤️ A person or community I genuinely helped",
   "📰 Content or ideas I put out into the world",
 ]);
+// Q9 — DIFFERENTIATION (decisive single-select)
 const Q9_OPTS = opts([
-  "💪 Very confident — I know what I want",
-  "🙂 Somewhat confident — fairly sure",
-  "🤔 Not very confident — still figuring it out",
-  "😶 No idea — I need guidance completely",
+  "🎨 Design how something looks",
+  "✨ Design how something works",
+  "🛠️ Build the system behind it",
+  "📊 Analyze and improve performance",
+  "📋 Manage and organize everything",
 ]);
 
 export default function Assessment() {
@@ -407,15 +410,16 @@ export default function Assessment() {
     q9: (
       <QuestionScreen
         tag="STEP 9 OF 10  ·  CAREER DIRECTION"
-        title="How confident are you in the career direction you have in mind?"
+        title="Which would you rather do?"
+        sub="Pick the one that feels most like you"
       >
         {Q9_OPTS.map((o) => (
           <SingleOption
             key={o.label}
             option={o}
-            selected={answers.careerConfidence === o.label}
+            selected={answers.differentiation === o.label}
             onSelect={() => {
-              setAnswers((p) => ({ ...p, careerConfidence: o.label }));
+              setAnswers((p) => ({ ...p, differentiation: o.label, careerConfidence: o.label }));
               autoAdvance("q9");
             }}
           />

@@ -33,6 +33,7 @@ export type Answers = {
   outputPreferences?: string[];
   careerConfidence?: string | null;  // Q9
   goalOrConcern: string;             // Q10 NLP
+  differentiation?: string | null;   // Q9 differentiation (UI/UX vs Graphic vs Build vs Analyse vs Manage)
 
   // Legacy fields for back-compat
   experienceItems?: string[];
@@ -63,6 +64,7 @@ export type CareerResult = {
   icon: string;
   category: CategoryKey;
   market: MarketData;
+  lowConfidence?: boolean; // refinement-loop flag (no strong pattern)
 };
 
 /* ============ CAREER PROFILES (16) ============ */
@@ -127,6 +129,35 @@ const CAREERS: CareerProfile[] = [
   { id: "HEALTHDATA", title: "Health Data Analyst", category: "tech", icon: "health",
     description: "Use data to improve diagnostics, healthcare delivery, and patient outcomes.",
     market: { salaryEntryNGN: "₦350k–550k/mo", salarySeniorNGN: "₦1.5M–2.5M/mo", growthPct: 25, heatLabel: "🔥 High" } },
+
+  // ===== Expansion v4 (broader coverage) =====
+  { id: "FRONTEND", title: "Frontend Developer", category: "tech", icon: "code",
+    description: "Build the interfaces users actually see, click, and love.",
+    market: { salaryEntryNGN: "₦400k–700k/mo", salarySeniorNGN: "₦1.5M–2.5M/mo", growthPct: 22, heatLabel: "🔥 High" } },
+  { id: "BACKEND", title: "Backend Developer", category: "tech", icon: "code",
+    description: "Engineer the servers, APIs, and databases that power applications.",
+    market: { salaryEntryNGN: "₦400k–750k/mo", salarySeniorNGN: "₦1.6M–2.8M/mo", growthPct: 22, heatLabel: "🔥 High" } },
+  { id: "FULLSTACK", title: "Full Stack Developer", category: "tech", icon: "code",
+    description: "Build complete products from interface to infrastructure.",
+    market: { salaryEntryNGN: "₦500k–900k/mo", salarySeniorNGN: "₦1.8M–3M/mo", growthPct: 24, heatLabel: "🔥 Very High" } },
+  { id: "DATASCI", title: "Data Scientist", category: "tech", icon: "chart",
+    description: "Use statistics and machine learning to extract insight from complex data.",
+    market: { salaryEntryNGN: "₦500k–800k/mo", salarySeniorNGN: "₦2M–3M/mo", growthPct: 28, heatLabel: "🔥 Very High" } },
+  { id: "PRODDES", title: "Product Designer", category: "creative", icon: "design",
+    description: "Shape end-to-end product experiences blending UX, UI, and strategy.",
+    market: { salaryEntryNGN: "₦400k–700k/mo", salarySeniorNGN: "₦1.6M–2.5M/mo", growthPct: 20, heatLabel: "🔥 High" } },
+  { id: "SALES", title: "Sales / Growth Specialist", category: "business", icon: "rocket",
+    description: "Drive revenue and customer growth through strategy and direct outreach.",
+    market: { salaryEntryNGN: "₦250k–500k/mo", salarySeniorNGN: "₦1.2M–2.5M/mo", growthPct: 18, heatLabel: "📈 Growing" } },
+  { id: "OPS", title: "Operations Manager", category: "business", icon: "briefcase",
+    description: "Run the systems and processes that make organisations function smoothly.",
+    market: { salaryEntryNGN: "₦300k–600k/mo", salarySeniorNGN: "₦1.5M–2.5M/mo", growthPct: 12, heatLabel: "🟢 Stable" } },
+  { id: "ELECENG", title: "Electrical Engineer", category: "science", icon: "wrench",
+    description: "Design and maintain the electrical systems that power modern life.",
+    market: { salaryEntryNGN: "₦250k–500k/mo", salarySeniorNGN: "₦1.2M–2M/mo", growthPct: 12, heatLabel: "🟢 Stable" } },
+  { id: "CIVILENG", title: "Civil Engineer", category: "science", icon: "wrench",
+    description: "Design and build the infrastructure that shapes cities and communities.",
+    market: { salaryEntryNGN: "₦250k–500k/mo", salarySeniorNGN: "₦1.2M–2M/mo", growthPct: 10, heatLabel: "🟢 Stable" } },
 ];
 
 /* ============ SIGNAL TABLES ============ */
@@ -184,8 +215,19 @@ const Q6_SIGNALS: SigMap = {
   "Analyzing data":         { DATA: 4, FINTECH: 4, AIML: 3, DATAENG: 3, HEALTHDATA: 3 },
   "Growing brands":         { DIGIMKT: 4, CONTENT: 4, ENTREP: 1 },
   "Work with people":       { PM: 3, CONTENT: 3, ENTREP: 2 },
-  "Working with people":    { PM: 3, CONTENT: 3, ENTREP: 2 },
-  "Research, discover":     { DATA: 3, MECHENG: 2, CYBER: 1, AIML: 2, HEALTHDATA: 2 },
+  "Working with people":    { PM: 3, CONTENT: 3, ENTREP: 2, SALES: 3, OPS: 2 },
+  "Research, discover":     { DATA: 3, MECHENG: 2, CYBER: 1, AIML: 2, HEALTHDATA: 2, DATASCI: 3 },
+};
+
+// Q9 — DIFFERENTIATION (single-select, decisive)
+const Q9_SIGNALS: SigMap = {
+  "looks":                  { GRAPHD: 5, UIUX: 2, PRODDES: 2 },
+  "Design how something looks": { GRAPHD: 5, UIUX: 2, PRODDES: 2 },
+  "works":                  { UIUX: 5, PRODDES: 4 },
+  "Design how something works": { UIUX: 5, PRODDES: 4 },
+  "Build the system":       { SOFTDEV: 5, BACKEND: 4, FULLSTACK: 4, CLOUD: 3, DATAENG: 2, CYBER: 2, MECHENG: 2, ELECENG: 2, CIVILENG: 2 },
+  "Analyze and improve":    { DATA: 5, DATASCI: 4, AIML: 3, FINTECH: 3, HEALTHDATA: 3, BACKEND: 1 },
+  "Manage and organize":    { PM: 5, OPS: 4, ENTREP: 3, SALES: 2 },
 };
 
 // Q7 — daily tasks (15%)
@@ -295,9 +337,52 @@ const INTENT_RULES: IntentRule[] = [
   },
   {
     name: "Software Development",
-    primary: ["code", "coding", "developer", "programming", "software engineer", "frontend", "backend", "fullstack", "build app", "build apps"],
-    careers: ["SOFTDEV", "CLOUD"],
+    primary: ["code", "coding", "developer", "programming", "software engineer", "build app", "build apps"],
+    careers: ["SOFTDEV", "FULLSTACK", "CLOUD"],
     dampens: ["GRAPHD", "CONTENT"],
+  },
+  {
+    name: "Frontend Engineering",
+    primary: ["frontend", "front-end", "react", "vue", "html", "css", "tailwind", "javascript ui"],
+    careers: ["FRONTEND", "FULLSTACK", "UIUX"],
+  },
+  {
+    name: "Backend Engineering",
+    primary: ["backend", "back-end", "api", "server", "node", "django", "rails", "database"],
+    careers: ["BACKEND", "FULLSTACK", "DATAENG"],
+  },
+  {
+    name: "Data Science",
+    primary: ["data scientist", "data science", "statistics", "regression", "analytics modeling"],
+    careers: ["DATASCI", "DATA", "AIML"],
+    dampens: ["GRAPHD", "CONTENT"],
+  },
+  {
+    name: "Product Design",
+    primary: ["product designer", "product design", "end-to-end design", "design strategy"],
+    careers: ["PRODDES", "UIUX"],
+  },
+  {
+    name: "Sales / Growth",
+    primary: ["sales", "selling", "revenue", "deals", "growth hacker", "biz dev", "business development"],
+    careers: ["SALES", "DIGIMKT", "ENTREP"],
+  },
+  {
+    name: "Operations",
+    primary: ["operations", "logistics", "supply chain", "process", "ops manager"],
+    careers: ["OPS", "PM"],
+  },
+  {
+    name: "Electrical Engineering",
+    primary: ["electrical", "circuits", "power systems", "electronics"],
+    careers: ["ELECENG", "MECHENG"],
+    requireSubject: ["Physics", "Mathematics"],
+  },
+  {
+    name: "Civil Engineering",
+    primary: ["civil", "construction", "structural", "infrastructure engineering", "buildings"],
+    careers: ["CIVILENG", "MECHENG"],
+    requireSubject: ["Physics", "Mathematics", "Technical Drawing"],
   },
   {
     name: "UI/UX Design",
@@ -434,7 +519,8 @@ function applyIntentRules(
 }
 
 /* ============ MAIN SCORER ============ */
-const W = { q1: 0.15, q3: 0.20, q6: 0.25, q7: 0.15, q8: 0.15, stream: 1.0 };
+// Q9 (differentiation) is decisive — highest single-question weight.
+const W = { q1: 0.12, q3: 0.15, q6: 0.20, q7: 0.13, q8: 0.13, q9: 0.27, stream: 1.0 };
 
 export function generateCareerResults(a: Answers): CareerResult[] {
   const total: Record<string, number> = {};
@@ -446,6 +532,7 @@ export function generateCareerResults(a: Answers): CareerResult[] {
   const q6: Record<string, number> = {};
   const q7: Record<string, number> = {};
   const q8: Record<string, number> = {};
+  const q9: Record<string, number> = {};
 
   applyMulti(q1, a.strongSubjects, Q1_SIGNALS);
   applyMulti(q3, a.activities, Q3_SIGNALS);
@@ -455,6 +542,7 @@ export function generateCareerResults(a: Answers): CareerResult[] {
     ? a.outputPreferences
     : (a.outputPreference ? [a.outputPreference] : []);
   applyMulti(q8, q8List, Q8_SIGNALS);
+  if (a.differentiation) applySignals(q9, a.differentiation, Q9_SIGNALS);
 
   // Combine weighted question buckets
   for (const c of CAREERS) {
@@ -463,7 +551,8 @@ export function generateCareerResults(a: Answers): CareerResult[] {
       (q3[c.id] || 0) * W.q3 +
       (q6[c.id] || 0) * W.q6 +
       (q7[c.id] || 0) * W.q7 +
-      (q8[c.id] || 0) * W.q8;
+      (q8[c.id] || 0) * W.q8 +
+      (q9[c.id] || 0) * W.q9;
   }
 
   // Stream baseline (Nigerian curriculum)
@@ -501,9 +590,15 @@ export function generateCareerResults(a: Answers): CareerResult[] {
   const second = sortedScores[1] || 0;
   const focused = top > 0 && (top - second) / top > 0.18;
 
+  // Refinement-loop signal: no strong pattern emerged.
+  // Fires when top score is very low or top vs second is essentially flat.
+  const lowConfidence = top < 8 || (top > 0 && (top - second) / top < 0.06);
+
   const bands = focused
     ? [[78, 92], [50, 68], [28, 45], [12, 26]]
-    : [[58, 70], [48, 60], [35, 50], [20, 35]];
+    : lowConfidence
+      ? [[42, 55], [38, 50], [30, 44], [20, 35]]
+      : [[58, 70], [48, 60], [35, 50], [20, 35]];
 
   const seed = Math.abs(hashStr(JSON.stringify(a))) || 1;
   const rand = seededRand(seed);
@@ -527,13 +622,14 @@ export function generateCareerResults(a: Answers): CareerResult[] {
     icon: c.icon,
     category: c.category,
     market: c.market,
+    lowConfidence,
   }));
 
   // Debug
   // eslint-disable-next-line no-console
-  console.log("=== WorthScope CRS v3 ===");
+  console.log("=== WorthScope CRS v4 ===");
   // eslint-disable-next-line no-console
-  console.log("Stream:", stream, "Triggered intents:", intent.triggered);
+  console.log("Stream:", stream, "Triggered intents:", intent.triggered, "lowConfidence:", lowConfidence);
   // eslint-disable-next-line no-console
   console.log("Totals:", Object.fromEntries(
     Object.entries(total).map(([k, v]) => [k, +v.toFixed(2)])

@@ -639,6 +639,12 @@ const TITLE_TO_MODULE: Record<string, string> = {
   "devops engineer": "cloud_engineer",
   "data engineer": "data_engineer",
   "health data analyst": "health_data_analyst",
+  "backend developer": "software_dev",
+  "full stack developer": "software_dev",
+  "sales / growth specialist": "entrepreneur",
+  "operations manager": "product_manager",
+  "electrical engineer": "mechanical_engineer",
+  "civil engineer": "mechanical_engineer",
 };
 
 const CATEGORY_FALLBACK: Record<string, string> = {
