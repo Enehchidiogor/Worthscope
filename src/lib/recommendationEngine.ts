@@ -337,9 +337,52 @@ const INTENT_RULES: IntentRule[] = [
   },
   {
     name: "Software Development",
-    primary: ["code", "coding", "developer", "programming", "software engineer", "frontend", "backend", "fullstack", "build app", "build apps"],
-    careers: ["SOFTDEV", "CLOUD"],
+    primary: ["code", "coding", "developer", "programming", "software engineer", "build app", "build apps"],
+    careers: ["SOFTDEV", "FULLSTACK", "CLOUD"],
     dampens: ["GRAPHD", "CONTENT"],
+  },
+  {
+    name: "Frontend Engineering",
+    primary: ["frontend", "front-end", "react", "vue", "html", "css", "tailwind", "javascript ui"],
+    careers: ["FRONTEND", "FULLSTACK", "UIUX"],
+  },
+  {
+    name: "Backend Engineering",
+    primary: ["backend", "back-end", "api", "server", "node", "django", "rails", "database"],
+    careers: ["BACKEND", "FULLSTACK", "DATAENG"],
+  },
+  {
+    name: "Data Science",
+    primary: ["data scientist", "data science", "statistics", "regression", "analytics modeling"],
+    careers: ["DATASCI", "DATA", "AIML"],
+    dampens: ["GRAPHD", "CONTENT"],
+  },
+  {
+    name: "Product Design",
+    primary: ["product designer", "product design", "end-to-end design", "design strategy"],
+    careers: ["PRODDES", "UIUX"],
+  },
+  {
+    name: "Sales / Growth",
+    primary: ["sales", "selling", "revenue", "deals", "growth hacker", "biz dev", "business development"],
+    careers: ["SALES", "DIGIMKT", "ENTREP"],
+  },
+  {
+    name: "Operations",
+    primary: ["operations", "logistics", "supply chain", "process", "ops manager"],
+    careers: ["OPS", "PM"],
+  },
+  {
+    name: "Electrical Engineering",
+    primary: ["electrical", "circuits", "power systems", "electronics"],
+    careers: ["ELECENG", "MECHENG"],
+    requireSubject: ["Physics", "Mathematics"],
+  },
+  {
+    name: "Civil Engineering",
+    primary: ["civil", "construction", "structural", "infrastructure engineering", "buildings"],
+    careers: ["CIVILENG", "MECHENG"],
+    requireSubject: ["Physics", "Mathematics", "Technical Drawing"],
   },
   {
     name: "UI/UX Design",
