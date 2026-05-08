@@ -290,7 +290,7 @@ export default function Onboarding() {
                 }} />
                 Setting up...
               </span>
-            ) : "Continue →"}
+            ) : "Start Assessment →"}
           </button>
         </div>
       </main>
