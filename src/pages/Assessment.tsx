@@ -3,8 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { generateCareerResults, type Answers } from "@/lib/recommendationEngine";
 import logo from "@/assets/worthscope-logo.png";
 
-/* WorthScope — Stage 2: 10-Question Career Assessment.
-   Reads worthscope_user_profile for context — never re-asks identity. */
+/* WorthScope — Stage 2: 9-Question Career Assessment.
+   Reads worthscope_user_profile for context. Q1/Q2 branch by education level. */
 
 const ACCENT = "#3498DB";
 const ACCENT_DARK = "#217BBB";
@@ -17,19 +17,17 @@ const TEXT3 = "#9CA3AF";
 const SUCCESS = "#22C55E";
 const FONT = "'Poppins', sans-serif";
 
-const TOTAL_STEPS = 10;
+const TOTAL_STEPS = 9;
 
 type ScreenId =
-  | "q1" | "q2" | "q3" | "q4"
-  | "q5" | "q5b"
-  | "section-break"
-  | "q6" | "q7" | "q8" | "q9" | "q10"
+  | "q1" | "q2" | "q3" | "q4" | "q5"
+  | "q6" | "q7" | "q8" | "q9"
   | "analyzing";
 
 type Profile = {
   fullName: string;
   firstName: string;
-  age: number;
+  ageRange?: string;
   educationLevel: "secondary" | "university";
   classOrLevel: string;
 };
@@ -49,17 +47,22 @@ function loadProfile(): Profile | null {
 const initialAnswers: Answers = {
   educationLevel: null,
   strongSubjects: [],
-  interests: [],
+  experienceLevel: null,
   activities: [],
+  preferenceConflict: null,
+  taskInterests: [],
+  outputPreferences: [],
+  personalityTraits: [],
+  differentiation: null,
+  goalOrConcern: "",
+
+  // legacy / unused
+  interests: [],
   personality: null,
   careerInclination: null,
   statedCareer: null,
-  preferenceConflict: null,
-  taskInterests: [],
   outputPreference: null,
   careerConfidence: null,
-  differentiation: null,
-  goalOrConcern: "",
 };
 
 type Option = { emoji?: string; label: string };
@@ -69,91 +72,102 @@ const opts = (arr: string[]): Option[] =>
     return m ? { emoji: m[1], label: m[2] } : { label: s };
   });
 
-const Q1_OPTS = opts([
+/* ============ QUESTION OPTIONS ============ */
+// Q1 — Subjects (Secondary)
+const Q1_SECONDARY = opts([
   "📐 Mathematics",
-  "➕ Further Mathematics",
-  "⚛️ Physics",
-  "🧪 Chemistry",
-  "🧬 Biology",
-  "💻 Computer Studies / ICT",
-  "📊 Data Processing",
-  "📐 Technical Drawing",
-  "💼 Economics / Business",
-  "📚 Literature / Arts",
+  "🔬 Sciences",
+  "💻 ICT / Technology",
+  "🎨 Arts / Creative",
+  "💼 Business / Economics",
   "🌍 Social Sciences",
 ]);
-const Q2_OPTS = opts([
-  "💻 Technology",
-  "🚀 Business / Entrepreneurship",
-  "🎨 Creative Arts / Design",
-  "🔭 Science / Research",
-  "🤝 Helping People",
-  "📢 Communication / Media",
+// Q1 — Academic areas (University)
+const Q1_UNIVERSITY = opts([
+  "💻 Computer Science / Tech",
+  "⚙️ Engineering",
+  "🎨 Design / Creative",
+  "💼 Business / Management",
+  "📊 Data / Analytics",
+  "🌍 Social Sciences",
+  "🧬 Health / Science",
+  "📰 Communication / Media",
 ]);
+// Q2 — Experience (Secondary)
+const Q2_SECONDARY = opts([
+  "🌱 I haven't started learning anything yet",
+  "🔍 I've tried learning something small",
+  "📚 I've learned a skill before",
+  "🏆 I've built or completed something before",
+]);
+// Q2 — Experience (University)
+const Q2_UNIVERSITY = opts([
+  "🌱 No experience yet",
+  "📖 Basic knowledge",
+  "🛠️ Intermediate (I've done projects before)",
+  "🚀 Advanced (real-world experience)",
+]);
+
 const Q3_OPTS = opts([
-  "🧩 Solving problems",
-  "✏️ Creating or designing things",
+  "🎨 Designing or creating visuals",
+  "🧩 Solving logical problems",
+  "🔧 Building or fixing systems",
+  "📊 Analyzing information or data",
   "👥 Leading or organizing people",
-  "📖 Learning new concepts",
-  "🤝 Working with others",
-  "🎯 Working independently",
+  "💬 Communicating or persuading people",
 ]);
+
 const Q4_OPTS = opts([
-  "🧠 Logical and analytical",
-  "🎨 Creative and expressive",
-  "💬 Social and outgoing",
-  "👁️ Quiet and observant",
-  "🔧 Practical and hands-on",
-  "🔭 Curious and exploratory",
+  "📱 Creating digital products like apps or websites",
+  "✨ Designing user experiences or visuals",
+  "📊 Working with data and insights",
+  "🏗️ Building systems or infrastructure",
+  "🛡️ Protecting systems and data",
+  "🚀 Running or growing a business",
+  "🤝 Working with people and communication",
+  "❓ I'm not sure yet",
 ]);
+
 const Q5_OPTS = opts([
-  "✅ Yes, I have one in mind",
-  "💭 I have a few ideas",
-  "❓ No, I'm not sure at all",
+  "🎨 Designing interfaces or visuals",
+  "💻 Writing code or scripts",
+  "☁️ Setting up systems or cloud tools",
+  "🔍 Finding patterns in data",
+  "📋 Managing projects or products",
+  "📣 Selling or marketing ideas",
+  "❓ I'm not sure yet",
 ]);
+
 const Q6_OPTS = opts([
-  "⚙️ Build systems and solve technical problems",
-  "🎨 Design and create visual experiences",
-  "📊 Analyse data and turn it into decisions",
-  "🤝 Work with people and communicate ideas",
-  "🚀 Start, lead, and grow business ideas",
-  "🔬 Research, discover, and understand how things work",
+  "🎨 A beautiful design",
+  "📱 A working application",
+  "🛡️ A secure system",
+  "📊 A data insight or report",
+  "🚀 A successful business or product",
+  "⚙️ A scalable system",
 ]);
+
 const Q7_OPTS = opts([
-  "🖥️ Designing apps or interfaces",
-  "💻 Writing code or building software",
-  "🎬 Creating content or visuals",
-  "🧩 Solving logical or technical problems",
-  "📋 Managing or organising projects",
-  "🔍 Researching and analysing ideas",
+  "🎨 Creative",
+  "🧠 Logical",
+  "📊 Analytical",
+  "💬 Social",
+  "♟️ Strategic",
+  "🔍 Detail-oriented",
 ]);
+
 const Q8_OPTS = opts([
-  "📱 A finished app or software people use",
-  "🎨 A beautiful design or visual experience",
-  "🏢 A business or product I built from scratch",
-  "📊 A report or insight that drove a real decision",
-  "🛡️ A secured system that stops attacks",
-  "🔧 A physical machine or engineered structure",
-  "❤️ A person or community I genuinely helped",
-  "📰 Content or ideas I put out into the world",
-]);
-// Q9 — DIFFERENTIATION (decisive single-select, Q8 in spec)
-const Q9_OPTS = opts([
   "🎨 Design how something looks",
   "✨ Design how something works",
   "🛠️ Build the system behind it",
   "📊 Analyze and improve performance",
   "📋 Manage and organize everything",
-  "📣 Grow and reach an audience",
-  "🛡️ Protect and secure systems",
-  "🔧 Design and build physical things",
 ]);
 
 export default function Assessment() {
   const navigate = useNavigate();
   const [profile] = useState<Profile | null>(() => loadProfile());
 
-  // If no profile, redirect to onboarding once mounted
   useEffect(() => {
     if (!profile) navigate("/onboarding", { replace: true });
   }, [profile, navigate]);
@@ -162,64 +176,36 @@ export default function Assessment() {
   const [direction, setDirection] = useState<"forward" | "back">("forward");
   const [answers, setAnswers] = useState<Answers>(() => ({
     ...initialAnswers,
-    educationLevel: (profile?.educationLevel ?? null),
+    educationLevel: profile?.educationLevel ?? null,
     classOrLevel: profile?.classOrLevel ?? null,
     firstName: profile?.firstName,
     fullName: profile?.fullName,
-    age: profile?.age ?? null,
+    ageRange: profile?.ageRange ?? null,
   }));
   const [transitioning, setTransitioning] = useState(false);
   const [maxToast, setMaxToast] = useState<string | null>(null);
   const [showGreeting, setShowGreeting] = useState(true);
 
-  // Greeting fades after 3s, only on Q1
   useEffect(() => {
     const t = window.setTimeout(() => setShowGreeting(false), 3000);
     return () => clearTimeout(t);
   }, []);
 
-  // Map each screen to a step number (1..10). Branch / break screens reuse step.
   const stepMap: Partial<Record<ScreenId, number>> = {
-    q1: 1, q2: 2, q3: 3, q4: 4, q5: 5, q5b: 5,
-    q6: 6, q7: 7, q8: 8, q9: 9, q10: 10,
+    q1: 1, q2: 2, q3: 3, q4: 4, q5: 5, q6: 6, q7: 7, q8: 8, q9: 9,
   };
   const currentStep = stepMap[screen] ?? 0;
   const progressPct = currentStep > 0 ? (currentStep / TOTAL_STEPS) * 100 : 0;
 
   function nextOf(s: ScreenId): ScreenId {
-    switch (s) {
-      case "q1": return "q2";
-      case "q2": return "q3";
-      case "q3": return "q4";
-      case "q4": return "q5";
-      case "q5":
-        return answers.careerInclination === "Yes, I have one in mind" ? "q5b" : "section-break";
-      case "q5b": return "section-break";
-      case "section-break": return "q6";
-      case "q6": return "q7";
-      case "q7": return "q8";
-      case "q8": return "q9";
-      case "q9": return "q10";
-      case "q10": return "analyzing";
-      default: return "analyzing";
-    }
+    const order: ScreenId[] = ["q1","q2","q3","q4","q5","q6","q7","q8","q9","analyzing"];
+    const i = order.indexOf(s);
+    return order[Math.min(i + 1, order.length - 1)];
   }
   function prevOf(s: ScreenId): ScreenId {
-    switch (s) {
-      case "q2": return "q1";
-      case "q3": return "q2";
-      case "q4": return "q3";
-      case "q5": return "q4";
-      case "q5b": return "q5";
-      case "section-break":
-        return answers.careerInclination === "Yes, I have one in mind" ? "q5b" : "q5";
-      case "q6": return "section-break";
-      case "q7": return "q6";
-      case "q8": return "q7";
-      case "q9": return "q8";
-      case "q10": return "q9";
-      default: return "q1";
-    }
+    const order: ScreenId[] = ["q1","q2","q3","q4","q5","q6","q7","q8","q9"];
+    const i = order.indexOf(s);
+    return order[Math.max(i - 1, 0)];
   }
 
   function go(next: ScreenId, dir: "forward" | "back" = "forward") {
@@ -241,171 +227,154 @@ export default function Assessment() {
     window.setTimeout(() => setMaxToast(null), 2000);
   }
 
-  // Q7 wording adapted from profile context (course-alignment style for university)
-  const q7Title = useMemo(() => {
-    if (!profile) return "How well does your current path align with your career goals?";
-    if (profile.educationLevel === "university") {
-      return `How well does your course at ${profile.classOrLevel} align with your career goals?`;
-    }
-    if (profile.classOrLevel === "SS3") {
-      return "As you approach the end of secondary school, how clear are you about your direction?";
-    }
-    return `As a ${profile.classOrLevel} student, how clear are you about your direction?`;
-  }, [profile]);
+  const isUni = profile?.educationLevel === "university";
 
-  const SingleOption = ({
-    option, selected, onSelect,
-  }: { option: Option; selected: boolean; onSelect: () => void }) => (
-    <button
-      onClick={onSelect}
-      className="ws-opt"
-      data-selected={selected}
-      style={optStyle(selected)}
-    >
-      {option.emoji && <span style={{ fontSize: 20 }}>{option.emoji}</span>}
-      <span style={{ flex: 1, textAlign: "left" }}>{option.label}</span>
-      {selected && (
-        <span style={checkStyle} aria-hidden>
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-            <polyline points="20 6 9 17 4 12" />
-          </svg>
-        </span>
-      )}
-    </button>
-  );
+  // Q1 spec
+  const q1Title = isUni
+    ? "Which academic areas fit you the most?"
+    : "Which subjects are you strongest in?";
+  const q1Sub = isUni
+    ? "Pick the areas or courses you enjoy the most. Min 2 · Max 3"
+    : "Pick at least 3 subjects you enjoy or perform well in. Min 3 · Max 4";
+  const q1Options = isUni ? Q1_UNIVERSITY : Q1_SECONDARY;
+  const q1Min = isUni ? 2 : 3;
+  const q1Max = isUni ? 3 : 4;
+
+  // Q2 spec
+  const q2Title = isUni
+    ? "What is your current experience level?"
+    : "How much experience do you currently have?";
+  const q2Sub = isUni
+    ? "Select the option that best describes you."
+    : "This helps us understand where you are starting from.";
+  const q2Options = isUni ? Q2_UNIVERSITY : Q2_SECONDARY;
 
   const screens: Record<ScreenId, React.ReactNode> = {
     q1: (
       <MultiQuestion
-        tag="STEP 1 OF 10  ·  CORE TRAITS"
-        title="Which subjects are you strongest in?"
-        sub="Select up to 3"
-        greeting={showGreeting && profile ? `Welcome, ${profile.firstName}! Let's figure out the perfect career direction for you.` : null}
-        options={Q1_OPTS}
+        tag="STEP 1 OF 9  ·  ACADEMIC FIT"
+        title={q1Title}
+        sub={q1Sub}
+        greeting={showGreeting && profile ? `Welcome, ${profile.firstName}! Let's find your perfect career direction.` : null}
+        options={q1Options}
         selected={answers.strongSubjects}
-        max={3}
+        max={q1Max}
+        min={q1Min}
         onChange={(arr) => setAnswers((p) => ({ ...p, strongSubjects: arr }))}
-        onMaxHit={() => showMaxToast("Max 3 selected")}
+        onMaxHit={() => showMaxToast(`Max ${q1Max} selected`)}
         onContinue={() => go(nextOf("q1"))}
       />
     ),
     q2: (
-      <MultiQuestion
-        tag="STEP 2 OF 10  ·  CORE TRAITS"
-        title="What are you most interested in?"
-        sub="Select up to 3"
-        options={Q2_OPTS}
-        selected={answers.interests}
-        max={3}
-        onChange={(arr) => setAnswers((p) => ({ ...p, interests: arr }))}
-        onMaxHit={() => showMaxToast("Max 3 selected")}
-        onContinue={() => go(nextOf("q2"))}
-      />
+      <QuestionScreen tag="STEP 2 OF 9  ·  EXPERIENCE" title={q2Title} sub={q2Sub}>
+        {q2Options.map((o) => (
+          <SingleOption
+            key={o.label}
+            option={o}
+            selected={answers.experienceLevel === o.label}
+            onSelect={() => {
+              setAnswers((p) => ({ ...p, experienceLevel: o.label }));
+              autoAdvance("q2");
+            }}
+          />
+        ))}
+      </QuestionScreen>
     ),
     q3: (
       <MultiQuestion
-        tag="STEP 3 OF 10  ·  CORE TRAITS"
-        title="Which activities do you enjoy the most?"
-        sub="Select all that apply"
+        tag="STEP 3 OF 9  ·  NATURAL TENDENCIES"
+        title="What do you naturally enjoy doing?"
+        sub="Pick the activities that feel most natural to you. Max 2"
         options={Q3_OPTS}
         selected={answers.activities}
-        max={Infinity}
+        max={2}
         onChange={(arr) => setAnswers((p) => ({ ...p, activities: arr }))}
-        onMaxHit={() => {}}
+        onMaxHit={() => showMaxToast("Max 2 selected")}
         onContinue={() => go(nextOf("q3"))}
       />
     ),
     q4: (
-      <QuestionScreen tag="STEP 4 OF 10  ·  CORE TRAITS" title="Which best describes your personality?">
-        {Q4_OPTS.map((o) => (
-          <SingleOption
-            key={o.label}
-            option={o}
-            selected={answers.personality === o.label}
-            onSelect={() => {
-              setAnswers((p) => ({ ...p, personality: o.label }));
-              autoAdvance("q4");
-            }}
-          />
-        ))}
-      </QuestionScreen>
-    ),
-    q5: (
-      <QuestionScreen tag="STEP 5 OF 10  ·  CAREER DIRECTION" title="Do you already have a career in mind?">
-        {Q5_OPTS.map((o) => (
-          <SingleOption
-            key={o.label}
-            option={o}
-            selected={answers.careerInclination === o.label}
-            onSelect={() => {
-              setAnswers((p) => ({
-                ...p,
-                careerInclination: o.label,
-                statedCareer: o.label === "Yes, I have one in mind" ? p.statedCareer : null,
-              }));
-              autoAdvance("q5");
-            }}
-          />
-        ))}
-      </QuestionScreen>
-    ),
-    q5b: (
-      <StatedCareerInput
-        value={answers.statedCareer || ""}
-        onChange={(v) => setAnswers((p) => ({ ...p, statedCareer: v }))}
-        onContinue={() => go("section-break", "forward")}
-        onSkip={() => {
-          setAnswers((p) => ({ ...p, statedCareer: null }));
-          go("section-break", "forward");
-        }}
+      <MultiQuestion
+        tag="STEP 4 OF 9  ·  WORK PREFERENCE"
+        title="What type of work sounds most interesting to you?"
+        sub="Choose the work styles that excite you the most. Min 2 · Max 3"
+        options={Q4_OPTS}
+        selected={
+          answers.preferenceConflict
+            ? [answers.preferenceConflict, ...(answers.workTypes || []).filter(x => x !== answers.preferenceConflict)]
+            : (answers.workTypes || [])
+        }
+        max={3}
+        min={2}
+        onChange={(arr) => setAnswers((p) => ({
+          ...p,
+          workTypes: arr,
+          preferenceConflict: arr[0] || null,
+        }))}
+        onMaxHit={() => showMaxToast("Max 3 selected")}
+        onContinue={() => go(nextOf("q4"))}
       />
     ),
-    "section-break": <SectionBreak onContinue={() => go("q6", "forward")} />,
-    q6: (
-      <QuestionScreen
-        tag="STEP 6 OF 10  ·  CAREER DIRECTION"
-        title="Which would you rather do every day?"
-        sub="Pick the one that feels most like you — be honest"
-      >
-        {Q6_OPTS.map((o) => (
-          <SingleOption
-            key={o.label}
-            option={o}
-            selected={answers.preferenceConflict === o.label}
-            onSelect={() => {
-              setAnswers((p) => ({ ...p, preferenceConflict: o.label }));
-              autoAdvance("q6");
-            }}
-          />
-        ))}
-      </QuestionScreen>
-    ),
-    q7: (
+    q5: (
       <MultiQuestion
-        tag="STEP 7 OF 10  ·  CAREER DIRECTION"
-        title={q7Title}
-        sub="Pick up to 2 tasks that excite you most"
-        options={Q7_OPTS}
+        tag="STEP 5 OF 9  ·  DAILY TASKS"
+        title="Which tasks would you enjoy doing regularly?"
+        sub="Choose the tasks you would not mind doing every day. Max 2"
+        options={Q5_OPTS}
         selected={answers.taskInterests}
         max={2}
         onChange={(arr) => setAnswers((p) => ({ ...p, taskInterests: arr }))}
         onMaxHit={() => showMaxToast("Max 2 selected")}
+        onContinue={() => go(nextOf("q5"))}
+      />
+    ),
+    q6: (
+      <MultiQuestion
+        tag="STEP 6 OF 9  ·  DESIRED OUTCOME"
+        title="What kind of result would make you feel proud?"
+        sub="Choose the type of outcome you would enjoy creating. Max 2"
+        options={Q6_OPTS}
+        selected={answers.outputPreferences || []}
+        max={2}
+        onChange={(arr) => setAnswers((p) => ({
+          ...p,
+          outputPreferences: arr,
+          outputPreference: arr[0] || null,
+        }))}
+        onMaxHit={() => showMaxToast("Max 2 selected")}
+        onContinue={() => go(nextOf("q6"))}
+      />
+    ),
+    q7: (
+      <MultiQuestion
+        tag="STEP 7 OF 9  ·  PERSONALITY"
+        title="Which personality traits describe you best?"
+        sub="Pick the traits that match how you usually think or behave. Max 3"
+        options={Q7_OPTS}
+        selected={answers.personalityTraits || []}
+        max={3}
+        onChange={(arr) => setAnswers((p) => ({
+          ...p,
+          personalityTraits: arr,
+          personality: arr[0] || null,
+        }))}
+        onMaxHit={() => showMaxToast("Max 3 selected")}
         onContinue={() => go(nextOf("q7"))}
       />
     ),
     q8: (
       <QuestionScreen
-        tag="STEP 8 OF 10  ·  CAREER DIRECTION"
-        title="What kind of result would you enjoy seeing from your work?"
-        sub="What outcome would make you most proud?"
+        tag="STEP 8 OF 9  ·  DIFFERENTIATION"
+        title="Which of these would you rather do?"
+        sub="Pick the option that feels most exciting to you."
       >
         {Q8_OPTS.map((o) => (
           <SingleOption
             key={o.label}
             option={o}
-            selected={answers.outputPreference === o.label}
+            selected={answers.differentiation === o.label}
             onSelect={() => {
-              setAnswers((p) => ({ ...p, outputPreference: o.label }));
+              setAnswers((p) => ({ ...p, differentiation: o.label, careerConfidence: o.label }));
               autoAdvance("q8");
             }}
           />
@@ -413,25 +382,6 @@ export default function Assessment() {
       </QuestionScreen>
     ),
     q9: (
-      <QuestionScreen
-        tag="STEP 9 OF 10  ·  CAREER DIRECTION"
-        title="Which would you rather do?"
-        sub="Pick the one that feels most like you"
-      >
-        {Q9_OPTS.map((o) => (
-          <SingleOption
-            key={o.label}
-            option={o}
-            selected={answers.differentiation === o.label}
-            onSelect={() => {
-              setAnswers((p) => ({ ...p, differentiation: o.label, careerConfidence: o.label }));
-              autoAdvance("q9");
-            }}
-          />
-        ))}
-      </QuestionScreen>
-    ),
-    q10: (
       <TextareaQuestion
         value={answers.goalOrConcern}
         onChange={(v) => setAnswers((p) => ({ ...p, goalOrConcern: v }))}
@@ -472,7 +422,6 @@ export default function Assessment() {
             alt="WorthScope — See Your Worth. Build Your Future."
             style={{ height: 64, width: "auto", objectFit: "contain", display: "block" }}
           />
-
           <div style={{ position: "relative", width: 200, maxWidth: "40vw" }}>
             <div style={{ height: 6, background: BORDER, borderRadius: 100, position: "relative" }}>
               <div
@@ -483,28 +432,24 @@ export default function Assessment() {
                   position: "relative",
                 }}
               >
-                <span
-                  style={{
-                    position: "absolute", right: -5, top: "50%", transform: "translateY(-50%)",
-                    width: 10, height: 10, borderRadius: "50%",
-                    background: ACCENT, boxShadow: "0 0 8px rgba(52,152,219,0.6)",
-                  }}
-                />
+                <span style={{
+                  position: "absolute", right: -5, top: "50%", transform: "translateY(-50%)",
+                  width: 10, height: 10, borderRadius: "50%",
+                  background: ACCENT, boxShadow: "0 0 8px rgba(52,152,219,0.6)",
+                }} />
               </div>
             </div>
           </div>
-
           <div style={{ fontWeight: 400, fontSize: 13, color: TEXT3, minWidth: 60, textAlign: "right" }}>
             {`${currentStep} of ${TOTAL_STEPS}`}
           </div>
         </header>
       )}
 
-      {/* Stage pills */}
       {screen !== "analyzing" && (
         <div style={{ display: "flex", justifyContent: "center", gap: 8, padding: "16px 24px 0", flexWrap: "wrap" }}>
           <Pill state="completed">Tell us about yourself</Pill>
-          <Pill state="active">Answer 10 questions</Pill>
+          <Pill state="active">Answer 9 questions</Pill>
           <Pill state="upcoming">Get your career path</Pill>
         </div>
       )}
@@ -547,17 +492,13 @@ export default function Assessment() {
       </div>
 
       {maxToast && (
-        <div
-          style={{
-            position: "fixed", left: "50%", bottom: 32, transform: "translateX(-50%)",
-            background: ACCENT, color: "white", padding: "10px 20px",
-            borderRadius: 10, fontFamily: FONT, fontSize: 13, fontWeight: 500,
-            zIndex: 100, animation: "ws-toast-slide-up 0.25s ease-out",
-            boxShadow: "0 8px 24px rgba(52,152,219,0.35)",
-          }}
-        >
-          {maxToast}
-        </div>
+        <div style={{
+          position: "fixed", left: "50%", bottom: 32, transform: "translateX(-50%)",
+          background: ACCENT, color: "white", padding: "10px 20px",
+          borderRadius: 10, fontFamily: FONT, fontSize: 13, fontWeight: 500,
+          zIndex: 100, animation: "ws-toast-slide-up 0.25s ease-out",
+          boxShadow: "0 8px 24px rgba(52,152,219,0.35)",
+        }}>{maxToast}</div>
       )}
 
       <style>{`
@@ -568,14 +509,8 @@ export default function Assessment() {
         @keyframes ws-fade-in { from {opacity:0} to {opacity:1} }
         @keyframes ws-fade-up { from {opacity:0; transform:translateY(12px)} to {opacity:1; transform:translateY(0)} }
         @keyframes ws-toast-slide-up { from {opacity:0; transform:translate(-50%, 30px)} to {opacity:1; transform:translate(-50%, 0)} }
-        @keyframes ws-stagger { from {opacity:0; transform:translateY(16px)} to {opacity:1; transform:translateY(0)} }
         @keyframes ws-float-y { 0%,100% {transform:translateY(0)} 50% {transform:translateY(-8px)} }
         @keyframes ws-spin { to { transform: rotate(360deg) } }
-        @keyframes ws-pulse-ring {
-          0% { box-shadow: 0 0 0 0 rgba(52,152,219,0.4); }
-          100% { box-shadow: 0 0 0 16px rgba(52,152,219,0); }
-        }
-        @keyframes ws-check-draw { from { stroke-dashoffset: 30 } to { stroke-dashoffset: 0 } }
         @keyframes ws-card-pop {
           0% { transform: scale(1) }
           50% { transform: scale(1.03) }
@@ -596,6 +531,24 @@ export default function Assessment() {
 }
 
 /* ===================== sub-components ===================== */
+function SingleOption({
+  option, selected, onSelect,
+}: { option: Option; selected: boolean; onSelect: () => void }) {
+  return (
+    <button onClick={onSelect} className="ws-opt" data-selected={selected} style={optStyle(selected)}>
+      {option.emoji && <span style={{ fontSize: 20 }}>{option.emoji}</span>}
+      <span style={{ flex: 1, textAlign: "left" }}>{option.label}</span>
+      {selected && (
+        <span style={checkStyle} aria-hidden>
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+            <polyline points="20 6 9 17 4 12" />
+          </svg>
+        </span>
+      )}
+    </button>
+  );
+}
+
 function Pill({ state, children }: { state: "active" | "upcoming" | "completed"; children: React.ReactNode }) {
   const styles: Record<string, React.CSSProperties> = {
     active: { background: ACCENT, color: "#fff", border: "1px solid transparent" },
@@ -603,16 +556,13 @@ function Pill({ state, children }: { state: "active" | "upcoming" | "completed";
     completed: { background: "rgba(34,197,94,0.1)", color: SUCCESS, border: "1px solid rgba(34,197,94,0.2)" },
   };
   return (
-    <span
-      style={{
-        ...styles[state],
-        padding: "5px 14px", borderRadius: 100,
-        fontFamily: FONT, fontWeight: 600, fontSize: 11,
-        whiteSpace: "nowrap",
-      }}
-    >
-      {state === "completed" && "✓ "}
-      {children}
+    <span style={{
+      ...styles[state],
+      padding: "5px 14px", borderRadius: 100,
+      fontFamily: FONT, fontWeight: 600, fontSize: 11,
+      whiteSpace: "nowrap",
+    }}>
+      {state === "completed" && "✓ "}{children}
     </span>
   );
 }
@@ -649,10 +599,7 @@ function QuestionScreen({
       <h1 style={{ fontWeight: 700, fontSize: 26, color: TEXT, letterSpacing: -0.5, marginTop: 12 }}>{title}</h1>
       {sub && <p style={{ fontWeight: 400, fontSize: 13, color: TEXT2, marginTop: 6 }}>{sub}</p>}
       {greeting && (
-        <p style={{
-          fontWeight: 400, fontSize: 14, color: TEXT2, marginTop: 10,
-          animation: "ws-fade-in 0.4s ease both",
-        }}>
+        <p style={{ fontWeight: 400, fontSize: 14, color: TEXT2, marginTop: 10, animation: "ws-fade-in 0.4s ease both" }}>
           {greeting}
         </p>
       )}
@@ -664,16 +611,16 @@ function QuestionScreen({
 }
 
 function MultiQuestion({
-  tag, title, sub, greeting, options, selected, max, onChange, onMaxHit, onContinue,
+  tag, title, sub, greeting, options, selected, max, min = 1, onChange, onMaxHit, onContinue,
 }: {
   tag: string; title: string; sub?: string; greeting?: string | null;
-  options: Option[]; selected: string[]; max: number;
+  options: Option[]; selected: string[]; max: number; min?: number;
   onChange: (next: string[]) => void;
   onMaxHit: () => void;
   onContinue: () => void;
 }) {
   const isFull = selected.length >= max;
-  const canContinue = selected.length > 0;
+  const canContinue = selected.length >= min;
 
   return (
     <>
@@ -712,6 +659,11 @@ function MultiQuestion({
         })}
       </QuestionScreen>
       <ContinueButton enabled={canContinue} onClick={onContinue} />
+      {!canContinue && min > 1 && (
+        <p style={{ marginTop: 8, fontSize: 12, color: TEXT3 }}>
+          Select at least {min} option{min > 1 ? "s" : ""} to continue.
+        </p>
+      )}
     </>
   );
 }
@@ -748,86 +700,6 @@ function ContinueButton({ enabled, onClick, width }: { enabled: boolean; onClick
   );
 }
 
-function SectionBreak({ onContinue }: { onContinue: () => void }) {
-  const fired = useRef(false);
-  const fire = () => { if (fired.current) return; fired.current = true; onContinue(); };
-  useEffect(() => {
-    const t = window.setTimeout(fire, 2000);
-    return () => clearTimeout(t);
-  }, []);
-  return (
-    <div style={{ textAlign: "center", padding: "60px 0", animation: "ws-fade-up 0.4s ease both" }}>
-      <div style={{ display: "inline-block", animation: "ws-float-y 3s ease-in-out infinite" }}>
-        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke={ACCENT} strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
-          <circle cx="12" cy="12" r="10" />
-          <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76" />
-        </svg>
-      </div>
-      <h1 style={{ marginTop: 18, fontWeight: 700, fontSize: 22, color: TEXT, letterSpacing: -0.5 }}>
-        Great — now let's get more specific 🎯
-      </h1>
-      <p style={{ margin: "12px auto 0", maxWidth: 380, fontWeight: 400, fontSize: 14, color: TEXT2, lineHeight: 1.6 }}>
-        These next questions reveal exactly what kind of work excites you.
-      </p>
-      <div style={{ display: "flex", justifyContent: "center" }}>
-        <ContinueButton enabled onClick={fire} width={180} />
-      </div>
-    </div>
-  );
-}
-
-function StatedCareerInput({
-  value, onChange, onContinue, onSkip,
-}: { value: string; onChange: (v: string) => void; onContinue: () => void; onSkip: () => void }) {
-  const enabled = value.trim().length >= 2;
-  const inputRef = useRef<HTMLInputElement>(null);
-  useEffect(() => { inputRef.current?.focus(); }, []);
-  return (
-    <>
-      <QuestionScreen
-        tag="STEP 5  ·  CAREER DIRECTION"
-        title="What career are you considering?"
-        sub="Be specific — this heavily shapes your results"
-      >
-        <input
-          ref={inputRef}
-          value={value}
-          onChange={(e) => onChange(e.target.value.slice(0, 80))}
-          placeholder="e.g. UI/UX Designer, Software Engineer, Doctor..."
-          style={{
-            width: "100%", height: 52, borderRadius: 14,
-            background: "#FFFFFF", border: `1.5px solid ${BORDER}`,
-            padding: "0 18px",
-            fontFamily: "inherit", fontWeight: 500, fontSize: 15, color: TEXT,
-            outline: "none", transition: "border-color 0.18s, box-shadow 0.18s",
-          }}
-          onFocus={(e) => {
-            e.currentTarget.style.borderColor = ACCENT;
-            e.currentTarget.style.boxShadow = "0 0 0 4px rgba(52,152,219,0.1)";
-          }}
-          onBlur={(e) => {
-            e.currentTarget.style.borderColor = BORDER;
-            e.currentTarget.style.boxShadow = "none";
-          }}
-        />
-      </QuestionScreen>
-      <ContinueButton enabled={enabled} onClick={onContinue} />
-      <button
-        onClick={onSkip}
-        style={{
-          marginTop: 10, alignSelf: "flex-start",
-          background: "transparent", border: "none", cursor: "pointer",
-          fontFamily: "inherit", fontSize: 13, color: TEXT3,
-        }}
-        onMouseEnter={(e) => { e.currentTarget.style.color = ACCENT; e.currentTarget.style.textDecoration = "underline"; }}
-        onMouseLeave={(e) => { e.currentTarget.style.color = TEXT3; e.currentTarget.style.textDecoration = "none"; }}
-      >
-        Skip
-      </button>
-    </>
-  );
-}
-
 function TextareaQuestion({
   value, onChange, onContinue, onSkip,
 }: {
@@ -844,14 +716,14 @@ function TextareaQuestion({
   return (
     <>
       <QuestionScreen
-        tag="STEP 10 OF 10  ·  ALMOST THERE"
-        title="What's your biggest goal or concern about your future?"
-        sub="Be honest — this shapes your entire Career Blueprint"
+        tag="STEP 9 OF 9  ·  IN YOUR OWN WORDS"
+        title="In your own words, what kind of career or work do you see yourself doing?"
+        sub="You can describe anything you are interested in, even if you are unsure."
       >
         <div style={{ position: "relative" }}>
           <textarea
             value={value}
-            onChange={(e) => onChange(e.target.value.slice(0, 300))}
+            onChange={(e) => onChange(e.target.value.slice(0, 400))}
             onFocus={(e) => {
               focusedRef.current = true;
               window.setTimeout(() => setShowSkip(true), 1500);
@@ -862,22 +734,20 @@ function TextareaQuestion({
               e.currentTarget.style.borderColor = BORDER;
               e.currentTarget.style.boxShadow = "none";
             }}
-            placeholder="e.g. I want to find a career I enjoy, or I'm worried about choosing the wrong path..."
+            placeholder='e.g. "I want to design apps people enjoy using" or "I want to build secure systems and solve technical problems."'
             style={{
-              width: "100%", minHeight: 130, resize: "none",
+              width: "100%", minHeight: 140, resize: "none",
               background: "#FFFFFF", border: `1.5px solid ${BORDER}`,
               borderRadius: 14, padding: "16px 18px",
               fontFamily: "inherit", fontWeight: 400, fontSize: 15, color: TEXT,
               outline: "none", transition: "border-color 0.18s, box-shadow 0.18s",
             }}
           />
-          <div
-            style={{
-              position: "absolute", right: 12, bottom: 8,
-              fontSize: 12, color: value.length > 0 ? ACCENT : TEXT3, fontWeight: 500,
-            }}
-          >
-            {value.length} / 300
+          <div style={{
+            position: "absolute", right: 12, bottom: 8,
+            fontSize: 12, color: value.length > 0 ? ACCENT : TEXT3, fontWeight: 500,
+          }}>
+            {value.length} / 400
           </div>
         </div>
         {showSkip && (
@@ -924,8 +794,9 @@ function Analyzing({ onDone, onReadyToCompute }: { onDone: () => void; onReadyTo
       }
       setPhase(3);
     }, 3200);
-    return () => { clearTimeout(t1); clearTimeout(t2); };
-  }, [onReadyToCompute]);
+    const t3 = window.setTimeout(() => onDone(), 4400);
+    return () => { clearTimeout(t1); clearTimeout(t2); clearTimeout(t3); };
+  }, [onReadyToCompute, onDone]);
 
   useEffect(() => {
     if (phase !== 2) return;
@@ -934,87 +805,23 @@ function Analyzing({ onDone, onReadyToCompute }: { onDone: () => void; onReadyTo
   }, [phase, messages]);
 
   return (
-    <div
-      style={{
-        minHeight: "100vh",
-        background: BG, display: "flex", alignItems: "center", justifyContent: "center",
-        padding: 40, textAlign: "center",
-      }}
-    >
-      <div
-        style={{
-          padding: "60px 0",
-          background: "radial-gradient(circle at 50% 40%, rgba(52,152,219,0.06), transparent 65%)",
-        }}
-      >
-        {phase < 3 ? (
-          <div
-            style={{
-              width: 60, height: 60, borderRadius: "50%",
-              border: "3px solid #E5E7EB", borderTopColor: ACCENT,
-              animation: "ws-spin 0.9s linear infinite",
-              margin: "0 auto",
-            }}
-          />
-        ) : (
-          <div
-            style={{
-              width: 60, height: 60, borderRadius: "50%", background: ACCENT,
-              margin: "0 auto", display: "grid", placeItems: "center",
-              animation: "ws-pulse-ring 0.6s ease-out",
-            }}
-          >
-            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3.2" strokeLinecap="round" strokeLinejoin="round">
-              <polyline
-                points="20 6 9 17 4 12"
-                strokeDasharray="30"
-                style={{ animation: "ws-check-draw 0.4s ease-out forwards" }}
-              />
-            </svg>
-          </div>
-        )}
-
-        <div
-          style={{
-            marginTop: 24,
-            fontWeight: phase === 3 ? 700 : 600,
-            fontSize: phase === 3 ? 24 : 22,
-            color: TEXT, fontFamily: FONT,
-          }}
-        >
-          {phase === 1 && "Analysing your profile…"}
-          {phase === 2 && (
-            <span style={{ fontWeight: 400, fontSize: 16, color: TEXT2 }}>
-              {messages[textIdx]}
-            </span>
-          )}
-          {phase === 3 && "Your Career Blueprint is ready."}
-        </div>
-
-        {phase === 3 && (
-          <button
-            onClick={onDone}
-            style={{
-              marginTop: 28, width: 260, height: 52, borderRadius: 14, border: "none",
-              background: ACCENT, color: "#FFFFFF",
-              fontFamily: FONT, fontWeight: 600, fontSize: 16, cursor: "pointer",
-              animation: "ws-stagger 0.4s ease both",
-              transition: "background 0.2s, box-shadow 0.2s, transform 0.2s",
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.background = ACCENT_DARK;
-              e.currentTarget.style.boxShadow = "0 8px 28px rgba(52,152,219,0.4)";
-              e.currentTarget.style.transform = "translateY(-2px)";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.background = ACCENT;
-              e.currentTarget.style.boxShadow = "none";
-              e.currentTarget.style.transform = "translateY(0)";
-            }}
-          >
-            See My Results →
-          </button>
-        )}
+    <div style={{
+      minHeight: "100vh",
+      background: BG, display: "flex", alignItems: "center", justifyContent: "center",
+      padding: 40, textAlign: "center",
+    }}>
+      <div style={{ animation: "ws-fade-up 0.5s ease both" }}>
+        <div style={{
+          width: 80, height: 80, borderRadius: "50%",
+          border: `4px solid ${ACCENT_LIGHT}`, borderTopColor: ACCENT,
+          margin: "0 auto 24px", animation: "ws-spin 1s linear infinite",
+        }} />
+        <h2 style={{ fontWeight: 700, fontSize: 22, color: TEXT, letterSpacing: -0.5 }}>
+          {phase === 3 ? "Your blueprint is ready ✨" : messages[textIdx]}
+        </h2>
+        <p style={{ marginTop: 10, fontSize: 14, color: TEXT2 }}>
+          {phase === 3 ? "Taking you to your results…" : "Analysing your answers across 9 signals…"}
+        </p>
       </div>
     </div>
   );
