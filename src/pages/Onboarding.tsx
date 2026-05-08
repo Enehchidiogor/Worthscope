@@ -20,10 +20,12 @@ const FONT = "'Poppins', sans-serif";
 const STORAGE_KEY = "worthscope_user_profile";
 
 type EducationLevel = "secondary" | "university" | "";
+const AGE_RANGES = ["13–15", "16–18", "19–21", "22–25", "26+"] as const;
+type AgeRange = (typeof AGE_RANGES)[number] | "";
 type Profile = {
   fullName: string;
   firstName: string;
-  age: number | "";
+  ageRange: AgeRange;
   educationLevel: EducationLevel;
   classOrLevel: string;
 };
@@ -36,13 +38,13 @@ function loadProfile(): Profile {
       return {
         fullName: p.fullName || "",
         firstName: p.firstName || "",
-        age: typeof p.age === "number" ? p.age : "",
+        ageRange: (p.ageRange as AgeRange) || "",
         educationLevel: (p.educationLevel as EducationLevel) || "",
         classOrLevel: p.classOrLevel || "",
       };
     }
   } catch {}
-  return { fullName: "", firstName: "", age: "", educationLevel: "", classOrLevel: "" };
+  return { fullName: "", firstName: "", ageRange: "", educationLevel: "", classOrLevel: "" };
 }
 
 const SECONDARY_OPTS = ["SS1", "SS2", "SS3"];
@@ -54,9 +56,8 @@ export default function Onboarding() {
   const [submitting, setSubmitting] = useState(false);
   const [showGreeting, setShowGreeting] = useState(false);
 
-  const ageNum = typeof p.age === "number" ? p.age : NaN;
   const validName = p.fullName.trim().length >= 2;
-  const validAge = !Number.isNaN(ageNum) && ageNum >= 12 && ageNum <= 35;
+  const validAge = p.ageRange !== "";
   const validLevel = p.educationLevel !== "";
   const validClass = p.classOrLevel.trim().length > 0;
   const canContinue = validName && validAge && validLevel && validClass && !submitting;
@@ -77,7 +78,7 @@ export default function Onboarding() {
     const profile = {
       fullName: p.fullName.trim(),
       firstName,
-      age: ageNum,
+      ageRange: p.ageRange,
       educationLevel: p.educationLevel,
       classOrLevel: p.classOrLevel,
     };
@@ -163,20 +164,15 @@ export default function Onboarding() {
           {/* Age + Education Level row */}
           <div className="ws-row" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
             <Field label="Age" highlight={validAge}>
-              <input
-                type="number"
-                inputMode="numeric"
-                min={12}
-                max={35}
-                value={p.age === "" ? "" : p.age}
-                onChange={(e) => {
-                  const v = e.target.value;
-                  setP({ ...p, age: v === "" ? "" : Number(v) });
-                }}
-                placeholder="Enter your age"
+              <select
+                value={p.ageRange}
+                onChange={(e) => setP({ ...p, ageRange: e.target.value as AgeRange })}
                 className="ws-input"
-                style={inputStyle()}
-              />
+                style={{ ...inputStyle(), appearance: "none", paddingRight: 36, cursor: "pointer" }}
+              >
+                <option value="" disabled>Select your age range</option>
+                {AGE_RANGES.map((r) => <option key={r} value={r}>{r}</option>)}
+              </select>
             </Field>
 
             <Field label="Education Level" highlight={validLevel}>
@@ -294,7 +290,7 @@ export default function Onboarding() {
                 }} />
                 Setting up...
               </span>
-            ) : "Continue →"}
+            ) : "Start Assessment →"}
           </button>
         </div>
       </main>
