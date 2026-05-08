@@ -454,10 +454,25 @@ export function generateCareerResults(a: Answers): CareerResult[] {
 
   applyMulti(q1, a.strongSubjects, Q1_SIGNALS);
   applyMulti(q3, a.activities, Q3_SIGNALS);
-  if (a.preferenceConflict) applySignals(q4b, a.preferenceConflict, Q4_SIGNALS);
+  // Q4 — multi-select (workTypes); fall back to legacy single preferenceConflict
+  if (a.workTypes && a.workTypes.length) {
+    applyMulti(q4b, a.workTypes, Q4_SIGNALS);
+  } else if (a.preferenceConflict) {
+    applySignals(q4b, a.preferenceConflict, Q4_SIGNALS);
+  }
   applyMulti(q5, a.taskInterests, Q5_SIGNALS);
-  if (a.outputPreference) applySignals(q6, a.outputPreference, Q6_SIGNALS);
-  if (a.personality) applySignals(q7, a.personality, Q7_SIGNALS);
+  // Q6 — multi-select (outputPreferences); fall back to single outputPreference
+  if (a.outputPreferences && a.outputPreferences.length) {
+    applyMulti(q6, a.outputPreferences, Q6_SIGNALS);
+  } else if (a.outputPreference) {
+    applySignals(q6, a.outputPreference, Q6_SIGNALS);
+  }
+  // Q7 — multi-select traits; fall back to single personality
+  if (a.personalityTraits && a.personalityTraits.length) {
+    applyMulti(q7, a.personalityTraits, Q7_SIGNALS);
+  } else if (a.personality) {
+    applySignals(q7, a.personality, Q7_SIGNALS);
+  }
   if (a.differentiation) applySignals(q8, a.differentiation, Q8_SIGNALS);
 
   for (const c of CAREERS) {
