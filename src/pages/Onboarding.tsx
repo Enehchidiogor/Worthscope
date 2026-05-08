@@ -164,20 +164,15 @@ export default function Onboarding() {
           {/* Age + Education Level row */}
           <div className="ws-row" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
             <Field label="Age" highlight={validAge}>
-              <input
-                type="number"
-                inputMode="numeric"
-                min={12}
-                max={35}
-                value={p.age === "" ? "" : p.age}
-                onChange={(e) => {
-                  const v = e.target.value;
-                  setP({ ...p, age: v === "" ? "" : Number(v) });
-                }}
-                placeholder="Enter your age"
+              <select
+                value={p.ageRange}
+                onChange={(e) => setP({ ...p, ageRange: e.target.value as AgeRange })}
                 className="ws-input"
-                style={inputStyle()}
-              />
+                style={{ ...inputStyle(), appearance: "none", paddingRight: 36, cursor: "pointer" }}
+              >
+                <option value="" disabled>Select your age range</option>
+                {AGE_RANGES.map((r) => <option key={r} value={r}>{r}</option>)}
+              </select>
             </Field>
 
             <Field label="Education Level" highlight={validLevel}>
