@@ -56,9 +56,8 @@ export default function Onboarding() {
   const [submitting, setSubmitting] = useState(false);
   const [showGreeting, setShowGreeting] = useState(false);
 
-  const ageNum = typeof p.age === "number" ? p.age : NaN;
   const validName = p.fullName.trim().length >= 2;
-  const validAge = !Number.isNaN(ageNum) && ageNum >= 12 && ageNum <= 35;
+  const validAge = p.ageRange !== "";
   const validLevel = p.educationLevel !== "";
   const validClass = p.classOrLevel.trim().length > 0;
   const canContinue = validName && validAge && validLevel && validClass && !submitting;
@@ -79,7 +78,7 @@ export default function Onboarding() {
     const profile = {
       fullName: p.fullName.trim(),
       firstName,
-      age: ageNum,
+      ageRange: p.ageRange,
       educationLevel: p.educationLevel,
       classOrLevel: p.classOrLevel,
     };
