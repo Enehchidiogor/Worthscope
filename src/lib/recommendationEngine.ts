@@ -22,12 +22,15 @@ export type Answers = {
   classOrLevel?: string | null;
 
   strongSubjects: string[];
+  experienceLevel?: string | null;
   interests?: string[];
   activities: string[];
   personality?: string | null;
+  personalityTraits?: string[];
   careerInclination: string | null;
   statedCareer: string | null;
   preferenceConflict: string | null;
+  workTypes?: string[];
   taskInterests: string[];
   outputPreference: string | null;
   outputPreferences?: string[];
