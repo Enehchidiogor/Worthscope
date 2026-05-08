@@ -20,10 +20,12 @@ const FONT = "'Poppins', sans-serif";
 const STORAGE_KEY = "worthscope_user_profile";
 
 type EducationLevel = "secondary" | "university" | "";
+const AGE_RANGES = ["13–15", "16–18", "19–21", "22–25", "26+"] as const;
+type AgeRange = (typeof AGE_RANGES)[number] | "";
 type Profile = {
   fullName: string;
   firstName: string;
-  age: number | "";
+  ageRange: AgeRange;
   educationLevel: EducationLevel;
   classOrLevel: string;
 };
@@ -36,13 +38,13 @@ function loadProfile(): Profile {
       return {
         fullName: p.fullName || "",
         firstName: p.firstName || "",
-        age: typeof p.age === "number" ? p.age : "",
+        ageRange: (p.ageRange as AgeRange) || "",
         educationLevel: (p.educationLevel as EducationLevel) || "",
         classOrLevel: p.classOrLevel || "",
       };
     }
   } catch {}
-  return { fullName: "", firstName: "", age: "", educationLevel: "", classOrLevel: "" };
+  return { fullName: "", firstName: "", ageRange: "", educationLevel: "", classOrLevel: "" };
 }
 
 const SECONDARY_OPTS = ["SS1", "SS2", "SS3"];
