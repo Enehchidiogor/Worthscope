@@ -72,101 +72,107 @@ const opts = (arr: string[]): Option[] =>
     return m ? { emoji: m[1], label: m[2] } : { label: s };
   });
 
-/* ============ QUESTION OPTIONS ============ */
-// Q1 — Subjects (Secondary)
+/* ============ QUESTION OPTIONS (v3.0 spec verbatim) ============ */
+// Q1 — Subjects You're Strongest In (Secondary)
 const Q1_SECONDARY = opts([
   "📐 Mathematics",
-  "🔬 Sciences",
-  "💻 ICT / Technology",
-  "🎨 Arts / Creative",
+  "🔬 Sciences (Physics, Chemistry, Biology)",
+  "💻 ICT / Technology / Computer Studies",
+  "🎨 Arts / Creative / Literature",
   "💼 Business / Economics",
-  "🌍 Social Sciences",
+  "🌍 Social Sciences / Government",
 ]);
-// Q1 — Academic areas (University)
+// Q1 — Your Academic Area (University / Polytechnic)
 const Q1_UNIVERSITY = opts([
-  "💻 Computer Science / Tech",
-  "⚙️ Engineering",
-  "🎨 Design / Creative",
-  "💼 Business / Management",
-  "📊 Data / Analytics",
-  "🌍 Social Sciences",
-  "🧬 Health / Science",
-  "📰 Communication / Media",
+  "💻 Computer Science / Software Engineering / IT",
+  "⚙️ Engineering (Electrical, Mechanical, Civil, etc.)",
+  "🎨 Design / Fine Arts / Architecture",
+  "💼 Business / Management / Accounting",
+  "📊 Data Science / Statistics / Mathematics",
+  "🌍 Social Sciences / Mass Communication / Psychology",
+  "🧬 Health / Biological Sciences",
+  "📰 Communication / Journalism / Media",
 ]);
-// Q2 — Experience (Secondary)
+// Q2 — How Far Have You Gone So Far? (Secondary)
 const Q2_SECONDARY = opts([
-  "🌱 I haven't started learning anything yet",
-  "🔍 I've tried learning something small",
-  "📚 I've learned a skill before",
-  "🏆 I've built or completed something before",
+  "🌱 I haven't started anything yet",
+  "🔍 I've tried learning something small (watched tutorials, read articles)",
+  "📚 I've learned a skill before (took a course, practiced consistently)",
+  "🏆 I've built or completed something (project, design, product, hustle)",
 ]);
-// Q2 — Experience (University)
+// Q2 — Your Real-World Experience Level (University)
 const Q2_UNIVERSITY = opts([
-  "🌱 No experience yet",
-  "📖 Basic knowledge",
-  "🛠️ Intermediate (I've done projects before)",
-  "🚀 Advanced (real-world experience)",
+  "🌱 No experience yet — I'm starting fresh",
+  "📖 Basic knowledge — I understand the concepts but haven't applied them",
+  "🛠️ Intermediate — I've completed personal projects or coursework",
+  "🚀 Advanced — I have real-world work, internship, or freelance experience",
 ]);
 
+// Q3 — What Do You Naturally Enjoy Doing? (max 2)
 const Q3_OPTS = opts([
   "🎨 Designing or creating visuals",
-  "🧩 Solving logical problems",
-  "🔧 Building or fixing systems",
+  "🧩 Solving logical / technical problems",
+  "🔧 Building or fixing systems (digital or physical)",
   "📊 Analyzing information or data",
-  "👥 Leading or organizing people",
-  "💬 Communicating or persuading people",
+  "👥 Leading, organizing, or managing people",
+  "💬 Communicating, persuading, or influencing",
 ]);
 
+// Q4 — What Kind of Work Sounds Most Like You? (min 2, max 3)
 const Q4_OPTS = opts([
-  "📱 Creating digital products like apps or websites",
-  "✨ Designing user experiences or visuals",
-  "📊 Working with data and insights",
-  "🏗️ Building systems or infrastructure",
-  "🛡️ Protecting systems and data",
-  "🚀 Running or growing a business",
-  "🤝 Working with people and communication",
-  "❓ I'm not sure yet",
+  "📱 Create digital products — apps, websites, tools",
+  "✨ Design experiences or visuals that people interact with",
+  "📊 Work with data, patterns, and insights",
+  "🏗️ Build or maintain technical systems and infrastructure",
+  "🛡️ Protect systems, networks, and user data from threats",
+  "🚀 Run, grow, or launch a business",
+  "🤝 Work with people through content, media, or marketing",
+  "❓ Not sure yet",
 ]);
 
+// Q5 — Tasks You'd Actually Enjoy Day-to-Day (max 2)
 const Q5_OPTS = opts([
-  "🎨 Designing interfaces or visuals",
+  "🎨 Designing interfaces, screens, or visuals",
   "💻 Writing code or scripts",
-  "☁️ Setting up systems or cloud tools",
-  "🔍 Finding patterns in data",
-  "📋 Managing projects or products",
-  "📣 Selling or marketing ideas",
-  "❓ I'm not sure yet",
+  "☁️ Setting up and managing systems or servers",
+  "🔍 Finding patterns or insights in data",
+  "📋 Managing projects, roadmaps, or products",
+  "📣 Selling, pitching, or marketing ideas",
+  "❓ Not sure yet",
 ]);
 
+// Q6 — What Do You Want Your Work to Produce? (max 2)
 const Q6_OPTS = opts([
-  "🎨 A beautiful design",
-  "📱 A working application",
-  "🛡️ A secure system",
-  "📊 A data insight or report",
-  "🚀 A successful business or product",
-  "🔧 A physical machine or engineered system",
+  "🎨 A beautiful, polished visual design or brand",
+  "📱 A working app or software product",
+  "🛡️ A secure, protected system or network",
+  "📊 A data insight, dashboard, or financial model",
+  "🚀 A successful business, product, or brand",
+  "🔧 A physical machine, structure, or engineered system",
   "📣 An audience, community, or media presence",
-  "⚙️ A scalable system",
+  "⚙️ A scalable cloud/infrastructure system",
 ]);
 
+// Q7 — Which Words Best Describe You? (max 3)
 const Q7_OPTS = opts([
   "🎨 Creative",
   "🧠 Logical",
   "📊 Analytical",
-  "💬 Social",
+  "💬 Social / People-oriented",
   "♟️ Strategic",
   "🔍 Detail-oriented",
 ]);
 
+// Q8 — The Critical Differentiator (single select)
 const Q8_OPTS = opts([
-  "🎨 Design how something looks",
-  "✨ Design how something works",
-  "🛠️ Build the system behind it",
-  "📊 Analyze and improve performance",
-  "📋 Manage and organize everything",
-  "📣 Grow and reach an audience",
-  "🛡️ Protect and secure systems",
-  "🔧 Design and build physical things",
+  "🎨 Design how something LOOKS — colors, layout, branding, visual identity",
+  "✨ Design how something WORKS — the flow, logic, user experience, interaction",
+  "🛠️ Build the system BEHIND it — code, infrastructure, server, logic",
+  "📊 Analyze and improve PERFORMANCE — data, metrics, financial results",
+  "📋 Manage and organize EVERYTHING — teams, timelines, strategy, product",
+  "📣 Grow and reach an AUDIENCE — marketing, content, brand, social",
+  "🛡️ Protect and secure systems — defense, monitoring, ethical hacking",
+  "🔧 Design and build physical things — hardware, machines, engineering",
 ]);
 
 export default function Assessment() {
