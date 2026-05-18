@@ -144,6 +144,8 @@ const Q6_OPTS = opts([
   "🛡️ A secure system",
   "📊 A data insight or report",
   "🚀 A successful business or product",
+  "🔧 A physical machine or engineered system",
+  "📣 An audience, community, or media presence",
   "⚙️ A scalable system",
 ]);
 
@@ -162,6 +164,9 @@ const Q8_OPTS = opts([
   "🛠️ Build the system behind it",
   "📊 Analyze and improve performance",
   "📋 Manage and organize everything",
+  "📣 Grow and reach an audience",
+  "🛡️ Protect and secure systems",
+  "🔧 Design and build physical things",
 ]);
 
 export default function Assessment() {
