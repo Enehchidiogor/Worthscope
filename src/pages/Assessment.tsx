@@ -242,22 +242,22 @@ export default function Assessment() {
 
   // Q1 spec
   const q1Title = isUni
-    ? "Which academic areas fit you the most?"
-    : "Which subjects are you strongest in?";
+    ? "Your Academic Area"
+    : "Subjects You're Strongest In";
   const q1Sub = isUni
-    ? "Pick the areas or courses you enjoy the most. Min 2 · Max 3"
-    : "Pick at least 3 subjects you enjoy or perform well in. Min 3 · Max 4";
+    ? "Pick the academic areas closest to what you study. Min 2 · Max 3"
+    : "Pick the subjects you're strongest in. Min 3 · Max 4";
   const q1Options = isUni ? Q1_UNIVERSITY : Q1_SECONDARY;
   const q1Min = isUni ? 2 : 3;
   const q1Max = isUni ? 3 : 4;
 
   // Q2 spec
   const q2Title = isUni
-    ? "What is your current experience level?"
-    : "How much experience do you currently have?";
+    ? "Your Real-World Experience Level"
+    : "How Far Have You Gone So Far?";
   const q2Sub = isUni
-    ? "Select the option that best describes you."
-    : "This helps us understand where you are starting from.";
+    ? "Pick the option that best describes where you are right now."
+    : "This helps us set the right starting point on your roadmap.";
   const q2Options = isUni ? Q2_UNIVERSITY : Q2_SECONDARY;
 
   const screens: Record<ScreenId, React.ReactNode> = {
@@ -293,9 +293,9 @@ export default function Assessment() {
     ),
     q3: (
       <MultiQuestion
-        tag="STEP 3 OF 9  ·  NATURAL TENDENCIES"
-        title="What do you naturally enjoy doing?"
-        sub="Pick the activities that feel most natural to you. Max 2"
+        tag="STEP 3 OF 9  ·  NATURAL ENJOYMENT"
+        title="What Do You Naturally Enjoy Doing?"
+        sub="Pick what feels most natural to you. Max 2"
         options={Q3_OPTS}
         selected={answers.activities}
         max={2}
@@ -306,9 +306,9 @@ export default function Assessment() {
     ),
     q4: (
       <MultiQuestion
-        tag="STEP 4 OF 9  ·  WORK PREFERENCE"
-        title="What type of work sounds most interesting to you?"
-        sub="Choose the work styles that excite you the most. Min 2 · Max 3"
+        tag="STEP 4 OF 9  ·  WORK TYPE"
+        title="What Kind of Work Sounds Most Like You?"
+        sub="Pick the kinds of work that genuinely appeal to you. Min 2 · Max 3"
         options={Q4_OPTS}
         selected={
           answers.preferenceConflict
@@ -329,8 +329,8 @@ export default function Assessment() {
     q5: (
       <MultiQuestion
         tag="STEP 5 OF 9  ·  DAILY TASKS"
-        title="Which tasks would you enjoy doing regularly?"
-        sub="Choose the tasks you would not mind doing every day. Max 2"
+        title="Tasks You'd Actually Enjoy Day-to-Day"
+        sub="Pick the day-to-day tasks you'd genuinely look forward to. Max 2"
         options={Q5_OPTS}
         selected={answers.taskInterests}
         max={2}
@@ -341,9 +341,9 @@ export default function Assessment() {
     ),
     q6: (
       <MultiQuestion
-        tag="STEP 6 OF 9  ·  DESIRED OUTCOME"
-        title="What kind of result would make you feel proud?"
-        sub="Choose the type of outcome you would enjoy creating. Max 2"
+        tag="STEP 6 OF 9  ·  DESIRED OUTPUT"
+        title="What Do You Want Your Work to Produce?"
+        sub="Pick the kind of thing you'd be proud to point at and say 'I made that.' Max 2"
         options={Q6_OPTS}
         selected={answers.outputPreferences || []}
         max={2}
@@ -359,8 +359,8 @@ export default function Assessment() {
     q7: (
       <MultiQuestion
         tag="STEP 7 OF 9  ·  PERSONALITY"
-        title="Which personality traits describe you best?"
-        sub="Pick the traits that match how you usually think or behave. Max 3"
+        title="Which Words Best Describe You?"
+        sub="Pick the traits that genuinely sound like you. Max 3"
         options={Q7_OPTS}
         selected={answers.personalityTraits || []}
         max={3}
@@ -375,9 +375,9 @@ export default function Assessment() {
     ),
     q8: (
       <QuestionScreen
-        tag="STEP 8 OF 9  ·  DIFFERENTIATION"
-        title="Which of these would you rather do?"
-        sub="Pick the option that feels most exciting to you."
+        tag="STEP 8 OF 9  ·  THE DIFFERENTIATOR"
+        title="If you had to choose just one — which would you rather spend your day doing?"
+        sub="Pick the single option that feels most true. This one carries extra weight."
       >
         {Q8_OPTS.map((o) => (
           <SingleOption
