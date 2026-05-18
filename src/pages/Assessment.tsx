@@ -728,8 +728,8 @@ function TextareaQuestion({
     <>
       <QuestionScreen
         tag="STEP 9 OF 9  ·  IN YOUR OWN WORDS"
-        title="In your own words, what kind of career or work do you see yourself doing?"
-        sub="You can describe anything you are interested in, even if you are unsure."
+        title="In your own words — what kind of career or work do you actually see yourself doing?"
+        sub="Don't overthink it. Just write what feels true."
       >
         <div style={{ position: "relative" }}>
           <textarea
