@@ -253,6 +253,14 @@ const Q4_SIGNALS: SigMap = {
   "analyse data":              { DATA: 4, FINTECH: 3 },
   "analyze data":              { DATA: 4, FINTECH: 3 },
   "communicate":               { CONTENT: 3, DIGIMKT: 3, PM: 2 },
+
+  /* ===== v4.0 Q4 PROBLEM TYPES ===== */
+  "digital problems":          { SOFTDEV: 4, UIUX: 3 },
+  "human problems":            { UIUX: 4, CONTENT: 2, PM: 2 },
+  "business problems":         { ENTREP: 4, PM: 3, DIGIMKT: 2, FINTECH: 2 },
+  "security problems":         { CYBER: 6 },
+  "physical problems":         { MECHENG: 5 },
+  "scientific problems":       { DATA: 4, MECHENG: 2 },
 };
 
 // Q5 — daily tasks (15%)
