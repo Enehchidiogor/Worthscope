@@ -156,6 +156,42 @@ const Q1_SIGNALS: SigMap = {
   "journalism":           { CONTENT: 4, DIGIMKT: 2 },
   "communication":        { CONTENT: 3, DIGIMKT: 3, PM: 1 },
   "media":                { CONTENT: 3, DIGIMKT: 2 },
+
+  /* ===== v4.0 Q1 INTEREST BUCKETS ===== */
+  "technology & software":      { SOFTDEV: 4, UIUX: 2, CYBER: 2, DATA: 1 },
+  "design & creativity":        { UIUX: 4, GRAPHD: 4, CONTENT: 2 },
+  "data & ai":                  { DATA: 5, FINTECH: 2, SOFTDEV: 1 },
+  "business & entrepreneurship":{ ENTREP: 4, PM: 3, DIGIMKT: 2, FINTECH: 2 },
+  "communication & media":      { CONTENT: 4, DIGIMKT: 4, PM: 1 },
+
+  /* ===== v4.0 Q1 SUB-OPTIONS (Interest sub-tags) ===== */
+  "creating apps":              { SOFTDEV: 4, UIUX: 3 },
+  "coding":                     { SOFTDEV: 4, CYBER: 2 },
+  "building systems":           { SOFTDEV: 3, MECHENG: 2, CYBER: 2 },
+  "cloud technology":           { SOFTDEV: 3, CYBER: 3 },
+  "cybersecurity":              { CYBER: 5 },
+  "ui/ux design":               { UIUX: 5, GRAPHD: 2 },
+  "graphic design":             { GRAPHD: 5, UIUX: 2 },
+  "product design":             { UIUX: 4, PM: 2, GRAPHD: 2 },
+  "branding":                   { GRAPHD: 4, DIGIMKT: 2, CONTENT: 1 },
+  "motion design":              { GRAPHD: 3, CONTENT: 3, UIUX: 1 },
+  "data analysis":              { DATA: 5, FINTECH: 2 },
+  "artificial intelligence":    { DATA: 4, SOFTDEV: 2 },
+  "machine learning":           { DATA: 4, SOFTDEV: 3 },
+  "research":                   { DATA: 3, FINTECH: 2 },
+  "entrepreneurship":           { ENTREP: 5, PM: 1, DIGIMKT: 1 },
+  "marketing":                  { DIGIMKT: 5, CONTENT: 2, ENTREP: 1 },
+  "product management":         { PM: 5, ENTREP: 2 },
+  "project management":         { PM: 5 },
+  "business analysis":          { FINTECH: 3, PM: 3, DATA: 2 },
+  "mechanical engineering":     { MECHENG: 5 },
+  "electrical engineering":     { MECHENG: 4 },
+  "civil engineering":          { MECHENG: 4 },
+  "robotics":                   { MECHENG: 4, SOFTDEV: 2 },
+  "content creation":           { CONTENT: 5, DIGIMKT: 2 },
+  "social media":               { DIGIMKT: 5, CONTENT: 3 },
+  "brand strategy":             { DIGIMKT: 4, GRAPHD: 2, PM: 1 },
+  "communications":             { CONTENT: 3, DIGIMKT: 3, PM: 1 },
 };
 
 // Q3 — natural enjoyment (15%)
@@ -217,6 +253,14 @@ const Q4_SIGNALS: SigMap = {
   "analyse data":              { DATA: 4, FINTECH: 3 },
   "analyze data":              { DATA: 4, FINTECH: 3 },
   "communicate":               { CONTENT: 3, DIGIMKT: 3, PM: 2 },
+
+  /* ===== v4.0 Q4 PROBLEM TYPES ===== */
+  "digital problems":          { SOFTDEV: 4, UIUX: 3 },
+  "human problems":            { UIUX: 4, CONTENT: 2, PM: 2 },
+  "business problems":         { ENTREP: 4, PM: 3, DIGIMKT: 2, FINTECH: 2 },
+  "security problems":         { CYBER: 6 },
+  "physical problems":         { MECHENG: 5 },
+  "scientific problems":       { DATA: 4, MECHENG: 2 },
 };
 
 // Q5 — daily tasks (15%)
@@ -290,6 +334,14 @@ const Q6_SIGNALS: SigMap = {
   "content or ideas":          { CONTENT: 5, DIGIMKT: 3 },
   "secure":                    { CYBER: 4 },
   "structure":                 { MECHENG: 3 },
+
+  /* ===== v4.0 Q5 PRIDE/MOTIVATION ===== */
+  "creating something people love using": { UIUX: 5, GRAPHD: 3 },
+  "building a powerful solution":         { SOFTDEV: 5, CYBER: 1 },
+  "keeping people safe":                  { CYBER: 6 },
+  "discovering valuable insights":        { DATA: 5, FINTECH: 2 },
+  "growing a successful business":        { ENTREP: 5, DIGIMKT: 2, PM: 1 },
+  "leading a team to achieve a goal":     { PM: 5, ENTREP: 2 },
 };
 
 // Q7 — personality (10%) — soft signals, tiebreakers only
@@ -308,6 +360,27 @@ const Q7_SIGNALS: SigMap = {
   "hands-on":               { MECHENG: 2, SOFTDEV: 1 },
   "curious":                { DATA: 1, SOFTDEV: 1, MECHENG: 1, CYBER: 1 },
   "exploratory":            { DATA: 1, ENTREP: 1, CONTENT: 1 },
+
+  /* ===== v4.0 Q2 personality + sub-options ===== */
+  "detail-oriented":        { GRAPHD: 2, UIUX: 1, DATA: 2, CYBER: 3 },
+  "visual design":          { UIUX: 2, GRAPHD: 3 },
+  "storytelling":           { CONTENT: 3, DIGIMKT: 1 },
+  "product ideas":          { PM: 2, ENTREP: 2, UIUX: 1 },
+  "systems":                { SOFTDEV: 2, CYBER: 2, MECHENG: 1 },
+  "automation":             { SOFTDEV: 3, CYBER: 1, MECHENG: 1 },
+  "data":                   { DATA: 3, FINTECH: 1 },
+  "business insights":      { FINTECH: 3, DATA: 2, PM: 1 },
+  "ai":                     { DATA: 3, SOFTDEV: 1 },
+  "leadership":             { PM: 3, ENTREP: 2 },
+  "communication":          { CONTENT: 2, DIGIMKT: 2, PM: 1 },
+  "community building":     { CONTENT: 3, DIGIMKT: 2 },
+  "business growth":        { ENTREP: 3, DIGIMKT: 2, PM: 1 },
+  "product strategy":       { PM: 3, ENTREP: 1 },
+  "project planning":       { PM: 3 },
+  "design precision":       { GRAPHD: 3, UIUX: 2 },
+  "security":               { CYBER: 4 },
+  "data accuracy":          { DATA: 3, FINTECH: 1 },
+  "quality assurance":      { SOFTDEV: 2, PM: 1, CYBER: 1 },
 };
 
 // Q8 — DIFFERENTIATOR (15% + override) — explicit conscious intent
@@ -327,6 +400,14 @@ const Q8_SIGNALS: SigMap = {
   "secure systems":         { CYBER: 6 },
   "design and build physical": { MECHENG: 6 },
   "hardware":               { MECHENG: 6 },
+
+  /* ===== v4.0 Q3 ROLE IDENTITIES ===== */
+  "the creator":            { UIUX: 5, GRAPHD: 4, CONTENT: 2 },
+  "the builder":            { SOFTDEV: 6, MECHENG: 1 },
+  "the analyst":            { DATA: 6, FINTECH: 3 },
+  "the protector":          { CYBER: 6 },
+  "the leader":             { PM: 6, ENTREP: 3 },
+  "the engineer":           { MECHENG: 6, SOFTDEV: 1 },
 };
 
 // Map each Q8 option (canonical) → its dominant career (used by override rule).
@@ -342,6 +423,13 @@ const Q8_OVERRIDE_WINNER: Array<{ kw: string; winner: string }> = [
   { kw: "secure", winner: "CYBER" },
   { kw: "physical", winner: "MECHENG" },
   { kw: "hardware", winner: "MECHENG" },
+  // v4.0 roles
+  { kw: "the creator", winner: "UIUX" },
+  { kw: "the builder", winner: "SOFTDEV" },
+  { kw: "the analyst", winner: "DATA" },
+  { kw: "the protector", winner: "CYBER" },
+  { kw: "the leader", winner: "PM" },
+  { kw: "the engineer", winner: "MECHENG" },
 ];
 
 /* ============ Q9 OPEN-ENDED (NLP) BOOSTS ============ */
