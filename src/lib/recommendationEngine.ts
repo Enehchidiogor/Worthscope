@@ -360,6 +360,27 @@ const Q7_SIGNALS: SigMap = {
   "hands-on":               { MECHENG: 2, SOFTDEV: 1 },
   "curious":                { DATA: 1, SOFTDEV: 1, MECHENG: 1, CYBER: 1 },
   "exploratory":            { DATA: 1, ENTREP: 1, CONTENT: 1 },
+
+  /* ===== v4.0 Q2 personality + sub-options ===== */
+  "detail-oriented":        { GRAPHD: 2, UIUX: 1, DATA: 2, CYBER: 3 },
+  "visual design":          { UIUX: 2, GRAPHD: 3 },
+  "storytelling":           { CONTENT: 3, DIGIMKT: 1 },
+  "product ideas":          { PM: 2, ENTREP: 2, UIUX: 1 },
+  "systems":                { SOFTDEV: 2, CYBER: 2, MECHENG: 1 },
+  "automation":             { SOFTDEV: 3, CYBER: 1, MECHENG: 1 },
+  "data":                   { DATA: 3, FINTECH: 1 },
+  "business insights":      { FINTECH: 3, DATA: 2, PM: 1 },
+  "ai":                     { DATA: 3, SOFTDEV: 1 },
+  "leadership":             { PM: 3, ENTREP: 2 },
+  "communication":          { CONTENT: 2, DIGIMKT: 2, PM: 1 },
+  "community building":     { CONTENT: 3, DIGIMKT: 2 },
+  "business growth":        { ENTREP: 3, DIGIMKT: 2, PM: 1 },
+  "product strategy":       { PM: 3, ENTREP: 1 },
+  "project planning":       { PM: 3 },
+  "design precision":       { GRAPHD: 3, UIUX: 2 },
+  "security":               { CYBER: 4 },
+  "data accuracy":          { DATA: 3, FINTECH: 1 },
+  "quality assurance":      { SOFTDEV: 2, PM: 1, CYBER: 1 },
 };
 
 // Q8 — DIFFERENTIATOR (15% + override) — explicit conscious intent
