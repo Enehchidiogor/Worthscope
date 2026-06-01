@@ -334,6 +334,14 @@ const Q6_SIGNALS: SigMap = {
   "content or ideas":          { CONTENT: 5, DIGIMKT: 3 },
   "secure":                    { CYBER: 4 },
   "structure":                 { MECHENG: 3 },
+
+  /* ===== v4.0 Q5 PRIDE/MOTIVATION ===== */
+  "creating something people love using": { UIUX: 5, GRAPHD: 3 },
+  "building a powerful solution":         { SOFTDEV: 5, CYBER: 1 },
+  "keeping people safe":                  { CYBER: 6 },
+  "discovering valuable insights":        { DATA: 5, FINTECH: 2 },
+  "growing a successful business":        { ENTREP: 5, DIGIMKT: 2, PM: 1 },
+  "leading a team to achieve a goal":     { PM: 5, ENTREP: 2 },
 };
 
 // Q7 — personality (10%) — soft signals, tiebreakers only
