@@ -400,6 +400,14 @@ const Q8_SIGNALS: SigMap = {
   "secure systems":         { CYBER: 6 },
   "design and build physical": { MECHENG: 6 },
   "hardware":               { MECHENG: 6 },
+
+  /* ===== v4.0 Q3 ROLE IDENTITIES ===== */
+  "the creator":            { UIUX: 5, GRAPHD: 4, CONTENT: 2 },
+  "the builder":            { SOFTDEV: 6, MECHENG: 1 },
+  "the analyst":            { DATA: 6, FINTECH: 3 },
+  "the protector":          { CYBER: 6 },
+  "the leader":             { PM: 6, ENTREP: 3 },
+  "the engineer":           { MECHENG: 6, SOFTDEV: 1 },
 };
 
 // Map each Q8 option (canonical) → its dominant career (used by override rule).
@@ -415,6 +423,13 @@ const Q8_OVERRIDE_WINNER: Array<{ kw: string; winner: string }> = [
   { kw: "secure", winner: "CYBER" },
   { kw: "physical", winner: "MECHENG" },
   { kw: "hardware", winner: "MECHENG" },
+  // v4.0 roles
+  { kw: "the creator", winner: "UIUX" },
+  { kw: "the builder", winner: "SOFTDEV" },
+  { kw: "the analyst", winner: "DATA" },
+  { kw: "the protector", winner: "CYBER" },
+  { kw: "the leader", winner: "PM" },
+  { kw: "the engineer", winner: "MECHENG" },
 ];
 
 /* ============ Q9 OPEN-ENDED (NLP) BOOSTS ============ */
