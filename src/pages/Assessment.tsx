@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { Sidebar } from "@/components/dashboard/Sidebar";
 import { generateCareerResults, type Answers } from "@/lib/recommendationEngine";
 import logo from "@/assets/worthscope-logo.png";
 
@@ -510,8 +511,11 @@ export default function Assessment() {
   const showBack = screen !== "q1" && screen !== "analyzing";
 
   return (
-    <div style={{ minHeight: "100vh", background: BG, fontFamily: FONT, color: TEXT }}>
-      {screen !== "analyzing" && (
+    <div className="min-h-screen bg-background font-poppins text-foreground" style={{ background: BG, color: TEXT }}>
+      <Sidebar activePath="/assessment" />
+
+      <div className="md:ml-[220px]">
+        {screen !== "analyzing" && (
         <header style={{
           position: "sticky", top: 0, zIndex: 30, height: 64,
           display: "flex", alignItems: "center", justifyContent: "space-between",
@@ -537,28 +541,45 @@ export default function Assessment() {
           <div style={{ fontWeight: 400, fontSize: 13, color: TEXT3, minWidth: 60, textAlign: "right" }}>
             {`${currentStep} of ${TOTAL_STEPS}`}
           </div>
-        </header>
-      )}
+          }}>
+            <img src={logo} alt="WorthScope" style={{ height: 64, width: "auto", objectFit: "contain" }} />
+            <div style={{ position: "relative", width: 200, maxWidth: "40vw" }}>
+              <div style={{ height: 6, background: BORDER, borderRadius: 100, position: "relative" }}>
+                <div style={{
+                  width: `${progressPct}%`, height: "100%", background: ACCENT, borderRadius: 100,
+                  transition: "width 0.5s cubic-bezier(0.4,0,0.2,1)", position: "relative",
+                }}>
+                  <span style={{
+                    position: "absolute", right: -5, top: "50%", transform: "translateY(-50%)",
+                    width: 10, height: 10, borderRadius: "50%",
+                    background: ACCENT, boxShadow: "0 0 8px rgba(52,152,219,0.6)",
+                  }} />
+                </div>
+              </div>
+            </div>
+            <div style={{ fontWeight: 400, fontSize: 13, color: TEXT3, minWidth: 60, textAlign: "right" }}>
+              {`${currentStep} of ${TOTAL_STEPS}`}
+            </div>
+          </header>
+        )}
 
-      {screen !== "analyzing" && (
-        <div style={{ display: "flex", justifyContent: "center", gap: 8, padding: "16px 24px 0", flexWrap: "wrap" }}>
-          <Pill state="completed">Tell us about yourself</Pill>
-          <Pill state="active">Answer 6 questions</Pill>
-          <Pill state="upcoming">Get your career path</Pill>
-        </div>
-      )}
+        {screen !== "analyzing" && (
+          <div className="mx-auto w-full max-w-[1100px] px-4 pt-4 md:px-8" style={{ display: "flex", justifyContent: "center", gap: 8, flexWrap: "wrap" }}>
+            <Pill state="completed">Tell us about yourself</Pill>
+            <Pill state="active">Answer 6 questions</Pill>
+            <Pill state="upcoming">Get your career path</Pill>
+          </div>
+        )}
 
-      <div style={{ position: "relative", display: "flex", justifyContent: "center", alignItems: "flex-start" }}>
+        <div style={{ position: "relative" }}>
         <main
           key={screen}
+          className="ws-stage mx-auto w-full max-w-[1100px] px-4 pb-24 pt-8 md:px-8 md:pb-12"
           style={{
-            width: "100%",
-            padding: "32px 60px 48px",
             animation: transitioning
               ? `${direction === "forward" ? "ws-out-left" : "ws-out-right"} 0.25s ease-in forwards`
               : `${direction === "forward" ? "ws-in-right" : "ws-in-left"} 0.25s ease-out`,
           }}
-          className="ws-stage"
         >
           {screens[screen]}
 
@@ -581,7 +602,8 @@ export default function Assessment() {
               Back
             </button>
           )}
-        </main>
+          </main>
+        </div>
       </div>
 
       {maxToast && (
