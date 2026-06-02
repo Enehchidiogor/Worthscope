@@ -550,8 +550,8 @@ export default function Assessment() {
         <main
           key={screen}
           style={{
-            width: "100%", maxWidth: 620,
-            padding: "32px 32px 48px",
+            width: "100%",
+            padding: "32px 60px 48px",
             animation: transitioning
               ? `${direction === "forward" ? "ws-out-left" : "ws-out-right"} 0.25s ease-in forwards`
               : `${direction === "forward" ? "ws-in-right" : "ws-in-left"} 0.25s ease-out`,
@@ -700,21 +700,27 @@ const checkStyle: React.CSSProperties = {
 };
 
 function QuestionScreen({
-  tag, title, sub, greeting, children,
-}: { tag: string; title: string; sub?: string; greeting?: string | null; children: React.ReactNode }) {
+  tag, title, sub, greeting, children, grid,
+}: { tag: string; title: string; sub?: string; greeting?: string | null; children: React.ReactNode; grid?: boolean }) {
   return (
     <>
       <div style={{ fontWeight: 600, fontSize: 11, color: ACCENT, textTransform: "uppercase", letterSpacing: 1.5 }}>
         {tag}
       </div>
-      <h1 style={{ fontWeight: 700, fontSize: 26, color: TEXT, letterSpacing: -0.5, marginTop: 12 }}>{title}</h1>
-      {sub && <p style={{ fontWeight: 400, fontSize: 13, color: TEXT2, marginTop: 6 }}>{sub}</p>}
+      <h1 style={{ fontWeight: 700, fontSize: 26, color: TEXT, letterSpacing: -0.5, marginTop: 16 }}>{title}</h1>
+      {sub && <p style={{ fontWeight: 400, fontSize: 13, color: TEXT2, marginTop: 8 }}>{sub}</p>}
       {greeting && (
         <p style={{ fontWeight: 400, fontSize: 14, color: TEXT2, marginTop: 10, animation: "ws-fade-in 0.4s ease both" }}>
           {greeting}
         </p>
       )}
-      <div style={{ marginTop: 24, display: "flex", flexDirection: "column", gap: 10 }}>
+      <div style={{
+        marginTop: 32,
+        display: grid ? "grid" : "flex",
+        flexDirection: grid ? undefined : "column",
+        gridTemplateColumns: grid ? "repeat(auto-fit, minmax(280px, 1fr))" : undefined,
+        gap: grid ? 16 : 10,
+      }}>
         {children}
       </div>
     </>
