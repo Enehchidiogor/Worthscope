@@ -541,7 +541,7 @@ export default function Assessment() {
         )}
 
         {screen !== "analyzing" && (
-          <div className="mx-auto w-full max-w-[1100px] px-4 pt-4 md:px-8" style={{ display: "flex", justifyContent: "center", gap: 8, flexWrap: "wrap" }}>
+          <div className="w-full px-4 pt-4 md:px-8" style={{ display: "flex", justifyContent: "center", gap: 8, flexWrap: "wrap" }}>
             <Pill state="completed">Tell us about yourself</Pill>
             <Pill state="active">Answer 6 questions</Pill>
             <Pill state="upcoming">Get your career path</Pill>
@@ -551,7 +551,7 @@ export default function Assessment() {
         <div style={{ position: "relative" }}>
         <main
           key={screen}
-          className="ws-stage mx-auto w-full max-w-[1100px] px-4 pb-24 pt-8 md:px-8 md:pb-12"
+          className="ws-stage w-full px-4 pb-24 pt-8 md:px-8 md:pb-12"
           style={{
             animation: transitioning
               ? `${direction === "forward" ? "ws-out-left" : "ws-out-right"} 0.25s ease-in forwards`
