@@ -398,18 +398,16 @@ export default function Assessment() {
 
   const screens: Record<ScreenId, React.ReactNode> = {
     q1: (
-      <ExpandableMulti
+      <DescMulti
         tag="STEP 1 OF 6  ·  INTERESTS"
-        title="What kinds of things catch your attention the most?"
-        sub="Pick up to 3. Tap a card to see related areas."
+        title={q1Cfg.question}
+        sub={q1Cfg.hint}
         greeting={showGreeting ? welcomeText : null}
-        options={Q1_INTERESTS}
+        options={q1Cfg.options}
         selected={answers.strongSubjects}
-        subSelections={q1Subs}
         max={3}
         min={1}
-        onChangeMain={(arr) => setAnswers((p) => ({ ...p, strongSubjects: arr }))}
-        onChangeSubs={setQ1Subs}
+        onChange={(arr) => setAnswers((p) => ({ ...p, strongSubjects: arr }))}
         onMaxHit={() => showMaxToast("Max 3 selected")}
         onContinue={() => go(nextOf("q1"))}
       />
@@ -465,26 +463,35 @@ export default function Assessment() {
       />
     ),
     q5: (
-      <DescMulti
+      <QuestionScreen
         tag="STEP 5 OF 6  ·  PRIDE & MOTIVATION"
-        title="What would make you feel most proud?"
-        sub="Pick up to 2."
-        options={Q5_PRIDE}
-        selected={answers.outputPreferences || []}
-        max={2}
-        min={1}
-        onChange={(arr) => setAnswers((p) => ({ ...p, outputPreferences: arr }))}
-        onMaxHit={() => showMaxToast("Max 2 selected")}
-        onContinue={() => go(nextOf("q5"))}
-      />
+        title={q5Cfg.question}
+        sub={q5Cfg.hint}
+      >
+        {q5Cfg.options.map((o) => (
+          <SingleOption
+            key={o.label}
+            label={o.label}
+            sub={o.desc}
+            selected={(answers.outputPreferences || [])[0] === o.label}
+            onSelect={() => {
+              setAnswers((p) => ({ ...p, outputPreferences: [o.label] }));
+              autoAdvance("q5");
+            }}
+          />
+        ))}
+      </QuestionScreen>
     ),
     q6: (
-      <TextareaQuestion
-        young={young}
+      <TagCloudQuestion
+        cfg={q6Cfg}
+        tags={q6Tags}
+        onTagsChange={setQ6Tags}
         value={answers.goalOrConcern}
         onChange={(v) => setAnswers((p) => ({ ...p, goalOrConcern: v }))}
         onContinue={() => go("analyzing")}
         onSkip={() => {
+          setQ6Tags([]);
           setAnswers((p) => ({ ...p, goalOrConcern: "" }));
           go("analyzing");
         }}
