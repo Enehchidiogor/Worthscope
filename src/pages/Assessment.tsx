@@ -63,21 +63,91 @@ const initialAnswers: Answers = {
 
 /* ============ v4.0 OPTION DATA ============ */
 type OptionDef = { label: string; tooltip: string; subs: string[] };
+type DescOpt = { label: string; desc: string };
+type AgeKey = "13" | "16" | "19" | "22" | "26";
 
-const Q1_INTERESTS: OptionDef[] = [
-  { label: "Technology & Software", tooltip: "Building apps, websites, software and digital products.",
-    subs: ["Creating apps", "Coding", "Building systems", "Cloud technology", "Cybersecurity"] },
-  { label: "Design & Creativity", tooltip: "Creating experiences, products and visuals people enjoy.",
-    subs: ["UI/UX Design", "Graphic Design", "Product Design", "Branding", "Motion Design"] },
-  { label: "Data & AI", tooltip: "Using information and technology to solve problems.",
-    subs: ["Data Analysis", "Artificial Intelligence", "Machine Learning", "Research", "Data Science"] },
-  { label: "Business & Entrepreneurship", tooltip: "Building businesses and helping products grow.",
-    subs: ["Entrepreneurship", "Marketing", "Product Management", "Project Management", "Business Analysis"] },
-  { label: "Engineering", tooltip: "Solving real-world technical challenges.",
-    subs: ["Mechanical Engineering", "Electrical Engineering", "Civil Engineering", "Robotics"] },
-  { label: "Communication & Media", tooltip: "Communicating ideas and influencing people.",
-    subs: ["Content Creation", "Social Media", "Brand Strategy", "Communications"] },
-];
+function ageKey(ageRange?: string | null): AgeKey {
+  if (!ageRange) return "16";
+  if (ageRange.startsWith("13")) return "13";
+  if (ageRange.startsWith("16")) return "16";
+  if (ageRange.startsWith("19")) return "19";
+  if (ageRange.startsWith("22")) return "22";
+  return "26";
+}
+
+/* ---- Q1: age-aware activity/interest options (no career labels) ---- */
+const Q1_BY_AGE: Record<AgeKey, { question: string; hint: string; options: DescOpt[] }> = {
+  "13": {
+    question: "What do you love doing most in your free time?",
+    hint: "Pick up to 3 — there's no wrong answer!",
+    options: [
+      { label: "Drawing or designing things", desc: "Logos, posters, apps, or just doodling for fun" },
+      { label: "Playing with gadgets or computers", desc: "Games, apps, YouTube, coding stuff" },
+      { label: "Figuring out how things work", desc: "Science experiments, taking things apart" },
+      { label: "Reading, writing, or storytelling", desc: "Books, blogs, essays, creative writing" },
+      { label: "Talking to and helping people", desc: "Listening to friends, solving arguments" },
+      { label: "Solving puzzles and number problems", desc: "Maths, logic games, brain teasers" },
+      { label: "Building or fixing things", desc: "Machines, models, DIY projects" },
+      { label: "Performing or presenting", desc: "Debates, drama, speaking in front of people" },
+    ],
+  },
+  "16": {
+    question: "Which type of activities do you find yourself naturally drawn to?",
+    hint: "Pick up to 3 that genuinely describe you",
+    options: [
+      { label: "Visual and creative work", desc: "Designing, illustrating, making things look great" },
+      { label: "Technology and software", desc: "Coding, apps, websites, digital tools" },
+      { label: "Research and analysis", desc: "Investigating, studying data, testing ideas" },
+      { label: "Writing and communication", desc: "Essays, content, journalism, presentations" },
+      { label: "Connecting with and supporting people", desc: "Mentoring, customer relations, leadership" },
+      { label: "Maths and structured thinking", desc: "Calculations, logic, problem frameworks" },
+      { label: "Engineering and construction", desc: "Physical systems, machines, infrastructure" },
+      { label: "Business and entrepreneurship", desc: "Strategy, sales, building something of your own" },
+    ],
+  },
+  "19": {
+    question: "Which of these areas aligns most with how you naturally think and work?",
+    hint: "Select up to 3 — be honest, not aspirational",
+    options: [
+      { label: "Design and visual communication", desc: "UX, product design, branding, interfaces" },
+      { label: "Engineering and systems", desc: "Software, hardware, infrastructure, networks" },
+      { label: "Data and quantitative analysis", desc: "Statistics, research, modelling, insight" },
+      { label: "Strategy and communication", desc: "Marketing, business development, management" },
+      { label: "Security and risk management", desc: "Cybersecurity, compliance, threat analysis" },
+      { label: "Artificial intelligence and ML", desc: "Algorithms, models, intelligent systems" },
+      { label: "Physical engineering disciplines", desc: "Civil, mechanical, electrical systems" },
+      { label: "Entrepreneurship and venture", desc: "Starting, scaling, or investing in businesses" },
+    ],
+  },
+  "22": {
+    question: "What kind of work do you find yourself doing best — even without being asked?",
+    hint: "Choose up to 3 honest answers",
+    options: [
+      { label: "Design and creative direction", desc: "Interfaces, visuals, brand expression" },
+      { label: "Engineering and development", desc: "Building, shipping, and maintaining systems" },
+      { label: "Analysis and insight generation", desc: "Interpreting data, forming recommendations" },
+      { label: "Sales, marketing, and influence", desc: "Pitching, growing audiences, closing deals" },
+      { label: "Security, risk, and compliance", desc: "Threat modelling, auditing, protection" },
+      { label: "Planning, operations, and delivery", desc: "Project execution, workflow management" },
+      { label: "Venture building and growth", desc: "Starting up, scaling, fundraising" },
+      { label: "AI, ML, and intelligent systems", desc: "Model building, automation, research" },
+    ],
+  },
+  "26": {
+    question: "Which domain consistently produces your best work and clearest thinking?",
+    hint: "Select up to 3 — prioritise genuine strength over aspiration",
+    options: [
+      { label: "Design systems and UX", desc: "Product design, research, visual communication" },
+      { label: "Software and platform engineering", desc: "Architecture, development, DevOps, cloud" },
+      { label: "Data science and analytics", desc: "Modelling, statistics, business intelligence" },
+      { label: "Cybersecurity and infrastructure", desc: "Threat analysis, compliance, network security" },
+      { label: "Product and project management", desc: "Roadmaps, delivery, stakeholder alignment" },
+      { label: "Growth, marketing, and BD", desc: "Demand generation, partnerships, revenue" },
+      { label: "Entrepreneurship and investment", desc: "Ventures, funding, market creation" },
+      { label: "Physical and applied engineering", desc: "Civil, mechanical, electrical disciplines" },
+    ],
+  },
+};
 
 const Q2_PERSONALITY: OptionDef[] = [
   { label: "Creative", tooltip: "You enjoy creating new ideas, visuals or experiences.",
@@ -94,7 +164,7 @@ const Q2_PERSONALITY: OptionDef[] = [
     subs: ["Design Precision", "Security", "Data Accuracy", "Quality Assurance"] },
 ];
 
-const Q3_ROLES: { label: string; desc: string }[] = [
+const Q3_ROLES: DescOpt[] = [
   { label: "The Creator", desc: "Creates experiences and designs." },
   { label: "The Builder", desc: "Builds the solution." },
   { label: "The Analyst", desc: "Uses data and insights." },
@@ -103,7 +173,7 @@ const Q3_ROLES: { label: string; desc: string }[] = [
   { label: "The Engineer", desc: "Solves technical real-world challenges." },
 ];
 
-const Q4_PROBLEMS: { label: string; desc: string }[] = [
+const Q4_PROBLEMS: DescOpt[] = [
   { label: "Digital Problems", desc: "Apps, websites and technology." },
   { label: "Human Problems", desc: "Improving experiences and helping people." },
   { label: "Business Problems", desc: "Helping companies grow." },
@@ -112,14 +182,103 @@ const Q4_PROBLEMS: { label: string; desc: string }[] = [
   { label: "Scientific Problems", desc: "Research and advanced technology." },
 ];
 
-const Q5_PRIDE: { label: string; desc: string }[] = [
-  { label: "Creating something people love using", desc: "UI/UX · Product Design · Graphic Design" },
-  { label: "Building a powerful solution", desc: "Software · Cloud · DevOps" },
-  { label: "Keeping people safe", desc: "Cybersecurity" },
-  { label: "Discovering valuable insights", desc: "Data · AI" },
-  { label: "Growing a successful business", desc: "Entrepreneurship · Marketing" },
-  { label: "Leading a team to achieve a goal", desc: "Product Manager · Project Manager" },
-];
+/* ---- Q5: age-aware (NO career labels under options) ---- */
+const Q5_BY_AGE: Record<AgeKey, { question: string; hint: string; options: DescOpt[] }> = {
+  "13": {
+    question: "If you had free time and no rules, what would you spend a whole day doing?",
+    hint: "Pick 1 that feels most like you",
+    options: [
+      { label: "Create something beautiful", desc: "Design, draw, or build something people can look at" },
+      { label: "Solve a tricky problem", desc: "Figure out something that seems impossible" },
+      { label: "Help someone through a hard time", desc: "Listen, advise, or guide a friend or stranger" },
+      { label: "Share an idea with the world", desc: "Write, post, present, or perform for others" },
+      { label: "Build or fix something real", desc: "Make something physical with your hands" },
+      { label: "Organise and plan a big project", desc: "Make lists, set goals, lead a team" },
+    ],
+  },
+  "16": {
+    question: "What kind of achievement would make you feel the most proud?",
+    hint: "Pick 1 that resonates most",
+    options: [
+      { label: "Building a product people use", desc: "An app, tool, or system that solves a real problem" },
+      { label: "Leading a team to success", desc: "Directing people toward a shared goal" },
+      { label: "Making a breakthrough discovery", desc: "Research, analysis, or insight that changes something" },
+      { label: "Creating work that moves people", desc: "Art, design, or content that gets a real reaction" },
+      { label: "Making a community better", desc: "Helping real people improve their lives" },
+      { label: "Growing a successful business", desc: "Starting or building something profitable and scalable" },
+    ],
+  },
+  "19": {
+    question: "What outcome matters most to you in your career?",
+    hint: "Pick 1 that represents your core driver",
+    options: [
+      { label: "Building impactful products", desc: "Ship things that solve real user problems at scale" },
+      { label: "Growing a business or venture", desc: "Drive revenue, strategy, or market expansion" },
+      { label: "Advancing knowledge", desc: "Research, discover, and publish insights" },
+      { label: "Protecting systems and people", desc: "Security, reliability, and resilience" },
+      { label: "Leading and developing teams", desc: "Coaching, managing, and scaling organisations" },
+      { label: "Crafting experiences that matter", desc: "Design, storytelling, and human-centred work" },
+    ],
+  },
+  "22": {
+    question: "What kind of problem do you most want your career to solve?",
+    hint: "Pick 1 that genuinely resonates",
+    options: [
+      { label: "Scaling ideas into products", desc: "From concept to market — repeat" },
+      { label: "Making systems safer", desc: "Reduce risk, prevent breaches, build trust" },
+      { label: "Helping brands tell better stories", desc: "Content, campaigns, and audience building" },
+      { label: "Turning raw data into decisions", desc: "Analytics, modelling, forecasting" },
+      { label: "Engineering better systems", desc: "Reliability, performance, infrastructure" },
+      { label: "Building and leading great teams", desc: "Culture, management, talent development" },
+    ],
+  },
+  "26": {
+    question: "What do you want your next career chapter to be defined by?",
+    hint: "Pick 1 that reflects your honest priority",
+    options: [
+      { label: "Commercial impact and growth", desc: "Revenue, market share, scalable results" },
+      { label: "Deep technical mastery", desc: "Expertise, architecture, specialised knowledge" },
+      { label: "People and organisational leadership", desc: "Culture, management, team-building" },
+      { label: "Product and innovation", desc: "New ideas shipped into the world" },
+      { label: "Resilience and protection", desc: "Security, stability, risk mitigation" },
+      { label: "Creative and brand excellence", desc: "Storytelling, design, content, identity" },
+    ],
+  },
+};
+
+/* ---- Q6: age-aware tag cloud + optional textarea ---- */
+const Q6_BY_AGE: Record<AgeKey, { question: string; tagPrompt: string; tags: string[]; placeholder: string }> = {
+  "13": {
+    question: "Tell us about the things you enjoy — in your own words",
+    tagPrompt: "Tap words that describe you, then add anything extra below:",
+    tags: ["creative","helpful","curious","logical","artistic","tech","leader","builder","communicator","problem-solver","detail-oriented","storyteller"],
+    placeholder: "e.g. I love drawing characters and I want to make apps one day...",
+  },
+  "16": {
+    question: "Describe yourself in your own words — what drives you?",
+    tagPrompt: "Select any that apply, then add your own take below:",
+    tags: ["analytical","creative","strategic","technical","empathetic","entrepreneurial","detail-oriented","visual","data-driven","communicator","innovator","organiser"],
+    placeholder: "e.g. I'm obsessed with how things are designed — I always notice when an app looks off...",
+  },
+  "19": {
+    question: "What does your thinking style look like in practice?",
+    tagPrompt: "Tag what fits, then describe a specific example below if you can:",
+    tags: ["systems thinker","user-focused","data-driven","creative problem-solver","strategic","security-minded","process-oriented","research-focused","business-minded","impact-driven","detail-first","big-picture"],
+    placeholder: "e.g. I spent 3 days redesigning my department's filing system just because it felt inefficient...",
+  },
+  "22": {
+    question: "What would your closest colleague say you're known for?",
+    tagPrompt: "Select the ones that fit, then add colour below:",
+    tags: ["execution","creativity","analysis","strategy","leadership","technical depth","communication","security expertise","product sense","data fluency","entrepreneurial drive","empathy"],
+    placeholder: "e.g. Everyone comes to me to sanity-check their logic before they present it...",
+  },
+  "26": {
+    question: "What do you want your next role to say about who you are?",
+    tagPrompt: "Tag what matters most, then give a specific example of your work below:",
+    tags: ["technical authority","creative leadership","strategic influence","operational excellence","security expertise","data fluency","entrepreneurial","people-first","product-minded","commercially driven","innovative","methodical"],
+    placeholder: "e.g. I rebuilt a reporting pipeline that saved 12 hours of manual work per week...",
+  },
+};
 
 /* ============ AGE-AWARE COPY ============ */
 function ageBucket(ageRange?: string | null): "young" | "older" {
@@ -147,9 +306,15 @@ export default function Assessment() {
     ageRange: profile?.ageRange ?? null,
   }));
 
-  // Sub-option selections per question (keyed by parent label)
-  const [q1Subs, setQ1Subs] = useState<Record<string, string[]>>({});
+  // Sub-option selections (Q2 only — Q1 is now flat per spec)
   const [q2Subs, setQ2Subs] = useState<Record<string, string[]>>({});
+  // Q6 selected tags
+  const [q6Tags, setQ6Tags] = useState<string[]>([]);
+
+  const ak = ageKey(profile?.ageRange);
+  const q1Cfg = Q1_BY_AGE[ak];
+  const q5Cfg = Q5_BY_AGE[ak];
+  const q6Cfg = Q6_BY_AGE[ak];
 
   const [transitioning, setTransitioning] = useState(false);
   const [maxToast, setMaxToast] = useState<string | null>(null);
@@ -196,28 +361,26 @@ export default function Assessment() {
     Object.values(m).flat();
 
   function commitAndAnalyze() {
-    // Build final Answers with everything mapped to engine fields
-    const allInterestSubs = flatSubs(q1Subs);
+    // Q1: selected option labels + their sub-descriptions feed the keyword engine
+    const q1Selected = answers.strongSubjects;
+    const q1Descs = q1Cfg.options
+      .filter((o) => q1Selected.includes(o.label))
+      .map((o) => o.desc);
     const allPersonalitySubs = flatSubs(q2Subs);
 
-    // Append sub-keywords to free text so NLP picks them up too
+    // Append everything to free text so NLP picks it up
     const enrichedText = [
       answers.goalOrConcern || "",
-      allInterestSubs.join(", "),
+      q1Descs.join(", "),
       allPersonalitySubs.join(", "),
+      q6Tags.join(", "),
     ].filter(Boolean).join(". ");
 
     const finalAnswers: Answers = {
       ...answers,
-      // Q1 interests + subs → strongSubjects (Q1_SIGNALS)
-      strongSubjects: [...answers.strongSubjects, ...allInterestSubs],
-      // Q2 personality + subs → personalityTraits (Q7_SIGNALS)
-      personalityTraits: [...(answers.personalityTraits || []), ...allPersonalitySubs],
+      strongSubjects: [...q1Selected, ...q1Descs],
+      personalityTraits: [...(answers.personalityTraits || []), ...allPersonalitySubs, ...q6Tags],
       personality: (answers.personalityTraits || [])[0] || null,
-      // Q3 role → differentiation (drives Q8 override)
-      // already set on selection
-      // Q4 problems → workTypes (Q4_SIGNALS)
-      // Q5 pride → outputPreferences (Q6_SIGNALS)
       outputPreference: (answers.outputPreferences || [])[0] || null,
       preferenceConflict: (answers.workTypes || [])[0] || null,
       goalOrConcern: enrichedText,
@@ -229,24 +392,22 @@ export default function Assessment() {
 
   // Welcome greeting per age
   const welcomeText =
-    young
+    young === "young"
       ? `Hey ${profile?.firstName ?? "there"} 👋 I'm Koko. A few quick questions and I'll help you discover careers that fit you best.`
       : `Welcome, ${profile?.firstName ?? "there"}. I'm Koko — answer a few questions and I'll generate personalised career recommendations.`;
 
   const screens: Record<ScreenId, React.ReactNode> = {
     q1: (
-      <ExpandableMulti
+      <DescMulti
         tag="STEP 1 OF 6  ·  INTERESTS"
-        title="What kinds of things catch your attention the most?"
-        sub="Pick up to 3. Tap a card to see related areas."
+        title={q1Cfg.question}
+        sub={q1Cfg.hint}
         greeting={showGreeting ? welcomeText : null}
-        options={Q1_INTERESTS}
+        options={q1Cfg.options}
         selected={answers.strongSubjects}
-        subSelections={q1Subs}
         max={3}
         min={1}
-        onChangeMain={(arr) => setAnswers((p) => ({ ...p, strongSubjects: arr }))}
-        onChangeSubs={setQ1Subs}
+        onChange={(arr) => setAnswers((p) => ({ ...p, strongSubjects: arr }))}
         onMaxHit={() => showMaxToast("Max 3 selected")}
         onContinue={() => go(nextOf("q1"))}
       />
@@ -302,26 +463,35 @@ export default function Assessment() {
       />
     ),
     q5: (
-      <DescMulti
+      <QuestionScreen
         tag="STEP 5 OF 6  ·  PRIDE & MOTIVATION"
-        title="What would make you feel most proud?"
-        sub="Pick up to 2."
-        options={Q5_PRIDE}
-        selected={answers.outputPreferences || []}
-        max={2}
-        min={1}
-        onChange={(arr) => setAnswers((p) => ({ ...p, outputPreferences: arr }))}
-        onMaxHit={() => showMaxToast("Max 2 selected")}
-        onContinue={() => go(nextOf("q5"))}
-      />
+        title={q5Cfg.question}
+        sub={q5Cfg.hint}
+      >
+        {q5Cfg.options.map((o) => (
+          <SingleOption
+            key={o.label}
+            label={o.label}
+            sub={o.desc}
+            selected={(answers.outputPreferences || [])[0] === o.label}
+            onSelect={() => {
+              setAnswers((p) => ({ ...p, outputPreferences: [o.label] }));
+              autoAdvance("q5");
+            }}
+          />
+        ))}
+      </QuestionScreen>
     ),
     q6: (
-      <TextareaQuestion
-        young={young}
+      <TagCloudQuestion
+        cfg={q6Cfg}
+        tags={q6Tags}
+        onTagsChange={setQ6Tags}
         value={answers.goalOrConcern}
         onChange={(v) => setAnswers((p) => ({ ...p, goalOrConcern: v }))}
         onContinue={() => go("analyzing")}
         onSkip={() => {
+          setQ6Tags([]);
           setAnswers((p) => ({ ...p, goalOrConcern: "" }));
           go("analyzing");
         }}
@@ -654,9 +824,9 @@ function ExpandableMulti({
 
 /* Multi-select with description text under each option */
 function DescMulti({
-  tag, title, sub, options, selected, max, min = 1, onChange, onMaxHit, onContinue,
+  tag, title, sub, greeting, options, selected, max, min = 1, onChange, onMaxHit, onContinue,
 }: {
-  tag: string; title: string; sub?: string;
+  tag: string; title: string; sub?: string; greeting?: string | null;
   options: { label: string; desc: string }[];
   selected: string[]; max: number; min?: number;
   onChange: (next: string[]) => void;
@@ -667,7 +837,7 @@ function DescMulti({
   const canContinue = selected.length >= min;
   return (
     <>
-      <QuestionScreen tag={tag} title={title} sub={sub}>
+      <QuestionScreen tag={tag} title={title} sub={sub} greeting={greeting}>
         {options.map((o) => {
           const isSelected = selected.includes(o.label);
           const disabled = !isSelected && isFull;
@@ -738,79 +908,118 @@ function ContinueButton({ enabled, onClick }: { enabled: boolean; onClick: () =>
   );
 }
 
-function TextareaQuestion({
-  young, value, onChange, onContinue, onSkip,
+function TagCloudQuestion({
+  cfg, tags, onTagsChange, value, onChange, onContinue, onSkip,
 }: {
-  young: "young" | "older";
-  value: string; onChange: (v: string) => void; onContinue: () => void; onSkip: () => void;
+  cfg: { question: string; tagPrompt: string; tags: string[]; placeholder: string };
+  tags: string[];
+  onTagsChange: (next: string[]) => void;
+  value: string; onChange: (v: string) => void;
+  onContinue: () => void; onSkip: () => void;
 }) {
-  const [showSkip, setShowSkip] = useState(false);
-  const focusedRef = useRef(false);
-  useEffect(() => {
-    const t = window.setTimeout(() => focusedRef.current && setShowSkip(true), 1500);
-    return () => clearTimeout(t);
-  }, []);
-  const enabled = value.trim().length >= 10;
+  const PURPLE = "#895AF6";
+  const enabled = tags.length >= 1 || value.trim().length >= 10;
 
-  const title = young === "young"
-    ? "What do you enjoy doing, learning about, creating, or researching in your free time?"
-    : "What career interests, goals, skills, or industries are you exploring or considering?";
-  const placeholder = young === "young"
-    ? 'e.g. "I enjoy designing things and watching videos about apps and technology."'
-    : 'e.g. "I\'m interested in UX Design because I enjoy understanding users and creating digital experiences."';
+  function toggleTag(t: string) {
+    onTagsChange(tags.includes(t) ? tags.filter((x) => x !== t) : [...tags, t]);
+  }
 
   return (
     <>
       <QuestionScreen
         tag="STEP 6 OF 6  ·  IN YOUR OWN WORDS"
-        title={title}
-        sub="This one matters most — be honest and specific."
+        title={cfg.question}
+        sub={cfg.tagPrompt}
       >
-        <div style={{ position: "relative" }}>
-          <textarea
-            value={value}
-            onChange={(e) => onChange(e.target.value.slice(0, 400))}
-            onFocus={(e) => {
-              focusedRef.current = true;
-              window.setTimeout(() => setShowSkip(true), 1500);
-              e.currentTarget.style.borderColor = ACCENT;
-              e.currentTarget.style.boxShadow = "0 0 0 4px rgba(52,152,219,0.1)";
-            }}
-            onBlur={(e) => {
-              e.currentTarget.style.borderColor = BORDER;
-              e.currentTarget.style.boxShadow = "none";
-            }}
-            placeholder={placeholder}
-            style={{
-              width: "100%", minHeight: 140, resize: "none",
-              background: "#FFFFFF", border: `1.5px solid ${BORDER}`,
-              borderRadius: 14, padding: "16px 18px",
-              fontFamily: "inherit", fontWeight: 400, fontSize: 15, color: TEXT,
-              outline: "none", transition: "border-color 0.18s, box-shadow 0.18s",
-            }}
-          />
+        {/* Tag cloud — primary input */}
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 4 }}>
+          {cfg.tags.map((t) => {
+            const on = tags.includes(t);
+            return (
+              <button
+                key={t}
+                type="button"
+                onClick={() => toggleTag(t)}
+                style={{
+                  padding: "8px 16px",
+                  borderRadius: 100,
+                  fontSize: 13,
+                  fontWeight: 500,
+                  fontFamily: "inherit",
+                  cursor: "pointer",
+                  background: on ? PURPLE : "#FFFFFF",
+                  color: on ? "#FFFFFF" : TEXT2,
+                  border: `1.5px solid ${on ? PURPLE : BORDER}`,
+                  transition: "all 0.18s ease",
+                  boxShadow: on ? "0 2px 8px rgba(137,90,246,0.25)" : "none",
+                }}
+                onMouseEnter={(e) => {
+                  if (on) return;
+                  e.currentTarget.style.borderColor = PURPLE;
+                  e.currentTarget.style.color = PURPLE;
+                }}
+                onMouseLeave={(e) => {
+                  if (on) return;
+                  e.currentTarget.style.borderColor = BORDER;
+                  e.currentTarget.style.color = TEXT2;
+                }}
+              >
+                {t}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Optional textarea — secondary input */}
+        <div style={{ marginTop: 14 }}>
           <div style={{
-            position: "absolute", right: 12, bottom: 8,
-            fontSize: 12, color: value.length > 0 ? ACCENT : TEXT3, fontWeight: 500,
+            fontSize: 12, fontWeight: 500, color: TEXT3,
+            marginBottom: 6, textTransform: "uppercase", letterSpacing: 0.8,
           }}>
-            {value.length} / 400
+            Optional — add more in your own words
+          </div>
+          <div style={{ position: "relative" }}>
+            <textarea
+              value={value}
+              onChange={(e) => onChange(e.target.value.slice(0, 400))}
+              onFocus={(e) => {
+                e.currentTarget.style.borderColor = PURPLE;
+                e.currentTarget.style.boxShadow = "0 0 0 4px rgba(137,90,246,0.12)";
+              }}
+              onBlur={(e) => {
+                e.currentTarget.style.borderColor = BORDER;
+                e.currentTarget.style.boxShadow = "none";
+              }}
+              placeholder={cfg.placeholder}
+              style={{
+                width: "100%", minHeight: 96, resize: "none",
+                background: "#FAFAFB", border: `1px dashed ${BORDER}`,
+                borderRadius: 12, padding: "12px 14px",
+                fontFamily: "inherit", fontWeight: 400, fontSize: 14, color: TEXT,
+                outline: "none", transition: "border-color 0.18s, box-shadow 0.18s",
+              }}
+            />
+            <div style={{
+              position: "absolute", right: 10, bottom: 6,
+              fontSize: 11, color: value.length > 0 ? PURPLE : TEXT3, fontWeight: 500,
+            }}>
+              {value.length} / 400
+            </div>
           </div>
         </div>
-        {showSkip && (
-          <button
-            onClick={onSkip}
-            style={{
-              alignSelf: "flex-start", marginTop: -2,
-              background: "transparent", border: "none", cursor: "pointer",
-              fontFamily: "inherit", fontSize: 13, color: TEXT3,
-              animation: "ws-fade-in 0.3s ease",
-            }}
-            onMouseEnter={(e) => { e.currentTarget.style.color = ACCENT; e.currentTarget.style.textDecoration = "underline"; }}
-            onMouseLeave={(e) => { e.currentTarget.style.color = TEXT3; e.currentTarget.style.textDecoration = "none"; }}
-          >
-            Skip for now
-          </button>
-        )}
+
+        <button
+          onClick={onSkip}
+          style={{
+            alignSelf: "flex-start", marginTop: 4,
+            background: "transparent", border: "none", cursor: "pointer",
+            fontFamily: "inherit", fontSize: 13, color: TEXT3,
+          }}
+          onMouseEnter={(e) => { e.currentTarget.style.color = PURPLE; e.currentTarget.style.textDecoration = "underline"; }}
+          onMouseLeave={(e) => { e.currentTarget.style.color = TEXT3; e.currentTarget.style.textDecoration = "none"; }}
+        >
+          Skip for now
+        </button>
       </QuestionScreen>
       <ContinueButton enabled={enabled} onClick={onContinue} />
     </>
