@@ -433,6 +433,7 @@ export default function Assessment() {
         tag="STEP 3 OF 6  ·  YOUR ROLE"
         title="Imagine you're part of a team building something exciting. Which role would you enjoy most?"
         sub="Choose one."
+        grid
       >
         {Q3_ROLES.map((o) => (
           <SingleOption
@@ -467,6 +468,7 @@ export default function Assessment() {
         tag="STEP 5 OF 6  ·  PRIDE & MOTIVATION"
         title={q5Cfg.question}
         sub={q5Cfg.hint}
+        grid
       >
         {q5Cfg.options.map((o) => (
           <SingleOption
@@ -752,7 +754,7 @@ function ExpandableMulti({
 
   return (
     <>
-      <QuestionScreen tag={tag} title={title} sub={sub} greeting={greeting}>
+      <QuestionScreen tag={tag} title={title} sub={sub} greeting={greeting} grid>
         {options.map((o) => {
           const isSelected = selected.includes(o.label);
           const disabled = !isSelected && isFull;
@@ -843,7 +845,7 @@ function DescMulti({
   const canContinue = selected.length >= min;
   return (
     <>
-      <QuestionScreen tag={tag} title={title} sub={sub} greeting={greeting}>
+      <QuestionScreen tag={tag} title={title} sub={sub} greeting={greeting} grid>
         {options.map((o) => {
           const isSelected = selected.includes(o.label);
           const disabled = !isSelected && isFull;
