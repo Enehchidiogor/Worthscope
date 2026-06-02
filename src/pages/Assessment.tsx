@@ -361,28 +361,26 @@ export default function Assessment() {
     Object.values(m).flat();
 
   function commitAndAnalyze() {
-    // Build final Answers with everything mapped to engine fields
-    const allInterestSubs = flatSubs(q1Subs);
+    // Q1: selected option labels + their sub-descriptions feed the keyword engine
+    const q1Selected = answers.strongSubjects;
+    const q1Descs = q1Cfg.options
+      .filter((o) => q1Selected.includes(o.label))
+      .map((o) => o.desc);
     const allPersonalitySubs = flatSubs(q2Subs);
 
-    // Append sub-keywords to free text so NLP picks them up too
+    // Append everything to free text so NLP picks it up
     const enrichedText = [
       answers.goalOrConcern || "",
-      allInterestSubs.join(", "),
+      q1Descs.join(", "),
       allPersonalitySubs.join(", "),
+      q6Tags.join(", "),
     ].filter(Boolean).join(". ");
 
     const finalAnswers: Answers = {
       ...answers,
-      // Q1 interests + subs → strongSubjects (Q1_SIGNALS)
-      strongSubjects: [...answers.strongSubjects, ...allInterestSubs],
-      // Q2 personality + subs → personalityTraits (Q7_SIGNALS)
-      personalityTraits: [...(answers.personalityTraits || []), ...allPersonalitySubs],
+      strongSubjects: [...q1Selected, ...q1Descs],
+      personalityTraits: [...(answers.personalityTraits || []), ...allPersonalitySubs, ...q6Tags],
       personality: (answers.personalityTraits || [])[0] || null,
-      // Q3 role → differentiation (drives Q8 override)
-      // already set on selection
-      // Q4 problems → workTypes (Q4_SIGNALS)
-      // Q5 pride → outputPreferences (Q6_SIGNALS)
       outputPreference: (answers.outputPreferences || [])[0] || null,
       preferenceConflict: (answers.workTypes || [])[0] || null,
       goalOrConcern: enrichedText,
@@ -394,7 +392,7 @@ export default function Assessment() {
 
   // Welcome greeting per age
   const welcomeText =
-    young
+    young === "young"
       ? `Hey ${profile?.firstName ?? "there"} 👋 I'm Koko. A few quick questions and I'll help you discover careers that fit you best.`
       : `Welcome, ${profile?.firstName ?? "there"}. I'm Koko — answer a few questions and I'll generate personalised career recommendations.`;
 
