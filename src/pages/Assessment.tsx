@@ -824,9 +824,9 @@ function ExpandableMulti({
 
 /* Multi-select with description text under each option */
 function DescMulti({
-  tag, title, sub, options, selected, max, min = 1, onChange, onMaxHit, onContinue,
+  tag, title, sub, greeting, options, selected, max, min = 1, onChange, onMaxHit, onContinue,
 }: {
-  tag: string; title: string; sub?: string;
+  tag: string; title: string; sub?: string; greeting?: string | null;
   options: { label: string; desc: string }[];
   selected: string[]; max: number; min?: number;
   onChange: (next: string[]) => void;
@@ -837,7 +837,7 @@ function DescMulti({
   const canContinue = selected.length >= min;
   return (
     <>
-      <QuestionScreen tag={tag} title={title} sub={sub}>
+      <QuestionScreen tag={tag} title={title} sub={sub} greeting={greeting}>
         {options.map((o) => {
           const isSelected = selected.includes(o.label);
           const disabled = !isSelected && isFull;
