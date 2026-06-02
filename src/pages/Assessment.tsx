@@ -581,7 +581,6 @@ export default function Assessment() {
           )}
           </main>
         </div>
-      </div>
 
       {maxToast && (
         <div style={{
