@@ -516,31 +516,12 @@ export default function Assessment() {
 
       <div className="md:ml-[220px]">
         {screen !== "analyzing" && (
-        <header style={{
-          position: "sticky", top: 0, zIndex: 30, height: 64,
-          display: "flex", alignItems: "center", justifyContent: "space-between",
-          padding: "0 24px",
-          background: "rgba(255,255,255,0.85)", backdropFilter: "blur(14px)",
-          borderBottom: "1px solid rgba(52,152,219,0.1)",
-        }}>
-          <img src={logo} alt="WorthScope" style={{ height: 64, width: "auto", objectFit: "contain" }} />
-          <div style={{ position: "relative", width: 200, maxWidth: "40vw" }}>
-            <div style={{ height: 6, background: BORDER, borderRadius: 100, position: "relative" }}>
-              <div style={{
-                width: `${progressPct}%`, height: "100%", background: ACCENT, borderRadius: 100,
-                transition: "width 0.5s cubic-bezier(0.4,0,0.2,1)", position: "relative",
-              }}>
-                <span style={{
-                  position: "absolute", right: -5, top: "50%", transform: "translateY(-50%)",
-                  width: 10, height: 10, borderRadius: "50%",
-                  background: ACCENT, boxShadow: "0 0 8px rgba(52,152,219,0.6)",
-                }} />
-              </div>
-            </div>
-          </div>
-          <div style={{ fontWeight: 400, fontSize: 13, color: TEXT3, minWidth: 60, textAlign: "right" }}>
-            {`${currentStep} of ${TOTAL_STEPS}`}
-          </div>
+          <header style={{
+            position: "sticky", top: 0, zIndex: 30, height: 64,
+            display: "flex", alignItems: "center", justifyContent: "space-between",
+            padding: "0 24px",
+            background: "rgba(255,255,255,0.85)", backdropFilter: "blur(14px)",
+            borderBottom: "1px solid rgba(52,152,219,0.1)",
           }}>
             <img src={logo} alt="WorthScope" style={{ height: 64, width: "auto", objectFit: "contain" }} />
             <div style={{ position: "relative", width: 200, maxWidth: "40vw" }}>
