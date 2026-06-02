@@ -519,10 +519,9 @@ export default function Assessment() {
           <header style={{
             position: "sticky", top: 0, zIndex: 30, height: 64,
             display: "flex", alignItems: "center", justifyContent: "space-between",
-            padding: "0 24px",
             background: "rgba(255,255,255,0.85)", backdropFilter: "blur(14px)",
             borderBottom: "1px solid rgba(52,152,219,0.1)",
-          }}>
+          }} className="px-4 md:px-8">
             <img src={logo} alt="WorthScope" style={{ height: 64, width: "auto", objectFit: "contain" }} />
             <div style={{ position: "relative", width: 200, maxWidth: "40vw" }}>
               <div style={{ height: 6, background: BORDER, borderRadius: 100, position: "relative" }}>
@@ -621,9 +620,6 @@ export default function Assessment() {
         .ws-opt:active { transform: scale(0.97); transition: transform 0.15s ease; }
         .ws-chip { transition: all 0.15s ease; }
         .ws-chip:hover { background: ${ACCENT_LIGHT} !important; border-color: ${ACCENT} !important; }
-        @media (max-width: 640px) {
-          .ws-stage { padding: 24px 20px 40px !important; }
-        }
       `}</style>
     </div>
   );
