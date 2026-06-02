@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Sidebar } from "@/components/dashboard/Sidebar";
+
 import { generateCareerResults, type Answers } from "@/lib/recommendationEngine";
 import logo from "@/assets/worthscope-logo.png";
 
@@ -512,9 +512,6 @@ export default function Assessment() {
 
   return (
     <div className="min-h-screen bg-background font-poppins text-foreground" style={{ background: BG, color: TEXT }}>
-      <Sidebar activePath="/assessment" />
-
-      <div className="md:ml-[220px]">
         {screen !== "analyzing" && (
           <header style={{
             position: "sticky", top: 0, zIndex: 30, height: 64,
@@ -584,7 +581,6 @@ export default function Assessment() {
           )}
           </main>
         </div>
-      </div>
 
       {maxToast && (
         <div style={{
