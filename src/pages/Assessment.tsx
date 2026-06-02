@@ -512,9 +512,6 @@ export default function Assessment() {
 
   return (
     <div className="min-h-screen bg-background font-poppins text-foreground" style={{ background: BG, color: TEXT }}>
-      <Sidebar activePath="/assessment" />
-
-      <div className="md:ml-[220px]">
         {screen !== "analyzing" && (
           <header style={{
             position: "sticky", top: 0, zIndex: 30, height: 64,
