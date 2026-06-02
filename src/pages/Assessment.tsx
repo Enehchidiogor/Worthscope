@@ -908,79 +908,118 @@ function ContinueButton({ enabled, onClick }: { enabled: boolean; onClick: () =>
   );
 }
 
-function TextareaQuestion({
-  young, value, onChange, onContinue, onSkip,
+function TagCloudQuestion({
+  cfg, tags, onTagsChange, value, onChange, onContinue, onSkip,
 }: {
-  young: "young" | "older";
-  value: string; onChange: (v: string) => void; onContinue: () => void; onSkip: () => void;
+  cfg: { question: string; tagPrompt: string; tags: string[]; placeholder: string };
+  tags: string[];
+  onTagsChange: (next: string[]) => void;
+  value: string; onChange: (v: string) => void;
+  onContinue: () => void; onSkip: () => void;
 }) {
-  const [showSkip, setShowSkip] = useState(false);
-  const focusedRef = useRef(false);
-  useEffect(() => {
-    const t = window.setTimeout(() => focusedRef.current && setShowSkip(true), 1500);
-    return () => clearTimeout(t);
-  }, []);
-  const enabled = value.trim().length >= 10;
+  const PURPLE = "#895AF6";
+  const enabled = tags.length >= 1 || value.trim().length >= 10;
 
-  const title = young === "young"
-    ? "What do you enjoy doing, learning about, creating, or researching in your free time?"
-    : "What career interests, goals, skills, or industries are you exploring or considering?";
-  const placeholder = young === "young"
-    ? 'e.g. "I enjoy designing things and watching videos about apps and technology."'
-    : 'e.g. "I\'m interested in UX Design because I enjoy understanding users and creating digital experiences."';
+  function toggleTag(t: string) {
+    onTagsChange(tags.includes(t) ? tags.filter((x) => x !== t) : [...tags, t]);
+  }
 
   return (
     <>
       <QuestionScreen
         tag="STEP 6 OF 6  ·  IN YOUR OWN WORDS"
-        title={title}
-        sub="This one matters most — be honest and specific."
+        title={cfg.question}
+        sub={cfg.tagPrompt}
       >
-        <div style={{ position: "relative" }}>
-          <textarea
-            value={value}
-            onChange={(e) => onChange(e.target.value.slice(0, 400))}
-            onFocus={(e) => {
-              focusedRef.current = true;
-              window.setTimeout(() => setShowSkip(true), 1500);
-              e.currentTarget.style.borderColor = ACCENT;
-              e.currentTarget.style.boxShadow = "0 0 0 4px rgba(52,152,219,0.1)";
-            }}
-            onBlur={(e) => {
-              e.currentTarget.style.borderColor = BORDER;
-              e.currentTarget.style.boxShadow = "none";
-            }}
-            placeholder={placeholder}
-            style={{
-              width: "100%", minHeight: 140, resize: "none",
-              background: "#FFFFFF", border: `1.5px solid ${BORDER}`,
-              borderRadius: 14, padding: "16px 18px",
-              fontFamily: "inherit", fontWeight: 400, fontSize: 15, color: TEXT,
-              outline: "none", transition: "border-color 0.18s, box-shadow 0.18s",
-            }}
-          />
+        {/* Tag cloud — primary input */}
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 4 }}>
+          {cfg.tags.map((t) => {
+            const on = tags.includes(t);
+            return (
+              <button
+                key={t}
+                type="button"
+                onClick={() => toggleTag(t)}
+                style={{
+                  padding: "8px 16px",
+                  borderRadius: 100,
+                  fontSize: 13,
+                  fontWeight: 500,
+                  fontFamily: "inherit",
+                  cursor: "pointer",
+                  background: on ? PURPLE : "#FFFFFF",
+                  color: on ? "#FFFFFF" : TEXT2,
+                  border: `1.5px solid ${on ? PURPLE : BORDER}`,
+                  transition: "all 0.18s ease",
+                  boxShadow: on ? "0 2px 8px rgba(137,90,246,0.25)" : "none",
+                }}
+                onMouseEnter={(e) => {
+                  if (on) return;
+                  e.currentTarget.style.borderColor = PURPLE;
+                  e.currentTarget.style.color = PURPLE;
+                }}
+                onMouseLeave={(e) => {
+                  if (on) return;
+                  e.currentTarget.style.borderColor = BORDER;
+                  e.currentTarget.style.color = TEXT2;
+                }}
+              >
+                {t}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Optional textarea — secondary input */}
+        <div style={{ marginTop: 14 }}>
           <div style={{
-            position: "absolute", right: 12, bottom: 8,
-            fontSize: 12, color: value.length > 0 ? ACCENT : TEXT3, fontWeight: 500,
+            fontSize: 12, fontWeight: 500, color: TEXT3,
+            marginBottom: 6, textTransform: "uppercase", letterSpacing: 0.8,
           }}>
-            {value.length} / 400
+            Optional — add more in your own words
+          </div>
+          <div style={{ position: "relative" }}>
+            <textarea
+              value={value}
+              onChange={(e) => onChange(e.target.value.slice(0, 400))}
+              onFocus={(e) => {
+                e.currentTarget.style.borderColor = PURPLE;
+                e.currentTarget.style.boxShadow = "0 0 0 4px rgba(137,90,246,0.12)";
+              }}
+              onBlur={(e) => {
+                e.currentTarget.style.borderColor = BORDER;
+                e.currentTarget.style.boxShadow = "none";
+              }}
+              placeholder={cfg.placeholder}
+              style={{
+                width: "100%", minHeight: 96, resize: "none",
+                background: "#FAFAFB", border: `1px dashed ${BORDER}`,
+                borderRadius: 12, padding: "12px 14px",
+                fontFamily: "inherit", fontWeight: 400, fontSize: 14, color: TEXT,
+                outline: "none", transition: "border-color 0.18s, box-shadow 0.18s",
+              }}
+            />
+            <div style={{
+              position: "absolute", right: 10, bottom: 6,
+              fontSize: 11, color: value.length > 0 ? PURPLE : TEXT3, fontWeight: 500,
+            }}>
+              {value.length} / 400
+            </div>
           </div>
         </div>
-        {showSkip && (
-          <button
-            onClick={onSkip}
-            style={{
-              alignSelf: "flex-start", marginTop: -2,
-              background: "transparent", border: "none", cursor: "pointer",
-              fontFamily: "inherit", fontSize: 13, color: TEXT3,
-              animation: "ws-fade-in 0.3s ease",
-            }}
-            onMouseEnter={(e) => { e.currentTarget.style.color = ACCENT; e.currentTarget.style.textDecoration = "underline"; }}
-            onMouseLeave={(e) => { e.currentTarget.style.color = TEXT3; e.currentTarget.style.textDecoration = "none"; }}
-          >
-            Skip for now
-          </button>
-        )}
+
+        <button
+          onClick={onSkip}
+          style={{
+            alignSelf: "flex-start", marginTop: 4,
+            background: "transparent", border: "none", cursor: "pointer",
+            fontFamily: "inherit", fontSize: 13, color: TEXT3,
+          }}
+          onMouseEnter={(e) => { e.currentTarget.style.color = PURPLE; e.currentTarget.style.textDecoration = "underline"; }}
+          onMouseLeave={(e) => { e.currentTarget.style.color = TEXT3; e.currentTarget.style.textDecoration = "none"; }}
+        >
+          Skip for now
+        </button>
       </QuestionScreen>
       <ContinueButton enabled={enabled} onClick={onContinue} />
     </>
