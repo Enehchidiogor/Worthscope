@@ -306,9 +306,15 @@ export default function Assessment() {
     ageRange: profile?.ageRange ?? null,
   }));
 
-  // Sub-option selections per question (keyed by parent label)
-  const [q1Subs, setQ1Subs] = useState<Record<string, string[]>>({});
+  // Sub-option selections (Q2 only — Q1 is now flat per spec)
   const [q2Subs, setQ2Subs] = useState<Record<string, string[]>>({});
+  // Q6 selected tags
+  const [q6Tags, setQ6Tags] = useState<string[]>([]);
+
+  const ak = ageKey(profile?.ageRange);
+  const q1Cfg = Q1_BY_AGE[ak];
+  const q5Cfg = Q5_BY_AGE[ak];
+  const q6Cfg = Q6_BY_AGE[ak];
 
   const [transitioning, setTransitioning] = useState(false);
   const [maxToast, setMaxToast] = useState<string | null>(null);
