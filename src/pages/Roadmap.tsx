@@ -17,7 +17,7 @@ const Roadmap = () => {
   const [nodes, setNodes] = useState<RoadmapNode[]>(initial.nodes);
   const [phasesMeta, setPhasesMeta] = useState(initial.phases);
   const [openNode, setOpenNode] = useState<RoadmapNode | null>(null);
-  const careerTitle = getChosenCareer()?.title;
+  const careerTitle = getChosenCareer()?.title || initial.phases.length ? (getChosenCareer()?.title ?? null) : null;
 
   useEffect(() => {
     const refresh = () => {
