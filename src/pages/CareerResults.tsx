@@ -48,6 +48,8 @@ export default function CareerResults() {
       category: r.category,
       percentage: r.percentage,
     });
+    // Fire-and-forget — DB write shouldn't block navigation.
+    persistCareerPath(r.title).catch(() => {});
     navigate("/dashboard");
   };
 
