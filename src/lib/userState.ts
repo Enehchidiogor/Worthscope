@@ -37,7 +37,35 @@ const K = {
   chosen: "worthscope_chosen_career",
   progress: "worthscope_progress",
   firstLogin: "worthscope_first_login",
+  lessons: "worthscope_mission_lessons",
+  lessonsDone: "worthscope_mission_lesson_done",
 } as const;
+
+/* ---------- Per-mission lesson cache + completion ---------- */
+export function getSavedLesson(missionId: string): string | null {
+  if (typeof window === "undefined") return null;
+  const map = safeParse<Record<string, string>>(localStorage.getItem(K.lessons)) || {};
+  return map[missionId] || null;
+}
+
+export function saveLesson(missionId: string, content: string) {
+  const map = safeParse<Record<string, string>>(localStorage.getItem(K.lessons)) || {};
+  map[missionId] = content;
+  localStorage.setItem(K.lessons, JSON.stringify(map));
+}
+
+export function isLessonComplete(missionId: string): boolean {
+  if (typeof window === "undefined") return false;
+  const map = safeParse<Record<string, boolean>>(localStorage.getItem(K.lessonsDone)) || {};
+  return !!map[missionId];
+}
+
+export function markLessonComplete(missionId: string) {
+  const map = safeParse<Record<string, boolean>>(localStorage.getItem(K.lessonsDone)) || {};
+  map[missionId] = true;
+  localStorage.setItem(K.lessonsDone, JSON.stringify(map));
+  window.dispatchEvent(new CustomEvent("worthscope:progress"));
+}
 
 const safeParse = <T,>(raw: string | null): T | null => {
   if (!raw) return null;

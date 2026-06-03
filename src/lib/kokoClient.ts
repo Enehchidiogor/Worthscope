@@ -11,6 +11,8 @@ export type KokoMission = {
   description?: string;
   career?: string;
   phase?: string;
+  userName?: string;
+  userAge?: number;
 };
 
 export type KokoMsg = { role: "user" | "assistant"; content: string };
@@ -49,7 +51,7 @@ export async function streamKokoChat({
   onError,
 }: {
   messages: KokoMsg[];
-  intent?: "chat" | "stuck" | "verify";
+  intent?: "chat" | "stuck" | "verify" | "lesson" | "qa";
   mission?: KokoMission;
   onDelta: (chunk: string) => void;
   onDone: () => void;
