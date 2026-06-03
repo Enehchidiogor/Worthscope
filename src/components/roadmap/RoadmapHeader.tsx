@@ -31,11 +31,11 @@ export const RoadmapHeader = ({ progress, careerTitle }: Props) => {
             Your Career Goal
           </div>
           <h2 className="mt-2.5 text-[28px] font-bold tracking-[-0.5px] text-foreground">
-            Product Designer
+            {title}
           </h2>
           <p className="mt-2 max-w-[420px] text-[14px] leading-[1.7] text-text2">
             This roadmap is designed to guide you step-by-step toward becoming a
-            Product Designer.
+            {" "}{title}.
           </p>
 
           <div className="mt-5">
