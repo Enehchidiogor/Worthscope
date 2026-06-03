@@ -17,7 +17,7 @@ const Roadmap = () => {
   const [nodes, setNodes] = useState<RoadmapNode[]>(initial.nodes);
   const [phasesMeta, setPhasesMeta] = useState(initial.phases);
   const [openNode, setOpenNode] = useState<RoadmapNode | null>(null);
-  const careerTitle = getChosenCareer()?.title;
+  const careerTitle = getChosenCareer()?.title ?? null;
 
   useEffect(() => {
     const refresh = () => {
@@ -83,7 +83,7 @@ const Roadmap = () => {
           <div className="grid grid-cols-1 gap-7 lg:grid-cols-[1fr_300px]">
             {/* LEFT: roadmap */}
             <section>
-              <RoadmapHeader progress={progress} />
+              <RoadmapHeader progress={progress} careerTitle={careerTitle} />
 
               {/* Vertical path container */}
               <div className="relative">
