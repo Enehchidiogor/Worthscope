@@ -1,0 +1,22 @@
+# WorthScope
+
+> AI-powered career intelligence platform that helps young people discover careers, build personalized roadmaps, and complete guided missions with Koko, an AI mentor.
+
+WorthScope guides users from a career assessment through a tailored roadmap of phases, missions, and skill-building activities. Koko, the built-in AI mentor, generates lessons, answers questions, and surfaces curated learning videos for each mission.
+
+## Pages
+
+- [Home](/): Overview of WorthScope, how the assessment and roadmap work, and the value Koko brings to career discovery.
+- [Sign in](/signin): Returning users sign in to access their dashboard, roadmap, and missions.
+- [Sign up](/signup): Create an account to start the career assessment and unlock a personalized roadmap.
+- [Career Assessment](/assessment): Multi-step assessment that scores interests, skills, and motivations to recommend matching careers.
+- [Career Results](/career-results): Top recommended career paths from the assessment, with the option to choose a preferred path.
+- [Career Roadmap](/roadmap): Personalized phase-by-phase roadmap toward the selected career, with missions to complete at each step.
+- [Missions](/missions): Active learning missions with Koko-generated lessons and curated "Watch & Learn" videos.
+- [Skill Progress](/skills): Weekly skill tracking, breakdown by competency, and suggested focus areas.
+- [Career Opportunities](/career): Curated job and opportunity listings aligned with the user's chosen career path.
+
+## Optional
+
+- [Dashboard](/dashboard): Authenticated home for active users — greeting, current phase, missions, and progress.
+- [Settings](/settings): Account, notification, and preference settings.

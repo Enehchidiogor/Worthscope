@@ -14,6 +14,7 @@ import { ShareProgressCard } from "@/components/dashboard/ShareProgressCard";
 import { MobileTabBar } from "@/components/dashboard/MobileTabBar";
 import { WelcomeToast } from "@/components/dashboard/WelcomeToast";
 import { getProfile, hasResults, isFirstLogin, markLoggedIn, tickStreak } from "@/lib/userState";
+import { SEO } from "@/components/SEO";
 
 const Index = () => {
   const profile = getProfile();
@@ -43,6 +44,11 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background font-poppins text-foreground">
+      <SEO
+        title="Dashboard — WorthScope"
+        description="Your WorthScope dashboard — current phase, active missions, and progress at a glance."
+        path="/dashboard"
+      />
       <Sidebar activePath="/dashboard" />
 
       <div className="md:ml-[220px]">

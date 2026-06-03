@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import logo from "@/assets/worthscope-logo.png";
+import { SEO } from "@/components/SEO";
+
 
 
 /* WorthScope — Landing Page
@@ -117,6 +119,27 @@ export default function Landing() {
 
   return (
     <div style={{ background: "#FFFFFF", color: TEXT, fontFamily: FONT, minHeight: "100vh" }}>
+      <SEO
+        title="WorthScope — AI Career Discovery & Roadmaps for Young People"
+        description="Discover careers that match you, get a personalized roadmap, and learn with Koko — your AI mentor. Take the free WorthScope career assessment."
+        path="/"
+        jsonLd={[
+          {
+            "@context": "https://schema.org",
+            "@type": "Organization",
+            name: "WorthScope",
+            url: "https://ambition-beacon.lovable.app",
+            description: "AI-powered career discovery and personalized roadmaps for young people.",
+          },
+          {
+            "@context": "https://schema.org",
+            "@type": "WebSite",
+            name: "WorthScope",
+            url: "https://ambition-beacon.lovable.app",
+          },
+        ]}
+      />
+
       {/* ─── Fonts + global animations ─── */}
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap');
@@ -223,8 +246,9 @@ export default function Landing() {
             ))}
           </div>
         )}
-      </header>
+     </header>
 
+     <main>
       {/* ───────────── HERO ───────────── */}
       <section id="hero" style={{ minHeight: "100vh", paddingTop: 120, paddingBottom: 80, display: "flex", alignItems: "center", position: "relative", overflow: "hidden" }}>
         {/* Soft background accents */}
@@ -396,7 +420,9 @@ export default function Landing() {
       </section>
 
       {/* ───────────── FOOTER ───────────── */}
-      <footer style={{ background: "#111111", color: "#9CA3AF", padding: "70px 0 30px" }}>
+     </main>
+
+     <footer style={{ background: "#111111", color: "#9CA3AF", padding: "70px 0 30px" }}>
         <div style={{ maxWidth: 1200, margin: "0 auto", padding: "0 24px" }}>
           <div style={{ display: "grid", gridTemplateColumns: "1.4fr 1fr 1fr 1fr", gap: 40 }}>
             <div>

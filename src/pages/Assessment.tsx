@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 
 import { generateCareerResults, type Answers } from "@/lib/recommendationEngine";
 import logo from "@/assets/worthscope-logo.png";
+import { SEO } from "@/components/SEO";
 
 /* WorthScope — CRS v4.0: 6-Question Career Assessment.
    Reads worthscope_user_profile for context. */
@@ -1068,6 +1069,11 @@ function Analyzing({ onDone, onReadyToCompute }: { onDone: () => void; onReadyTo
       display: "flex", alignItems: "center", justifyContent: "center",
       padding: 40, textAlign: "center",
     }}>
+      <SEO
+        title="Career Assessment — WorthScope"
+        description="Take WorthScope's guided career assessment to discover careers that match your interests, strengths, and motivations."
+        path="/assessment"
+      />
       <div style={{ animation: "ws-fade-up 0.5s ease both" }}>
         <div style={{
           width: 80, height: 80, borderRadius: "50%",

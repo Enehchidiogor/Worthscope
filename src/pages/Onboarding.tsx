@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import logo from "@/assets/worthscope-logo.png";
+import { SEO } from "@/components/SEO";
 
 /* WorthScope — Stage 1: User Setup Screen
    Collects identity context ONCE: name, age, education level, class/level.
@@ -114,6 +115,11 @@ export default function Onboarding() {
 
   return (
     <div style={{ minHeight: "100vh", background: BG, fontFamily: FONT, color: TEXT, display: "flex", flexDirection: "column" }}>
+      <SEO
+        title="Get Started — WorthScope"
+        description="Tell us a little about you so WorthScope can personalize your career assessment and roadmap."
+        path="/onboarding"
+      />
       {/* Top bar */}
       <header
         style={{

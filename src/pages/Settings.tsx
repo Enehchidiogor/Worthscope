@@ -5,6 +5,7 @@ import { TopBar } from "@/components/dashboard/TopBar";
 import { MobileTabBar } from "@/components/dashboard/MobileTabBar";
 import { InviteParentModal } from "@/components/parent/InviteParentModal";
 import { getProfile } from "@/lib/userState";
+import { SEO } from "@/components/SEO";
 
 /* WorthScope — Settings Page
    5 grouped white cards on a soft-blue page bg.
@@ -251,6 +252,11 @@ const Settings = () => {
 
   return (
     <div className="min-h-screen font-poppins" style={{ background: pageBg, color: textColor, transition: "all 0.3s ease" }}>
+      <SEO
+        title="Settings — WorthScope"
+        description="Manage notifications, preferences, and account settings for WorthScope."
+        path="/settings"
+      />
       <Sidebar activePath="/settings" />
 
       <div className="md:ml-[220px]">

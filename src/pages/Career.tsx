@@ -5,6 +5,7 @@ import { IconBell, IconLock } from "@/components/dashboard/icons";
 import { JobCard } from "@/components/career/JobCard";
 import { JOBS } from "@/components/career/jobsData";
 import { getChosenCareer } from "@/lib/userState";
+import { SEO } from "@/components/SEO";
 
 /* WorthScope — Career Opportunities Page
    Two complete states (locked / unlocked) toggleable via
@@ -86,6 +87,11 @@ const Career = () => {
   // ===================================================
   return (
     <div className="min-h-screen" style={{ background: "#F4F9FE", fontFamily: "'Poppins', sans-serif" }}>
+      <SEO
+        title="Career Opportunities — WorthScope"
+        description="Browse curated job and opportunity listings aligned with your chosen career path."
+        path="/career"
+      />
       <Sidebar activePath="/career" />
 
       {/* Top bar */}

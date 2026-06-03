@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import logo from "@/assets/worthscope-logo.png";
 import { Field, inputStyle, eyeBtn, googleBtn, Divider, EyeIcon, GoogleG, SharedAuthStyles } from "./SignIn";
+import { SEO } from "@/components/SEO";
 
 
 const ACCENT = "#3498DB";
@@ -38,6 +39,11 @@ export default function SignUp() {
 
   return (
     <div style={{ minHeight: "100vh", background: "#fff", fontFamily: FONT, color: TEXT, position: "relative" }}>
+      <SEO
+        title="Create Account — WorthScope"
+        description="Create your free WorthScope account to start the career assessment and build a personalized roadmap."
+        path="/signup"
+      />
       <div style={{ position: "absolute", top: 0, left: 0, padding: "20px 28px", opacity: 0, animation: "ws-logo 0.3s ease forwards" }}>
         <Link to="/" style={{ display: "flex", alignItems: "center", textDecoration: "none" }}>
           <img src={logo} alt="WorthScope" style={{ height: 72, width: "auto", objectFit: "contain", display: "block" }} />
