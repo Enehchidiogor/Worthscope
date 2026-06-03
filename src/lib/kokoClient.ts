@@ -1,7 +1,9 @@
 /* WorthScope — Koko client helpers.
    Streams chat from the koko-chat edge function and fetches videos from
-   koko-youtube. Pure browser-side; relies on the Lovable Cloud project URL
-   from VITE_SUPABASE_URL. */
+   koko-youtube. Uses the user's auth token when present so the edge
+   function can look up their profile server-side. */
+
+import { supabase } from "@/integrations/supabase/client";
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string;
 const PUBLISHABLE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string;
@@ -13,6 +15,8 @@ export type KokoMission = {
   phase?: string;
   userName?: string;
   userAge?: number;
+  educationLevel?: string;
+  learningSignal?: "needs support" | "on track" | "ready to level up";
 };
 
 export type KokoMsg = { role: "user" | "assistant"; content: string };
@@ -27,6 +31,15 @@ export type KokoVideo = {
   views: number;
   score: number;
 };
+
+async function authHeaders(): Promise<Record<string, string>> {
+  const { data } = await supabase.auth.getSession();
+  const token = data.session?.access_token;
+  return {
+    "Content-Type": "application/json",
+    Authorization: `Bearer ${token || PUBLISHABLE_KEY}`,
+  };
+}
 
 export async function fetchKokoVideos(query: string, max = 3): Promise<KokoVideo[]> {
   const res = await fetch(`${SUPABASE_URL}/functions/v1/koko-youtube`, {
@@ -46,25 +59,27 @@ export async function streamKokoChat({
   messages,
   intent = "chat",
   mission,
+  brief,
+  submission,
   onDelta,
   onDone,
   onError,
 }: {
   messages: KokoMsg[];
-  intent?: "chat" | "stuck" | "verify" | "lesson" | "qa";
+  intent?: "chat" | "stuck" | "verify" | "lesson" | "qa" | "project" | "assess";
   mission?: KokoMission;
+  brief?: string;
+  submission?: string;
   onDelta: (chunk: string) => void;
   onDone: () => void;
   onError?: (err: Error) => void;
 }) {
   try {
+    const headers = await authHeaders();
     const res = await fetch(`${SUPABASE_URL}/functions/v1/koko-chat`, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${PUBLISHABLE_KEY}`,
-      },
-      body: JSON.stringify({ messages, intent, mission }),
+      headers,
+      body: JSON.stringify({ messages, intent, mission, brief, submission }),
     });
     if (!res.ok || !res.body) {
       const errBody = await res.json().catch(() => ({ error: `HTTP ${res.status}` }));
@@ -98,7 +113,6 @@ export async function streamKokoChat({
           const content: string | undefined = parsed.choices?.[0]?.delta?.content;
           if (content) onDelta(content);
         } catch {
-          // partial — push back and wait
           buffer = line + "\n" + buffer;
           break;
         }
