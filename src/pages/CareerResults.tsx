@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { CareerIcon } from "@/components/career/CareerIcon";
 import { loadResults, type CareerResult } from "@/lib/recommendationEngine";
 import { setChosenCareer } from "@/lib/userState";
+import { persistCareerPath } from "@/lib/authClient";
 import logo from "@/assets/worthscope-logo.png";
 import { SEO } from "@/components/SEO";
 
@@ -47,6 +48,8 @@ export default function CareerResults() {
       category: r.category,
       percentage: r.percentage,
     });
+    // Fire-and-forget — DB write shouldn't block navigation.
+    persistCareerPath(r.title).catch(() => {});
     navigate("/dashboard");
   };
 

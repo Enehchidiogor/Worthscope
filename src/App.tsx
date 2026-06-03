@@ -20,8 +20,11 @@ import ParentAccess from "./pages/ParentAccess.tsx";
 import Profile from "./pages/Profile.tsx";
 import NotFound from "./pages/NotFound.tsx";
 import { KokoFloatingChat } from "@/components/koko/KokoFloatingChat";
+import { AuthGate } from "@/components/auth/AuthGate";
 
 const queryClient = new QueryClient();
+
+const Gated = ({ children }: { children: React.ReactNode }) => <AuthGate>{children}</AuthGate>;
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
@@ -30,25 +33,29 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <Routes>
+          {/* Public */}
           <Route path="/" element={<Landing />} />
           <Route path="/signin" element={<SignIn />} />
           <Route path="/signup" element={<SignUp />} />
-          <Route path="/onboarding" element={<Onboarding />} />
-          <Route path="/dashboard" element={<Index />} />
-          <Route path="/roadmap" element={<Roadmap />} />
-          <Route path="/mission" element={<Mission />} />
-          <Route path="/missions" element={<Mission />} />
-          <Route path="/skills" element={<Skills />} />
-          <Route path="/career" element={<Career />} />
-          <Route path="/assessment" element={<Assessment />} />
-          <Route path="/career-results" element={<CareerResults />} />
-          <Route path="/settings" element={<Settings />} />
-          <Route path="/profile" element={<Profile />} />
           <Route path="/parent/:token" element={<ParentAccess />} />
           <Route path="/parent-view/:token" element={<ParentView />} />
           <Route path="/parent-view" element={<ParentView />} />
           <Route path="/parent-dashboard" element={<ParentView />} />
-          <Route path="/koko" element={<Index />} />
+
+          {/* Protected */}
+          <Route path="/onboarding" element={<Gated><Onboarding /></Gated>} />
+          <Route path="/dashboard" element={<Gated><Index /></Gated>} />
+          <Route path="/roadmap" element={<Gated><Roadmap /></Gated>} />
+          <Route path="/mission" element={<Gated><Mission /></Gated>} />
+          <Route path="/missions" element={<Gated><Mission /></Gated>} />
+          <Route path="/skills" element={<Gated><Skills /></Gated>} />
+          <Route path="/career" element={<Gated><Career /></Gated>} />
+          <Route path="/assessment" element={<Gated><Assessment /></Gated>} />
+          <Route path="/career-results" element={<Gated><CareerResults /></Gated>} />
+          <Route path="/settings" element={<Gated><Settings /></Gated>} />
+          <Route path="/profile" element={<Gated><Profile /></Gated>} />
+          <Route path="/koko" element={<Gated><Index /></Gated>} />
+
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

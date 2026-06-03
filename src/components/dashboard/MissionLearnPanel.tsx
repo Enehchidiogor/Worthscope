@@ -1,13 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import { streamKokoChat, fetchKokoVideos, type KokoMsg, type KokoVideo } from "@/lib/kokoClient";
-import {
-  getProfile,
-  getChosenCareer,
-  getSavedLesson,
-  saveLesson,
-  isLessonComplete,
-  markLessonComplete,
-} from "@/lib/userState";
+import { getProfile, getChosenCareer, markLessonComplete } from "@/lib/userState";
+import { supabase } from "@/integrations/supabase/client";
+import { aggregateSignal, type LearningSignal } from "@/lib/learningSignal";
 
 type Props = {
   missionId: string;
@@ -18,84 +13,126 @@ type Props = {
 type QA = { role: "koko" | "user"; text: string };
 
 const ERR = "Koko is having a moment — please try again shortly.";
+const KOKO_PURPLE = "#895AF6";
 
-/* Very small markdown-ish renderer: bold (**x**) + bullets (- ).
-   The lesson prompt forces a known structure so this is enough. */
-function renderLesson(raw: string) {
+/* ---------- Lightweight markdown renderer ---------- */
+function renderMarkdown(raw: string) {
   const lines = raw.split("\n").map((l) => l.trimEnd());
-  let hook = "";
-  const out: { type: "p" | "ul" | "hook"; content: string | string[] }[] = [];
+  type Block =
+    | { type: "hook"; text: string }
+    | { type: "h2"; text: string }
+    | { type: "h3"; text: string }
+    | { type: "p"; text: string }
+    | { type: "ul"; items: string[] }
+    | { type: "ol"; items: string[] };
+  const blocks: Block[] = [];
   let bullets: string[] = [];
+  let numbered: string[] = [];
 
-  const flushBullets = () => {
-    if (bullets.length) {
-      out.push({ type: "ul", content: bullets });
-      bullets = [];
-    }
+  const flush = () => {
+    if (bullets.length) { blocks.push({ type: "ul", items: bullets }); bullets = []; }
+    if (numbered.length) { blocks.push({ type: "ol", items: numbered }); numbered = []; }
   };
 
-  for (const line of lines) {
-    if (!line.trim()) {
-      flushBullets();
+  for (const raw of lines) {
+    const line = raw;
+    if (!line.trim()) { flush(); continue; }
+    if (/^HOOK:/i.test(line) || /^\*\*HOOK:\*\*/i.test(line)) {
+      flush();
+      blocks.push({ type: "hook", text: line.replace(/^\**HOOK:\**\s*/i, "").trim() });
       continue;
     }
-    if (line.startsWith("HOOK:") || line.startsWith("**HOOK:**")) {
-      hook = line.replace(/^\**HOOK:\**\s*/i, "").trim();
-      continue;
-    }
-    if (line.startsWith("- ") || line.startsWith("* ")) {
-      bullets.push(line.slice(2).trim());
-      continue;
-    }
-    flushBullets();
-    out.push({ type: "p", content: line });
+    if (line.startsWith("### ")) { flush(); blocks.push({ type: "h3", text: line.slice(4).trim() }); continue; }
+    if (line.startsWith("## "))  { flush(); blocks.push({ type: "h2", text: line.slice(3).trim() }); continue; }
+    if (/^\s*[-*]\s+/.test(line)) { bullets.push(line.replace(/^\s*[-*]\s+/, "").trim()); continue; }
+    if (/^\s*\d+\.\s+/.test(line)) { numbered.push(line.replace(/^\s*\d+\.\s+/, "").trim()); continue; }
+    flush();
+    blocks.push({ type: "p", text: line });
   }
-  flushBullets();
+  flush();
 
-  const renderInline = (s: string) => {
+  const inline = (s: string) => {
     const parts = s.split(/(\*\*[^*]+\*\*)/g);
     return parts.map((p, i) =>
       p.startsWith("**") && p.endsWith("**") ? (
-        <strong key={i} className="font-semibold text-foreground">
-          {p.slice(2, -2)}
-        </strong>
-      ) : (
-        <span key={i}>{p}</span>
-      ),
+        <strong key={i} className="font-semibold text-foreground">{p.slice(2, -2)}</strong>
+      ) : <span key={i}>{p}</span>
     );
   };
 
-  return (
-    <div className="text-[14px] leading-[1.7] text-foreground">
-      {hook && (
-        <p className="mb-3 text-[16px] font-semibold leading-snug text-accent">
-          {renderInline(hook)}
+  // Group "How AI helps" h3/h2 + following content into a highlighted block.
+  const out: React.ReactNode[] = [];
+  let i = 0;
+  while (i < blocks.length) {
+    const b = blocks[i];
+    if (b.type === "hook") {
+      out.push(
+        <p key={i} className="mb-4 text-[16px] font-semibold leading-snug" style={{ color: KOKO_PURPLE }}>
+          {inline(b.text)}
         </p>
-      )}
-      {out.map((b, i) =>
-        b.type === "p" ? (
-          <p key={i} className="mb-2.5 text-text2">
-            {renderInline(b.content as string)}
-          </p>
-        ) : (
-          <ul key={i} className="my-3 flex flex-col gap-1.5 pl-1">
-            {(b.content as string[]).map((li, j) => (
-              <li key={j} className="flex gap-2 text-foreground">
-                <span aria-hidden className="mt-[7px] h-1.5 w-1.5 shrink-0 rounded-full bg-accent" />
-                <span className="font-medium">{renderInline(li)}</span>
-              </li>
-            ))}
-          </ul>
-        ),
-      )}
-    </div>
+      );
+      i++;
+    } else if ((b.type === "h2" || b.type === "h3") && /how ai helps/i.test(b.text)) {
+      // Collect this heading + everything until next h2/h3.
+      const group: Block[] = [b];
+      i++;
+      while (i < blocks.length && blocks[i].type !== "h2" && blocks[i].type !== "h3") {
+        group.push(blocks[i]); i++;
+      }
+      out.push(
+        <aside
+          key={`ai-${i}`}
+          className="my-4 rounded-r-lg p-3.5"
+          style={{ borderLeft: `3px solid ${KOKO_PURPLE}`, background: "rgba(137, 90, 246, 0.06)" }}
+        >
+          <div className="mb-2 text-[12px] font-bold tracking-wide" style={{ color: KOKO_PURPLE }}>
+            ✦ {group[0].type === "h2" || group[0].type === "h3" ? group[0].text : "How AI helps"}
+          </div>
+          {group.slice(1).map((g, j) => renderBlock(g, j, inline))}
+        </aside>
+      );
+    } else {
+      out.push(renderBlock(b, i, inline));
+      i++;
+    }
+  }
+
+  return <div className="text-[14px] leading-[1.7] text-foreground">{out}</div>;
+}
+
+function renderBlock(
+  b: { type: "p" | "h2" | "h3" | "ul" | "ol" | "hook"; text?: string; items?: string[] } | any,
+  key: number,
+  inline: (s: string) => React.ReactNode,
+): React.ReactNode {
+  if (b.type === "p")  return <p key={key} className="mb-2.5 text-text2">{inline(b.text)}</p>;
+  if (b.type === "h2") return <h3 key={key} className="mt-3 mb-2 text-[15px] font-semibold text-foreground">{inline(b.text)}</h3>;
+  if (b.type === "h3") return <h4 key={key} className="mt-3 mb-1.5 text-[13px] font-semibold text-foreground">{inline(b.text)}</h4>;
+  if (b.type === "ul") return (
+    <ul key={key} className="my-2 flex flex-col gap-1.5 pl-1">
+      {b.items.map((li: string, j: number) => (
+        <li key={j} className="flex gap-2 text-foreground">
+          <span aria-hidden className="mt-[7px] h-1.5 w-1.5 shrink-0 rounded-full" style={{ background: KOKO_PURPLE }} />
+          <span className="font-medium">{inline(li)}</span>
+        </li>
+      ))}
+    </ul>
   );
+  if (b.type === "ol") return (
+    <ol key={key} className="my-2 flex flex-col gap-1.5 pl-5 list-decimal">
+      {b.items.map((li: string, j: number) => (
+        <li key={j} className="text-foreground"><span className="font-medium">{inline(li)}</span></li>
+      ))}
+    </ol>
+  );
+  return null;
 }
 
 export const MissionLearnPanel = ({ missionId, missionTitle, missionDescription }: Props) => {
   const profile = getProfile();
   const career = getChosenCareer();
-  const missionMeta = {
+
+  const baseMission = {
     title: missionTitle,
     description: missionDescription,
     career: career?.title,
@@ -103,16 +140,37 @@ export const MissionLearnPanel = ({ missionId, missionTitle, missionDescription 
     userAge: typeof profile?.age === "number" ? profile.age : undefined,
   };
 
-  const [lesson, setLesson] = useState<string>(() => getSavedLesson(missionId) || "");
-  const [loadingLesson, setLoadingLesson] = useState(false);
+  const [lesson, setLesson] = useState<string>("");
+  const [loadingLesson, setLoadingLesson] = useState(true);
   const [lessonErr, setLessonErr] = useState<string | null>(null);
-  const [completed, setCompleted] = useState<boolean>(() => isLessonComplete(missionId));
+  const [completed, setCompleted] = useState<boolean>(false);
+  const [hydrated, setHydrated] = useState(false);
 
   const startedRef = useRef(false);
 
-  // Generate lesson once on first mount (if not cached)
+  // 1. Hydrate from DB on mount.
   useEffect(() => {
-    if (lesson || startedRef.current) return;
+    (async () => {
+      const { data: u } = await supabase.auth.getUser();
+      if (!u.user) { setHydrated(true); setLoadingLesson(false); return; }
+      const { data: row } = await supabase
+        .from("mission_lessons")
+        .select("lesson_md, completed_at")
+        .eq("user_id", u.user.id)
+        .eq("mission_id", missionId)
+        .maybeSingle();
+      if (row?.lesson_md) {
+        setLesson(row.lesson_md);
+        setLoadingLesson(false);
+      }
+      if (row?.completed_at) setCompleted(true);
+      setHydrated(true);
+    })();
+  }, [missionId]);
+
+  // 2. Generate lesson once if not cached.
+  useEffect(() => {
+    if (!hydrated || lesson || startedRef.current) return;
     startedRef.current = true;
     setLoadingLesson(true);
     setLessonErr(null);
@@ -120,47 +178,52 @@ export const MissionLearnPanel = ({ missionId, missionTitle, missionDescription 
     streamKokoChat({
       messages: [],
       intent: "lesson",
-      mission: missionMeta,
-      onDelta: (c) => {
-        acc += c;
-        setLesson(acc);
-      },
-      onDone: () => {
+      mission: baseMission,
+      onDelta: (c) => { acc += c; setLesson(acc); },
+      onDone: async () => {
         setLoadingLesson(false);
-        if (acc.trim()) saveLesson(missionId, acc);
-        else setLessonErr(ERR);
+        if (!acc.trim()) { setLessonErr(ERR); return; }
+        const { data: u } = await supabase.auth.getUser();
+        if (u.user) {
+          await supabase.from("mission_lessons").upsert({
+            user_id: u.user.id,
+            mission_id: missionId,
+            mission_title: missionTitle,
+            lesson_md: acc,
+          }, { onConflict: "user_id,mission_id" });
+        }
       },
-      onError: () => {
-        setLoadingLesson(false);
-        setLessonErr(ERR);
-      },
+      onError: () => { setLoadingLesson(false); setLessonErr(ERR); },
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [hydrated]);
 
-  /* ---------- Q&A ---------- */
+  /* ---------- Q&A + learning signal ---------- */
   const [qaInput, setQaInput] = useState("");
   const [qaMessages, setQaMessages] = useState<QA[]>([]);
   const [qaThinking, setQaThinking] = useState(false);
+  const learningSignal: LearningSignal = aggregateSignal(qaMessages);
 
   const askKoko = async () => {
     const q = qaInput.trim();
     if (!q || qaThinking) return;
     setQaInput("");
-    setQaMessages((m) => [...m, { role: "user", text: q }]);
+    const nextMsgs: QA[] = [...qaMessages, { role: "user", text: q }];
+    setQaMessages(nextMsgs);
     setQaThinking(true);
+    const signal = aggregateSignal(nextMsgs);
 
-    const history: KokoMsg[] = [
-      ...qaMessages.map((m) => ({ role: m.role === "koko" ? "assistant" : "user", content: m.text } as KokoMsg)),
-      { role: "user", content: q },
-    ];
+    const history: KokoMsg[] = nextMsgs.map((m) => ({
+      role: m.role === "koko" ? "assistant" : "user",
+      content: m.text,
+    } as KokoMsg));
 
     let acc = "";
     let started = false;
     await streamKokoChat({
       messages: history,
       intent: "qa",
-      mission: missionMeta,
+      mission: { ...baseMission, learningSignal: signal },
       onDelta: (c) => {
         acc += c;
         if (!started) {
@@ -182,9 +245,20 @@ export const MissionLearnPanel = ({ missionId, missionTitle, missionDescription 
     });
   };
 
-  const onComplete = () => {
+  const onComplete = async () => {
     markLessonComplete(missionId);
     setCompleted(true);
+    const { data: u } = await supabase.auth.getUser();
+    if (u.user) {
+      await supabase.from("mission_lessons").upsert({
+        user_id: u.user.id,
+        mission_id: missionId,
+        mission_title: missionTitle,
+        lesson_md: lesson,
+        completed_at: new Date().toISOString(),
+        learning_signal: learningSignal,
+      }, { onConflict: "user_id,mission_id" });
+    }
   };
 
   /* ---------- Subsection 02: Watch & Learn ---------- */
@@ -202,12 +276,100 @@ export const MissionLearnPanel = ({ missionId, missionTitle, missionDescription 
       .finally(() => setVideoLoading(false));
   }, [completed, missionTitle, career?.title]);
 
+  /* ---------- Subsection 03: Real-world project ---------- */
+  const [brief, setBrief] = useState<string>("");
+  const [briefLoading, setBriefLoading] = useState(false);
+  const [briefErr, setBriefErr] = useState<string | null>(null);
+  const [submission, setSubmission] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [assessment, setAssessment] = useState<string>("");
+  const [assessmentErr, setAssessmentErr] = useState<string | null>(null);
+  const projectHydrated = useRef(false);
+
+  useEffect(() => {
+    if (!completed || projectHydrated.current) return;
+    projectHydrated.current = true;
+    (async () => {
+      const { data: u } = await supabase.auth.getUser();
+      if (!u.user) return;
+      const { data: row } = await supabase
+        .from("mission_projects")
+        .select("brief_md, submission, assessment_md")
+        .eq("user_id", u.user.id)
+        .eq("mission_id", missionId)
+        .maybeSingle();
+      if (row?.brief_md) setBrief(row.brief_md);
+      if (row?.submission) setSubmission(row.submission);
+      if (row?.assessment_md) setAssessment(row.assessment_md);
+    })();
+  }, [completed, missionId]);
+
+  const generateBrief = async () => {
+    if (briefLoading) return;
+    setBriefLoading(true);
+    setBriefErr(null);
+    setBrief("");
+    let acc = "";
+    await streamKokoChat({
+      messages: [],
+      intent: "project",
+      mission: { ...baseMission, learningSignal },
+      onDelta: (c) => { acc += c; setBrief(acc); },
+      onDone: async () => {
+        setBriefLoading(false);
+        if (!acc.trim()) { setBriefErr(ERR); return; }
+        const { data: u } = await supabase.auth.getUser();
+        if (u.user) {
+          await supabase.from("mission_projects").upsert({
+            user_id: u.user.id,
+            mission_id: missionId,
+            brief_md: acc,
+          }, { onConflict: "user_id,mission_id" });
+        }
+      },
+      onError: () => { setBriefLoading(false); setBriefErr(ERR); },
+    });
+  };
+
+  const submitProject = async () => {
+    const text = submission.trim();
+    if (!text || submitting) return;
+    setSubmitting(true);
+    setAssessmentErr(null);
+    setAssessment("");
+    let acc = "";
+    await streamKokoChat({
+      messages: [],
+      intent: "assess",
+      mission: { ...baseMission, learningSignal },
+      brief,
+      submission: text,
+      onDelta: (c) => { acc += c; setAssessment(acc); },
+      onDone: async () => {
+        setSubmitting(false);
+        if (!acc.trim()) { setAssessmentErr(ERR); return; }
+        const { data: u } = await supabase.auth.getUser();
+        if (u.user) {
+          await supabase.from("mission_projects").upsert({
+            user_id: u.user.id,
+            mission_id: missionId,
+            brief_md: brief,
+            submission: text,
+            assessment_md: acc,
+            submitted_at: new Date().toISOString(),
+          }, { onConflict: "user_id,mission_id" });
+        }
+      },
+      onError: () => { setSubmitting(false); setAssessmentErr(ERR); },
+    });
+  };
+
   return (
     <div className="mt-3 flex flex-col gap-3 border-t border-border pt-4">
       {/* ───── Subsection 01 ───── */}
       <section className="rounded-xl border border-border bg-bg-elevated/60 p-4">
         <header className="mb-3 flex items-center gap-2">
-          <span className="text-[11px] font-bold tracking-[1.5px] text-accent">01</span>
+          <span className="text-[11px] font-bold tracking-[1.5px]" style={{ color: KOKO_PURPLE }}>01</span>
           <h4 className="text-[14px] font-semibold text-foreground">Learn with Koko</h4>
         </header>
 
@@ -215,11 +377,8 @@ export const MissionLearnPanel = ({ missionId, missionTitle, missionDescription 
           <div className="flex items-center gap-2.5 py-4 text-[13px] text-text2">
             <span className="flex gap-1">
               {[0, 0.15, 0.3].map((d) => (
-                <span
-                  key={d}
-                  className="inline-block h-1.5 w-1.5 rounded-full bg-accent"
-                  style={{ animation: `ws-koko-bounce 0.8s ease-in-out ${d}s infinite` }}
-                />
+                <span key={d} className="inline-block h-1.5 w-1.5 rounded-full"
+                  style={{ background: KOKO_PURPLE, animation: `ws-koko-bounce 0.8s ease-in-out ${d}s infinite` }} />
               ))}
             </span>
             Koko is preparing your lesson...
@@ -232,8 +391,8 @@ export const MissionLearnPanel = ({ missionId, missionTitle, missionDescription 
 
         {lesson && (
           <>
-            {renderLesson(lesson)}
-            <div className="mt-3 text-[11px] italic text-text3">Generated by Koko</div>
+            {renderMarkdown(lesson)}
+            <div className="mt-3 text-[11px] italic text-text3">Generated by Koko ✦</div>
           </>
         )}
 
@@ -249,42 +408,27 @@ export const MissionLearnPanel = ({ missionId, missionTitle, missionDescription 
                 {qaMessages.map((m, i) =>
                   m.role === "koko" ? (
                     <div key={i} className="flex items-start gap-2">
-                      <div
-                        className="grid h-6 w-6 shrink-0 place-items-center rounded-full text-[10px] font-bold text-white"
-                        style={{ background: "linear-gradient(135deg,#895AF6,#a87bff)" }}
-                      >
-                        K
-                      </div>
-                      <div className="max-w-[88%] rounded-[0_12px_12px_12px] border border-border bg-card px-3 py-2 text-[13px] leading-[1.6] text-foreground">
+                      <div className="grid h-6 w-6 shrink-0 place-items-center rounded-full text-[10px] font-bold text-white"
+                        style={{ background: `linear-gradient(135deg,${KOKO_PURPLE},#a87bff)` }}>K</div>
+                      <div className="max-w-[88%] rounded-[0_12px_12px_12px] border border-border bg-card px-3 py-2 text-[13px] leading-[1.6] text-foreground whitespace-pre-wrap">
                         {m.text}
                       </div>
                     </div>
                   ) : (
                     <div key={i} className="flex justify-end">
-                      <div
-                        className="max-w-[88%] rounded-[12px_0_12px_12px] px-3 py-2 text-[13px] leading-[1.6] text-white"
-                        style={{ background: "#895AF6" }}
-                      >
-                        {m.text}
-                      </div>
+                      <div className="max-w-[88%] rounded-[12px_0_12px_12px] px-3 py-2 text-[13px] leading-[1.6] text-white"
+                        style={{ background: KOKO_PURPLE }}>{m.text}</div>
                     </div>
                   ),
                 )}
                 {qaThinking && (
                   <div className="flex items-start gap-2">
-                    <div
-                      className="grid h-6 w-6 shrink-0 place-items-center rounded-full text-[10px] font-bold text-white"
-                      style={{ background: "linear-gradient(135deg,#895AF6,#a87bff)" }}
-                    >
-                      K
-                    </div>
+                    <div className="grid h-6 w-6 shrink-0 place-items-center rounded-full text-[10px] font-bold text-white"
+                      style={{ background: `linear-gradient(135deg,${KOKO_PURPLE},#a87bff)` }}>K</div>
                     <div className="flex items-center gap-1 rounded-[0_12px_12px_12px] border border-border bg-card px-3 py-2.5">
                       {[0, 0.15, 0.3].map((d) => (
-                        <span
-                          key={d}
-                          className="inline-block h-1.5 w-1.5 rounded-full bg-text3"
-                          style={{ animation: `ws-koko-bounce 0.8s ease-in-out ${d}s infinite` }}
-                        />
+                        <span key={d} className="inline-block h-1.5 w-1.5 rounded-full bg-text3"
+                          style={{ animation: `ws-koko-bounce 0.8s ease-in-out ${d}s infinite` }} />
                       ))}
                     </div>
                   </div>
@@ -293,42 +437,23 @@ export const MissionLearnPanel = ({ missionId, missionTitle, missionDescription 
             )}
 
             <div className="flex gap-2">
-              <input
-                type="text"
-                value={qaInput}
-                onChange={(e) => setQaInput(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    e.preventDefault();
-                    askKoko();
-                  }
-                }}
+              <input type="text" value={qaInput} onChange={(e) => setQaInput(e.target.value)}
+                onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); askKoko(); } }}
                 placeholder="e.g. Can you explain that in a simpler way?..."
-                className="flex-1 rounded-lg border border-border bg-card px-3 py-2 text-[13px] text-foreground placeholder:text-text3 focus:border-accent focus:outline-none"
-              />
-              <button
-                type="button"
-                onClick={askKoko}
-                disabled={!qaInput.trim() || qaThinking}
+                className="flex-1 rounded-lg border border-border bg-card px-3 py-2 text-[13px] text-foreground placeholder:text-text3 focus:outline-none"
+                style={{ borderColor: undefined }} />
+              <button type="button" onClick={askKoko} disabled={!qaInput.trim() || qaThinking}
                 className="rounded-lg px-3.5 py-2 text-[13px] font-semibold text-white transition-opacity disabled:opacity-50"
-                style={{ background: "#895AF6" }}
-              >
-                Ask
-              </button>
+                style={{ background: KOKO_PURPLE }}>Ask</button>
             </div>
           </div>
         )}
 
-        {/* Mark as complete */}
         {lesson && !loadingLesson && (
           <div className="mt-5 flex justify-end">
-            <button
-              type="button"
-              onClick={onComplete}
-              disabled={completed}
+            <button type="button" onClick={onComplete} disabled={completed}
               className="rounded-lg px-4 py-2 text-[13px] font-semibold text-white transition-opacity disabled:opacity-60"
-              style={{ background: "#895AF6" }}
-            >
+              style={{ background: KOKO_PURPLE }}>
               {completed ? "✓ Completed" : "Mark as Complete →"}
             </button>
           </div>
@@ -343,7 +468,7 @@ export const MissionLearnPanel = ({ missionId, missionTitle, missionDescription 
         ].join(" ")}
       >
         <header className="mb-3 flex items-center gap-2">
-          <span className="text-[11px] font-bold tracking-[1.5px] text-accent">02</span>
+          <span className="text-[11px] font-bold tracking-[1.5px]" style={{ color: KOKO_PURPLE }}>02</span>
           <h4 className="text-[14px] font-semibold text-foreground">Watch & Learn</h4>
           {!completed && (
             <span className="ml-auto flex items-center gap-1.5 text-[11px] text-text3">
@@ -361,18 +486,12 @@ export const MissionLearnPanel = ({ missionId, missionTitle, missionDescription 
             <div className="mb-2 text-[13px] font-semibold text-foreground">{missionTitle}</div>
             <div className="relative overflow-hidden rounded-lg border border-border bg-black aspect-video">
               {videoLoading && (
-                <div className="absolute inset-0 grid place-items-center text-[12px] text-white/70">
-                  Loading video...
-                </div>
+                <div className="absolute inset-0 grid place-items-center text-[12px] text-white/70">Loading video...</div>
               )}
               {!videoLoading && video && (
-                <iframe
-                  src={`https://www.youtube.com/embed/${video.videoId}`}
-                  title={video.title}
+                <iframe src={`https://www.youtube.com/embed/${video.videoId}`} title={video.title}
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  allowFullScreen
-                  className="absolute inset-0 h-full w-full"
-                />
+                  allowFullScreen className="absolute inset-0 h-full w-full" />
               )}
               {!videoLoading && !video && (
                 <div className="absolute inset-0 grid place-items-center text-[12px] text-white/70">
@@ -383,7 +502,6 @@ export const MissionLearnPanel = ({ missionId, missionTitle, missionDescription 
             <p className="mt-3 text-[12px] text-text2">
               Video lessons powered by YouTube — curated to match your learning path
             </p>
-            <p className="mt-1 text-[12px] font-medium text-text2">🎬 Watch to reinforce what you just learned</p>
           </>
         ) : (
           <div className="rounded-lg border border-dashed border-border bg-card/40 py-8 text-center text-[12px] text-text3">
@@ -391,6 +509,94 @@ export const MissionLearnPanel = ({ missionId, missionTitle, missionDescription 
           </div>
         )}
       </section>
+
+      {/* ───── Subsection 03: Real-world project ───── */}
+      {completed && (
+        <section className="rounded-xl border border-border bg-bg-elevated/60 p-4">
+          <header className="mb-3 flex items-center gap-2">
+            <span className="text-[11px] font-bold tracking-[1.5px]" style={{ color: KOKO_PURPLE }}>03</span>
+            <h4 className="text-[14px] font-semibold text-foreground">Your Mission Project</h4>
+          </header>
+
+          {!brief && !briefLoading && (
+            <div className="flex flex-col items-start gap-3">
+              <p className="text-[13px] text-text2">
+                Ready to put what you just learned into practice? Koko will generate a real-world project for you.
+              </p>
+              <button type="button" onClick={generateBrief}
+                className="rounded-lg px-4 py-2 text-[13px] font-semibold text-white"
+                style={{ background: KOKO_PURPLE }}>
+                Generate my project
+              </button>
+            </div>
+          )}
+
+          {briefLoading && !brief && (
+            <div className="flex items-center gap-2.5 py-4 text-[13px] text-text2">
+              <span className="flex gap-1">
+                {[0, 0.15, 0.3].map((d) => (
+                  <span key={d} className="inline-block h-1.5 w-1.5 rounded-full"
+                    style={{ background: KOKO_PURPLE, animation: `ws-koko-bounce 0.8s ease-in-out ${d}s infinite` }} />
+                ))}
+              </span>
+              Koko is designing your project...
+            </div>
+          )}
+
+          {briefErr && !brief && (
+            <div className="rounded-lg border border-border bg-card px-3 py-2 text-[13px] text-text2">{briefErr}</div>
+          )}
+
+          {brief && (
+            <>
+              <div className="rounded-lg border border-border bg-card p-3.5">
+                {renderMarkdown(brief)}
+                <div className="mt-3 text-[11px] italic text-text3">Generated by Koko ✦</div>
+              </div>
+
+              <div className="mt-4">
+                <label className="mb-2 block text-[12px] font-semibold text-foreground">
+                  Describe what you built, paste links, or share your reflection
+                </label>
+                <textarea
+                  value={submission}
+                  onChange={(e) => setSubmission(e.target.value)}
+                  placeholder="What you did, what tools you used, links to your work..."
+                  rows={5}
+                  className="w-full rounded-lg border border-border bg-card px-3 py-2 text-[13px] text-foreground placeholder:text-text3 focus:outline-none"
+                />
+                <div className="mt-3 flex justify-end">
+                  <button type="button" onClick={submitProject} disabled={!submission.trim() || submitting}
+                    className="rounded-lg px-4 py-2 text-[13px] font-semibold text-white transition-opacity disabled:opacity-60"
+                    style={{ background: KOKO_PURPLE }}>
+                    {submitting ? "Koko is reviewing…" : "Submit to Koko"}
+                  </button>
+                </div>
+              </div>
+
+              {assessment && (
+                <div className="mt-4 rounded-lg p-3.5"
+                  style={{ borderLeft: `3px solid ${KOKO_PURPLE}`, background: "rgba(137, 90, 246, 0.06)" }}>
+                  <div className="mb-2 text-[12px] font-bold tracking-wide" style={{ color: KOKO_PURPLE }}>
+                    ✦ Koko's feedback
+                  </div>
+                  {renderMarkdown(assessment)}
+                </div>
+              )}
+              {assessmentErr && (
+                <div className="mt-3 rounded-lg border border-border bg-card px-3 py-2 text-[13px] text-text2">{assessmentErr}</div>
+              )}
+            </>
+          )}
+        </section>
+      )}
+
+      <style>{`
+        @keyframes ws-koko-bounce {
+          0%, 80%, 100% { transform: scale(0.6); opacity: 0.4; }
+          40% { transform: scale(1); opacity: 1; }
+        }
+      `}</style>
     </div>
   );
 };

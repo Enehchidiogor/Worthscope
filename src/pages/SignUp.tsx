@@ -3,6 +3,9 @@ import { Link, useNavigate } from "react-router-dom";
 import logo from "@/assets/worthscope-logo.png";
 import { Field, inputStyle, eyeBtn, googleBtn, Divider, EyeIcon, GoogleG, SharedAuthStyles } from "./SignIn";
 import { SEO } from "@/components/SEO";
+import { signUpWithEmail } from "@/lib/authClient";
+import { lovable } from "@/integrations/lovable/index";
+import { toast } from "sonner";
 
 
 const ACCENT = "#3498DB";
@@ -10,6 +13,12 @@ const TEXT = "#111111";
 const TEXT3 = "#9CA3AF";
 const BORDER = "#E5E7EB";
 const FONT = "'DM Sans', sans-serif";
+
+const EDUCATION_OPTIONS = [
+  "JSS1", "JSS2", "JSS3", "SS1", "SS2", "SS3",
+  "100 Level", "200 Level", "300 Level", "400 Level", "500 Level",
+  "Graduate", "Working professional", "Other",
+];
 
 type Strength = { level: 0 | 1 | 2 | 3; label: "" | "Weak" | "Medium" | "Strong"; color: string };
 
@@ -26,14 +35,55 @@ function evalPwd(pw: string): Strength {
 export default function SignUp() {
   const navigate = useNavigate();
   const [showPwd, setShowPwd] = useState(false);
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
   const [pwd, setPwd] = useState("");
+  const [age, setAge] = useState<string>("");
+  const [educationLevel, setEducationLevel] = useState<string>("");
+  const [submitting, setSubmitting] = useState(false);
   const strength = useMemo(() => evalPwd(pwd), [pwd]);
 
-  const onSubmit = (e: React.FormEvent) => {
+  const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // New users always go through onboarding/setup first.
-    navigate("/onboarding");
+    if (submitting) return;
+    if (!name.trim()) return toast.error("Enter your first name");
+    if (!age || Number(age) < 13) return toast.error("You must be 13 or older");
+    if (!educationLevel) return toast.error("Select your education level");
+    setSubmitting(true);
+    const { data, error } = await signUpWithEmail({
+      email,
+      password: pwd,
+      name: name.trim(),
+      age: Number(age),
+      educationLevel,
+    });
+    setSubmitting(false);
+    if (error) {
+      toast.error(error.message || "Couldn't create account");
+      return;
+    }
+    if (data.session) {
+      // Signup already captured name/age/education, so skip onboarding
+      // and send the user straight into the assessment.
+      navigate("/assessment");
+    } else {
+      toast.success("Check your email to confirm your account.");
+      navigate("/signin");
+    }
   };
+
+  const onGoogle = async () => {
+    const result = await lovable.auth.signInWithOAuth("google", {
+      redirect_uri: window.location.origin,
+    });
+    if (result.error) {
+      toast.error("Google sign-in failed");
+      return;
+    }
+    if (result.redirected) return;
+    navigate("/assessment");
+  };
+
 
   const barColor = (idx: number) => (strength.level > idx ? strength.color : BORDER);
 
@@ -66,16 +116,35 @@ export default function SignUp() {
           </p>
 
           <Field label="First Name">
-            <input type="text" required placeholder="Enter your first name" className="ws-input" style={inputStyle()} />
+            <input type="text" required value={name} onChange={(e) => setName(e.target.value)}
+              placeholder="Enter your first name" className="ws-input" style={inputStyle()} />
           </Field>
 
-          <div style={{ height: 20 }} />
+          <div style={{ height: 16 }} />
+
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+            <Field label="Age">
+              <input type="number" min={13} max={99} required value={age}
+                onChange={(e) => setAge(e.target.value)}
+                placeholder="e.g. 16" className="ws-input" style={inputStyle()} />
+            </Field>
+            <Field label="Education level">
+              <select required value={educationLevel} onChange={(e) => setEducationLevel(e.target.value)}
+                className="ws-input" style={{ ...inputStyle(), appearance: "none", paddingRight: 36, cursor: "pointer" }}>
+                <option value="" disabled>Select…</option>
+                {EDUCATION_OPTIONS.map((o) => <option key={o} value={o}>{o}</option>)}
+              </select>
+            </Field>
+          </div>
+
+          <div style={{ height: 16 }} />
 
           <Field label="Email Address">
-            <input type="email" required placeholder="Enter your email address" className="ws-input" style={inputStyle()} />
+            <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)}
+              placeholder="Enter your email address" className="ws-input" style={inputStyle()} />
           </Field>
 
-          <div style={{ height: 20 }} />
+          <div style={{ height: 16 }} />
 
           <Field label="Password">
             <div style={{ position: "relative" }}>
@@ -103,28 +172,28 @@ export default function SignUp() {
 
           <button
             type="submit"
+            disabled={submitting}
             className="ws-submit"
             style={{
               marginTop: 28, width: "100%", height: 56, background: ACCENT, color: "#fff",
               border: "none", borderRadius: 14, fontFamily: FONT, fontWeight: 700, fontSize: 17,
-              cursor: "pointer", transition: "all 0.2s ease",
+              cursor: submitting ? "wait" : "pointer", transition: "all 0.2s ease",
+              opacity: submitting ? 0.7 : 1,
             }}
           >
-            Begin Journey
+            {submitting ? "Creating account…" : "Begin Journey"}
           </button>
 
           <Divider />
 
-          <button type="button" className="ws-google" style={googleBtn()}>
+          <button type="button" onClick={onGoogle} className="ws-google" style={googleBtn()}>
             <GoogleG />
-            <span>Sign in to Google</span>
+            <span>Continue with Google</span>
           </button>
 
           <p style={{ marginTop: 20, textAlign: "center", fontSize: 14, color: TEXT }}>
             Already have an account?{" "}
-            <Link to="/signin" style={{ color: ACCENT, fontWeight: 600, textDecoration: "none" }}
-              onMouseEnter={(e) => (e.currentTarget.style.textDecoration = "underline")}
-              onMouseLeave={(e) => (e.currentTarget.style.textDecoration = "none")}>
+            <Link to="/signin" style={{ color: ACCENT, fontWeight: 600, textDecoration: "none" }}>
               Sign in
             </Link>
           </p>

@@ -1,7 +1,11 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import logo from "@/assets/worthscope-logo.png";
 import { SEO } from "@/components/SEO";
+import { signInWithEmail, hydrateProfile } from "@/lib/authClient";
+import { lovable } from "@/integrations/lovable/index";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 
 const ACCENT = "#3498DB";
@@ -13,12 +17,40 @@ const FONT = "'DM Sans', sans-serif";
 
 export default function SignIn() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [showPwd, setShowPwd] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [submitting, setSubmitting] = useState(false);
 
-  const onSubmit = (e: React.FormEvent) => {
+  const intended = (location.state as { from?: string } | null)?.from || "/dashboard";
+
+  const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Returning users go straight to their dashboard.
-    navigate("/dashboard");
+    if (submitting) return;
+    setSubmitting(true);
+    const { data, error } = await signInWithEmail(email, password);
+    setSubmitting(false);
+    if (error) {
+      toast.error(error.message || "Couldn't sign in");
+      return;
+    }
+    if (data.user) await hydrateProfile(data.user);
+    navigate(intended, { replace: true });
+  };
+
+  const onGoogle = async () => {
+    const result = await lovable.auth.signInWithOAuth("google", {
+      redirect_uri: window.location.origin,
+    });
+    if (result.error) {
+      toast.error("Google sign-in failed");
+      return;
+    }
+    if (result.redirected) return;
+    const { data } = await supabase.auth.getUser();
+    if (data.user) await hydrateProfile(data.user);
+    navigate(intended, { replace: true });
   };
 
   return (
@@ -45,15 +77,17 @@ export default function SignIn() {
           </p>
 
           <Field label="Email Address">
-            <input type="email" required placeholder="Enter your email address" className="ws-input"
-              style={inputStyle()} />
+            <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)}
+              placeholder="Enter your email address" className="ws-input" style={inputStyle()} />
           </Field>
 
           <div style={{ height: 20 }} />
 
           <Field label="Password">
             <div style={{ position: "relative" }}>
-              <input type={showPwd ? "text" : "password"} required placeholder="Create a password" className="ws-input"
+              <input type={showPwd ? "text" : "password"} required value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Enter your password" className="ws-input"
                 style={{ ...inputStyle(), paddingRight: 48 }} />
               <button type="button" aria-label="Toggle password" onClick={() => setShowPwd((v) => !v)}
                 style={eyeBtn()}>
@@ -64,28 +98,28 @@ export default function SignIn() {
 
           <button
             type="submit"
+            disabled={submitting}
             className="ws-submit"
             style={{
               marginTop: 28, width: "100%", height: 56, background: ACCENT, color: "#fff",
               border: "none", borderRadius: 14, fontFamily: FONT, fontWeight: 700, fontSize: 17,
-              cursor: "pointer", transition: "all 0.2s ease",
+              cursor: submitting ? "wait" : "pointer", transition: "all 0.2s ease",
+              opacity: submitting ? 0.7 : 1,
             }}
           >
-            Sign In
+            {submitting ? "Signing in…" : "Sign In"}
           </button>
 
           <Divider />
 
-          <button type="button" className="ws-google" style={googleBtn()}>
+          <button type="button" onClick={onGoogle} className="ws-google" style={googleBtn()}>
             <GoogleG />
-            <span>Sign in to Google</span>
+            <span>Continue with Google</span>
           </button>
 
           <p style={{ marginTop: 24, textAlign: "center", fontSize: 14, color: TEXT }}>
             Don't have an account?{" "}
-            <Link to="/signup" style={{ color: ACCENT, fontWeight: 600, textDecoration: "none" }}
-              onMouseEnter={(e) => (e.currentTarget.style.textDecoration = "underline")}
-              onMouseLeave={(e) => (e.currentTarget.style.textDecoration = "none")}>
+            <Link to="/signup" style={{ color: ACCENT, fontWeight: 600, textDecoration: "none" }}>
               Sign up
             </Link>
           </p>
@@ -93,6 +127,11 @@ export default function SignIn() {
       </div>
 
       <SharedAuthStyles />
+      <SEO
+        title="Sign In — WorthScope"
+        description="Sign in to WorthScope to continue your career roadmap, missions, and skill tracking."
+        path="/signin"
+      />
     </div>
   );
 }
@@ -134,11 +173,6 @@ export function googleBtn(): React.CSSProperties {
 export function Divider() {
   return (
     <div style={{ display: "flex", alignItems: "center", gap: 12, margin: "24px 0" }}>
-      <SEO
-        title="Sign In — WorthScope"
-        description="Sign in to WorthScope to continue your career roadmap, missions, and skill tracking."
-        path="/signin"
-      />
       <div style={{ flex: 1, height: 1, background: BORDER }} />
       <span style={{ fontSize: 13, color: TEXT3 }}>or continue with</span>
       <div style={{ flex: 1, height: 1, background: BORDER }} />
