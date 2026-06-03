@@ -82,6 +82,8 @@ export default function SignUp() {
     }
     if (result.redirected) return;
     navigate("/assessment");
+  };
+
 
   const barColor = (idx: number) => (strength.level > idx ? strength.color : BORDER);
 
