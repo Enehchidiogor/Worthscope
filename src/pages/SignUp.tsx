@@ -63,9 +63,9 @@ export default function SignUp() {
       return;
     }
     if (data.session) {
-      // Auto-confirm is off by default — only goes straight in if email
-      // confirmation isn't required for this project.
-      navigate("/onboarding");
+      // Signup already captured name/age/education, so skip onboarding
+      // and send the user straight into the assessment.
+      navigate("/assessment");
     } else {
       toast.success("Check your email to confirm your account.");
       navigate("/signin");
