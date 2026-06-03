@@ -51,7 +51,7 @@ export async function streamKokoChat({
   onError,
 }: {
   messages: KokoMsg[];
-  intent?: "chat" | "stuck" | "verify";
+  intent?: "chat" | "stuck" | "verify" | "lesson" | "qa";
   mission?: KokoMission;
   onDelta: (chunk: string) => void;
   onDone: () => void;
