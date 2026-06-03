@@ -14,7 +14,111 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      mission_lessons: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          id: string
+          learning_signal: string
+          lesson_md: string | null
+          mission_id: string
+          mission_title: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          learning_signal?: string
+          lesson_md?: string | null
+          mission_id: string
+          mission_title?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          learning_signal?: string
+          lesson_md?: string | null
+          mission_id?: string
+          mission_title?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      mission_projects: {
+        Row: {
+          assessment_md: string | null
+          brief_md: string | null
+          created_at: string
+          id: string
+          mission_id: string
+          submission: string | null
+          submitted_at: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          assessment_md?: string | null
+          brief_md?: string | null
+          created_at?: string
+          id?: string
+          mission_id: string
+          submission?: string | null
+          submitted_at?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          assessment_md?: string | null
+          brief_md?: string | null
+          created_at?: string
+          id?: string
+          mission_id?: string
+          submission?: string | null
+          submitted_at?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          age: number | null
+          career_path: string | null
+          created_at: string
+          education_level: string | null
+          id: string
+          name: string | null
+          overall_progress: number
+          updated_at: string
+        }
+        Insert: {
+          age?: number | null
+          career_path?: string | null
+          created_at?: string
+          education_level?: string | null
+          id: string
+          name?: string | null
+          overall_progress?: number
+          updated_at?: string
+        }
+        Update: {
+          age?: number | null
+          career_path?: string | null
+          created_at?: string
+          education_level?: string | null
+          id?: string
+          name?: string | null
+          overall_progress?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
