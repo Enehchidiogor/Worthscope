@@ -1,6 +1,7 @@
-type Props = { progress: number };
+type Props = { progress: number; careerTitle?: string | null };
 
-export const RoadmapHeader = ({ progress }: Props) => {
+export const RoadmapHeader = ({ progress, careerTitle }: Props) => {
+  const title = careerTitle && careerTitle.trim() ? careerTitle : "Your Career";
   const radius = 26;
   const circumference = 2 * Math.PI * radius;
   const offset = circumference * (1 - progress / 100);
