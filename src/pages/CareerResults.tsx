@@ -4,6 +4,7 @@ import { CareerIcon } from "@/components/career/CareerIcon";
 import { loadResults, type CareerResult } from "@/lib/recommendationEngine";
 import { setChosenCareer } from "@/lib/userState";
 import logo from "@/assets/worthscope-logo.png";
+import { SEO } from "@/components/SEO";
 
 const ACCENT = "#3498DB";
 const ACCENT_DARK = "#217DBB";
@@ -51,6 +52,11 @@ export default function CareerResults() {
 
   return (
     <div style={{ minHeight: "100vh", background: BG, fontFamily: "'Poppins', sans-serif", color: TEXT }}>
+      <SEO
+        title="Your Career Matches — WorthScope"
+        description="Top career recommendations from your WorthScope assessment. Pick a path and start your roadmap."
+        path="/career-results"
+      />
       {/* Top bar */}
       <header
         style={{

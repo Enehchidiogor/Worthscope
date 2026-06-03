@@ -11,6 +11,7 @@ import { RelatedMissions } from "@/components/skills/RelatedMissions";
 import { iconForSkill, levelFor, type Skill } from "@/components/skills/skillsData";
 import { getProgress, getChosenCareer } from "@/lib/userState";
 import { getActiveModule, loadModuleForCareer } from "@/lib/careerModules";
+import { SEO } from "@/components/SEO";
 
 const Skills = () => {
   const [skills, setSkills] = useState<Skill[]>([]);
@@ -50,6 +51,11 @@ const Skills = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEO
+        title="Skill Progress — WorthScope"
+        description="Track weekly skill growth, see your strongest competencies, and find where to focus next."
+        path="/skills"
+      />
       <Sidebar activePath="/skills" />
 
       <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-border bg-background/85 px-4 backdrop-blur-xl md:ml-[220px] md:px-8">

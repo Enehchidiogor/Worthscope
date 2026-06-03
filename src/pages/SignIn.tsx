@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import logo from "@/assets/worthscope-logo.png";
+import { SEO } from "@/components/SEO";
 
 
 const ACCENT = "#3498DB";
@@ -133,6 +134,11 @@ export function googleBtn(): React.CSSProperties {
 export function Divider() {
   return (
     <div style={{ display: "flex", alignItems: "center", gap: 12, margin: "24px 0" }}>
+      <SEO
+        title="Sign In — WorthScope"
+        description="Sign in to WorthScope to continue your career roadmap, missions, and skill tracking."
+        path="/signin"
+      />
       <div style={{ flex: 1, height: 1, background: BORDER }} />
       <span style={{ fontSize: 13, color: TEXT3 }}>or continue with</span>
       <div style={{ flex: 1, height: 1, background: BORDER }} />

@@ -5,6 +5,7 @@ import { TopBar } from "@/components/dashboard/TopBar";
 import { MobileTabBar } from "@/components/dashboard/MobileTabBar";
 import { getProfile, saveProfile } from "@/lib/userState";
 import { toast } from "sonner";
+import { SEO } from "@/components/SEO";
 
 const SECONDARY_OPTS = ["SS1", "SS2", "SS3"];
 const UNI_OPTS = ["100 Level", "200 Level", "300 Level", "400 Level", "500 Level"];
@@ -53,6 +54,11 @@ const Profile = () => {
 
   return (
     <div className="min-h-screen bg-background font-poppins text-foreground">
+      <SEO
+        title="Profile — WorthScope"
+        description="Manage your WorthScope profile, account details, and personal preferences."
+        path="/profile"
+      />
       <Sidebar activePath="/profile" />
       <div className="md:ml-[220px]">
         <TopBar title="Profile" />

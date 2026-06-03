@@ -11,6 +11,7 @@ import { KokoSidePanel } from "@/components/roadmap/KokoSidePanel";
 import { buildRoadmapForUser, type RoadmapNode } from "@/components/roadmap/nodesData";
 import { getChosenCareer, completeMission } from "@/lib/userState";
 import { toast } from "@/hooks/use-toast";
+import { SEO } from "@/components/SEO";
 
 const Roadmap = () => {
   const initial = buildRoadmapForUser();
@@ -74,6 +75,11 @@ const Roadmap = () => {
 
   return (
     <div className="min-h-screen bg-background font-poppins text-foreground">
+      <SEO
+        title="Your Career Roadmap — WorthScope"
+        description="Your personalized career roadmap — phases, missions, and milestones tailored to your chosen path."
+        path="/roadmap"
+      />
       <Sidebar activePath="/roadmap" />
 
       <div className="md:ml-[220px]">

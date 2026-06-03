@@ -14,6 +14,7 @@ import { KokoMissionPanel } from "@/components/mission/KokoMissionPanel";
 import { IconArrowRight } from "@/components/dashboard/icons";
 import { completeMission, getProgress, getChosenCareer } from "@/lib/userState";
 import { getActiveModule, loadModuleForCareer, flatMissions } from "@/lib/careerModules";
+import { SEO } from "@/components/SEO";
 
 const Mission = () => {
   const navigate = useNavigate();
@@ -75,6 +76,11 @@ const Mission = () => {
 
   return (
     <div className="min-h-screen bg-background font-poppins text-foreground">
+      <SEO
+        title="Missions — WorthScope"
+        description="Active learning missions with lessons from Koko and curated videos for your career path."
+        path="/missions"
+      />
       <Sidebar activePath="/missions" />
 
       <div className="md:ml-[220px]">
