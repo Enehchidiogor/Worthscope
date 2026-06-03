@@ -11,6 +11,8 @@ export type KokoMission = {
   description?: string;
   career?: string;
   phase?: string;
+  userName?: string;
+  userAge?: number;
 };
 
 export type KokoMsg = { role: "user" | "assistant"; content: string };
