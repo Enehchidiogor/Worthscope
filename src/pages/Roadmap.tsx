@@ -83,7 +83,7 @@ const Roadmap = () => {
           <div className="grid grid-cols-1 gap-7 lg:grid-cols-[1fr_300px]">
             {/* LEFT: roadmap */}
             <section>
-              <RoadmapHeader progress={progress} />
+              <RoadmapHeader progress={progress} careerTitle={careerTitle} />
 
               {/* Vertical path container */}
               <div className="relative">
