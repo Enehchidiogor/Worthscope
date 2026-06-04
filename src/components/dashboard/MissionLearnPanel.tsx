@@ -138,6 +138,7 @@ export const MissionLearnPanel = ({ missionId, missionTitle, missionDescription 
     career: career?.title,
     userName: profile?.firstName,
     userAge: typeof profile?.age === "number" ? profile.age : undefined,
+    educationLevel: profile?.educationLevel || undefined,
   };
 
   const [lesson, setLesson] = useState<string>("");
