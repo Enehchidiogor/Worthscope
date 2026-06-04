@@ -138,6 +138,7 @@ export const MissionLearnPanel = ({ missionId, missionTitle, missionDescription 
     career: career?.title,
     userName: profile?.firstName,
     userAge: typeof profile?.age === "number" ? profile.age : undefined,
+    educationLevel: profile?.educationLevel || undefined,
   };
 
   const [lesson, setLesson] = useState<string>("");
@@ -500,7 +501,7 @@ export const MissionLearnPanel = ({ missionId, missionTitle, missionDescription 
               )}
             </div>
             <p className="mt-3 text-[12px] text-text2">
-              Video lessons powered by YouTube — curated to match your learning path
+              🎬 Watch to reinforce what Koko just taught you
             </p>
           </>
         ) : (
