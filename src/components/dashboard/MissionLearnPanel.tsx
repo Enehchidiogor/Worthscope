@@ -262,9 +262,10 @@ export const MissionLearnPanel = ({ missionId, missionTitle, missionDescription 
     }
   };
 
-  /* ---------- Subsection 02: Watch & Learn ---------- */
+  /* ---------- Subsection 02: Watch & Apply ---------- */
   const [video, setVideo] = useState<KokoVideo | null>(null);
   const [videoLoading, setVideoLoading] = useState(false);
+  const [videoCompleted, setVideoCompleted] = useState(false);
   const videoFetchedRef = useRef(false);
 
   useEffect(() => {
@@ -470,7 +471,7 @@ export const MissionLearnPanel = ({ missionId, missionTitle, missionDescription 
       >
         <header className="mb-3 flex items-center gap-2">
           <span className="text-[11px] font-bold tracking-[1.5px]" style={{ color: KOKO_PURPLE }}>02</span>
-          <h4 className="text-[14px] font-semibold text-foreground">Watch & Learn</h4>
+          <h4 className="text-[14px] font-semibold text-foreground">Watch & Apply</h4>
           {!completed && (
             <span className="ml-auto flex items-center gap-1.5 text-[11px] text-text3">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -484,7 +485,6 @@ export const MissionLearnPanel = ({ missionId, missionTitle, missionDescription 
 
         {completed ? (
           <>
-            <div className="mb-2 text-[13px] font-semibold text-foreground">{missionTitle}</div>
             <div className="relative overflow-hidden rounded-lg border border-border bg-black aspect-video">
               {videoLoading && (
                 <div className="absolute inset-0 grid place-items-center text-[12px] text-white/70">Loading video...</div>
@@ -500,9 +500,38 @@ export const MissionLearnPanel = ({ missionId, missionTitle, missionDescription 
                 </div>
               )}
             </div>
-            <p className="mt-3 text-[12px] text-text2">
-              🎬 Watch to reinforce what Koko just taught you
-            </p>
+
+            {video && (
+              <div className="mt-3 flex flex-col gap-1">
+                <div className="text-[13px] font-semibold text-foreground line-clamp-2">{video.title}</div>
+                <div className="flex items-center gap-2 text-[12px] text-text2">
+                  <span>{video.channel}</span>
+                  <span aria-hidden>·</span>
+                  <span>{video.duration}</span>
+                </div>
+              </div>
+            )}
+
+            <div className="mt-3 rounded-lg p-3" style={{ background: "rgba(137, 90, 246, 0.06)", borderLeft: `3px solid ${KOKO_PURPLE}` }}>
+              <div className="text-[11px] font-bold tracking-wide mb-1" style={{ color: KOKO_PURPLE }}>
+                ✦ LEARNING OBJECTIVE
+              </div>
+              <p className="text-[12px] text-foreground leading-snug">
+                See {missionTitle.toLowerCase()} in action and connect it to your {career?.title || "career"} path.
+              </p>
+            </div>
+
+            <div className="mt-4 flex justify-end">
+              <button
+                type="button"
+                onClick={() => setVideoCompleted(true)}
+                disabled={videoCompleted}
+                className="rounded-lg px-4 py-2 text-[13px] font-semibold text-white transition-opacity disabled:opacity-60"
+                style={{ background: KOKO_PURPLE }}
+              >
+                {videoCompleted ? "✓ Video Completed" : "Mark Video Complete →"}
+              </button>
+            </div>
           </>
         ) : (
           <div className="rounded-lg border border-dashed border-border bg-card/40 py-8 text-center text-[12px] text-text3">
@@ -510,87 +539,6 @@ export const MissionLearnPanel = ({ missionId, missionTitle, missionDescription 
           </div>
         )}
       </section>
-
-      {/* ───── Subsection 03: Real-world project ───── */}
-      {completed && (
-        <section className="rounded-xl border border-border bg-bg-elevated/60 p-4">
-          <header className="mb-3 flex items-center gap-2">
-            <span className="text-[11px] font-bold tracking-[1.5px]" style={{ color: KOKO_PURPLE }}>03</span>
-            <h4 className="text-[14px] font-semibold text-foreground">Your Mission Project</h4>
-          </header>
-
-          {!brief && !briefLoading && (
-            <div className="flex flex-col items-start gap-3">
-              <p className="text-[13px] text-text2">
-                Ready to put what you just learned into practice? Koko will generate a real-world project for you.
-              </p>
-              <button type="button" onClick={generateBrief}
-                className="rounded-lg px-4 py-2 text-[13px] font-semibold text-white"
-                style={{ background: KOKO_PURPLE }}>
-                Generate my project
-              </button>
-            </div>
-          )}
-
-          {briefLoading && !brief && (
-            <div className="flex items-center gap-2.5 py-4 text-[13px] text-text2">
-              <span className="flex gap-1">
-                {[0, 0.15, 0.3].map((d) => (
-                  <span key={d} className="inline-block h-1.5 w-1.5 rounded-full"
-                    style={{ background: KOKO_PURPLE, animation: `ws-koko-bounce 0.8s ease-in-out ${d}s infinite` }} />
-                ))}
-              </span>
-              Koko is designing your project...
-            </div>
-          )}
-
-          {briefErr && !brief && (
-            <div className="rounded-lg border border-border bg-card px-3 py-2 text-[13px] text-text2">{briefErr}</div>
-          )}
-
-          {brief && (
-            <>
-              <div className="rounded-lg border border-border bg-card p-3.5">
-                {renderMarkdown(brief)}
-                <div className="mt-3 text-[11px] italic text-text3">Generated by Koko ✦</div>
-              </div>
-
-              <div className="mt-4">
-                <label className="mb-2 block text-[12px] font-semibold text-foreground">
-                  Describe what you built, paste links, or share your reflection
-                </label>
-                <textarea
-                  value={submission}
-                  onChange={(e) => setSubmission(e.target.value)}
-                  placeholder="What you did, what tools you used, links to your work..."
-                  rows={5}
-                  className="w-full rounded-lg border border-border bg-card px-3 py-2 text-[13px] text-foreground placeholder:text-text3 focus:outline-none"
-                />
-                <div className="mt-3 flex justify-end">
-                  <button type="button" onClick={submitProject} disabled={!submission.trim() || submitting}
-                    className="rounded-lg px-4 py-2 text-[13px] font-semibold text-white transition-opacity disabled:opacity-60"
-                    style={{ background: KOKO_PURPLE }}>
-                    {submitting ? "Koko is reviewing…" : "Submit to Koko"}
-                  </button>
-                </div>
-              </div>
-
-              {assessment && (
-                <div className="mt-4 rounded-lg p-3.5"
-                  style={{ borderLeft: `3px solid ${KOKO_PURPLE}`, background: "rgba(137, 90, 246, 0.06)" }}>
-                  <div className="mb-2 text-[12px] font-bold tracking-wide" style={{ color: KOKO_PURPLE }}>
-                    ✦ Koko's feedback
-                  </div>
-                  {renderMarkdown(assessment)}
-                </div>
-              )}
-              {assessmentErr && (
-                <div className="mt-3 rounded-lg border border-border bg-card px-3 py-2 text-[13px] text-text2">{assessmentErr}</div>
-              )}
-            </>
-          )}
-        </section>
-      )}
 
       <style>{`
         @keyframes ws-koko-bounce {
