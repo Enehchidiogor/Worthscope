@@ -267,6 +267,8 @@ export const MissionLearnPanel = ({ missionId, missionTitle, missionDescription,
   const [video, setVideo] = useState<KokoVideo | null>(null);
   const [videoLoading, setVideoLoading] = useState(false);
   const [videoCompleted, setVideoCompleted] = useState(false);
+  const [assignmentCompleted, setAssignmentCompleted] = useState(false);
+  const [missionDone, setMissionDone] = useState(false);
   const videoFetchedRef = useRef(false);
 
   useEffect(() => {
