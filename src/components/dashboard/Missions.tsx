@@ -47,7 +47,7 @@ export const Missions = () => {
   ).length;
 
   return (
-    <div className="rounded-[20px] border border-border bg-card p-6 shadow-card">
+    <div data-tour="missions" className="rounded-[20px] border border-border bg-card p-6 shadow-card">
       <div className="mb-4 flex items-center justify-between">
         <h3 className="text-[16px] font-bold text-foreground">
           <span className="mr-1.5">🎯</span> Missions

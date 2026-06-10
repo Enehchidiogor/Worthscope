@@ -14,6 +14,7 @@ import {
   updateKokoAvatar,
   setAvatarUrl,
   loadUserProfile,
+  setOnboardingTourCompleted,
   type KokoAvatarKey,
 } from "@/lib/profileStore";
 
@@ -671,6 +672,37 @@ const Settings = () => {
                     Invite
                   </button>
                 }
+              />
+            </div>
+          </section>
+
+          {/* ───── Group 7: Help ───── */}
+          <section className="ws-fade-up mb-5" style={{ animationDelay: "0.7s" }}>
+            <GroupLabel>Help</GroupLabel>
+            <div
+              className="overflow-hidden rounded-[18px] border border-[#E5E7EB]"
+              style={{ background: cardBg, boxShadow: "0 2px 12px rgba(0,0,0,0.04)" }}
+            >
+              <Row
+                icon={
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#895AF6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="12" cy="12" r="10" />
+                    <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
+                    <path d="M12 17h.01" />
+                  </svg>
+                }
+                iconBg="rgba(137,90,246,0.12)"
+                label="Replay onboarding tour"
+                sub="Take Koko's quick walkthrough of your dashboard again"
+                onClick={async () => {
+                  await setOnboardingTourCompleted(false);
+                  toast.success("Tour will restart on your dashboard.");
+                  setTimeout(() => {
+                    window.location.href = "/dashboard";
+                  }, 600);
+                }}
+                hasBorder={false}
+                right={<Chev />}
               />
             </div>
           </section>

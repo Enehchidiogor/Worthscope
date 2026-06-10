@@ -56,6 +56,7 @@ export const Roadmap = () => {
 
   return (
     <section
+      data-tour="roadmap"
       className="ws-fade-up mb-6 rounded-[20px] border border-border bg-card p-7 shadow-card"
       style={{ animationDelay: "0.35s" }}
     >

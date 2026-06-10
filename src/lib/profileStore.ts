@@ -12,6 +12,7 @@ export type UserProfileRecord = {
   name: string | null;
   avatar_url: string | null;
   koko_avatar: KokoAvatarKey;
+  onboarding_tour_completed: boolean;
 };
 
 const EVT = "worthscope:profile";
@@ -39,7 +40,7 @@ export async function loadUserProfile(force = false): Promise<UserProfileRecord 
     }
     const { data } = await supabase
       .from("profiles")
-      .select("id, name, avatar_url, koko_avatar")
+      .select("id, name, avatar_url, koko_avatar, onboarding_tour_completed")
       .eq("id", u.user.id)
       .maybeSingle();
     if (data) {
@@ -48,9 +49,13 @@ export async function loadUserProfile(force = false): Promise<UserProfileRecord 
         name: (data as any).name ?? null,
         avatar_url: (data as any).avatar_url ?? null,
         koko_avatar: ((data as any).koko_avatar as KokoAvatarKey) || "robot",
+        onboarding_tour_completed: !!(data as any).onboarding_tour_completed,
       };
     } else {
-      cached = { id: u.user.id, name: null, avatar_url: null, koko_avatar: "robot" };
+      cached = {
+        id: u.user.id, name: null, avatar_url: null,
+        koko_avatar: "robot", onboarding_tour_completed: false,
+      };
     }
     broadcast();
     return cached;
@@ -88,6 +93,21 @@ export async function setAvatarUrl(url: string | null): Promise<boolean> {
   if (error) return false;
   if (cached) {
     cached = { ...cached, avatar_url: url };
+    broadcast();
+  }
+  return true;
+}
+
+export async function setOnboardingTourCompleted(completed: boolean): Promise<boolean> {
+  const { data: u } = await supabase.auth.getUser();
+  if (!u.user) return false;
+  const { error } = await supabase
+    .from("profiles")
+    .update({ onboarding_tour_completed: completed })
+    .eq("id", u.user.id);
+  if (error) return false;
+  if (cached) {
+    cached = { ...cached, onboarding_tour_completed: completed };
     broadcast();
   }
   return true;

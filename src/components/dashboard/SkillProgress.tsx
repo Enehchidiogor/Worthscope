@@ -20,7 +20,7 @@ export const SkillProgress = () => {
   }, []);
 
   return (
-    <div className="rounded-[20px] border border-border bg-card p-6 shadow-card">
+    <div data-tour="skills" className="rounded-[20px] border border-border bg-card p-6 shadow-card">
       <h3 className="mb-5 text-[16px] font-bold text-foreground">
         <span className="mr-1.5">📊</span> Skill Progress
       </h3>

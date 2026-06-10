@@ -13,6 +13,7 @@ import { CareerOpportunitiesCard } from "@/components/dashboard/CareerOpportunit
 import { ShareProgressCard } from "@/components/dashboard/ShareProgressCard";
 import { MobileTabBar } from "@/components/dashboard/MobileTabBar";
 import { WelcomeToast } from "@/components/dashboard/WelcomeToast";
+import { OnboardingTour } from "@/components/onboarding/OnboardingTour";
 import { getProfile, hasResults, isFirstLogin, markLoggedIn, tickStreak } from "@/lib/userState";
 import { SEO } from "@/components/SEO";
 
@@ -75,7 +76,7 @@ const Index = () => {
             <CareerSummary />
           </section>
 
-          <div className="mt-6">
+          <div data-tour="career" className="mt-6">
             <CareerOpportunitiesCard />
           </div>
 
@@ -85,6 +86,7 @@ const Index = () => {
 
       <MobileTabBar />
       <WelcomeToast />
+      <OnboardingTour />
     </div>
   );
 };

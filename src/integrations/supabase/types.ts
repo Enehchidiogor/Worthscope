@@ -216,6 +216,7 @@ export type Database = {
           id: string
           koko_avatar: string
           name: string | null
+          onboarding_tour_completed: boolean
           overall_progress: number
           updated_at: string
         }
@@ -228,6 +229,7 @@ export type Database = {
           id: string
           koko_avatar?: string
           name?: string | null
+          onboarding_tour_completed?: boolean
           overall_progress?: number
           updated_at?: string
         }
@@ -240,6 +242,7 @@ export type Database = {
           id?: string
           koko_avatar?: string
           name?: string | null
+          onboarding_tour_completed?: boolean
           overall_progress?: number
           updated_at?: string
         }
