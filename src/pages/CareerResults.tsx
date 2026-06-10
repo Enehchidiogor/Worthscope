@@ -50,7 +50,8 @@ export default function CareerResults() {
     });
     // Fire-and-forget — DB write shouldn't block navigation.
     persistCareerPath(r.title).catch(() => {});
-    navigate("/dashboard");
+    // Go to the Koko roadmap generation screen — replaces the old static roadmap.
+    navigate("/roadmap-loading");
   };
 
   return (
