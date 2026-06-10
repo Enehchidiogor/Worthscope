@@ -12,11 +12,13 @@ type Props = {
 
 export const TopBar = ({ title = "Dashboard", progress }: Props) => {
   const [initials, setInitials] = useState("U");
+  const [name, setName] = useState("User");
   const [streakCount, setStreakCount] = useState(1);
   useEffect(() => {
     const p = getProfile();
     if (p?.firstName) {
       setInitials((p.firstName[0] + (p.lastName?.[0] || "")).toUpperCase() || "U");
+      setName(p.firstName);
     }
     const refresh = () => setStreakCount(getStreak().count || 1);
     refresh();
