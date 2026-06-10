@@ -14,6 +14,7 @@ import Skills from "./pages/Skills.tsx";
 import Career from "./pages/Career.tsx";
 import Assessment from "./pages/Assessment.tsx";
 import CareerResults from "./pages/CareerResults.tsx";
+import RoadmapLoading from "./pages/RoadmapLoading.tsx";
 import Settings from "./pages/Settings.tsx";
 import ParentView from "./pages/ParentView.tsx";
 import ParentAccess from "./pages/ParentAccess.tsx";
@@ -52,6 +53,7 @@ const App = () => (
           <Route path="/career" element={<Gated><Career /></Gated>} />
           <Route path="/assessment" element={<Gated><Assessment /></Gated>} />
           <Route path="/career-results" element={<Gated><CareerResults /></Gated>} />
+          <Route path="/roadmap-loading" element={<Gated><RoadmapLoading /></Gated>} />
           <Route path="/settings" element={<Gated><Settings /></Gated>} />
           <Route path="/profile" element={<Gated><Profile /></Gated>} />
           <Route path="/koko" element={<Gated><Index /></Gated>} />

@@ -1,17 +1,11 @@
 import {
-  IconCompass,
-  IconBook,
-  IconLayers,
-  IconBranch,
-  IconEye,
-  IconPencil,
-  IconBriefcase,
-  IconChat,
-  IconStar,
+  IconCompass, IconBook, IconLayers, IconBranch, IconEye, IconPencil,
+  IconBriefcase, IconChat, IconStar,
 } from "@/components/dashboard/icons";
 import type { ComponentType } from "react";
-import { getProgress } from "@/lib/userState";
-import { getActiveModule, loadModuleForCareer } from "@/lib/careerModules";
+import {
+  loadRoadmap, getMissionStatus, isPhaseLocked, missionId, type KokoRoadmap,
+} from "@/lib/kokoRoadmap";
 
 export type NodeStatus = "completed" | "current" | "locked";
 
@@ -21,46 +15,43 @@ export type RoadmapNode = {
   title: string;
   sub: string;
   Icon: ComponentType<{ className?: string }>;
-  phase: 1 | 2 | 3;
+  phase: number;
   status: NodeStatus;
 };
 
 const ICONS = [IconCompass, IconBook, IconLayers, IconBranch, IconEye, IconPencil, IconBriefcase, IconChat, IconStar];
 
-export function buildRoadmapForUser(): { nodes: RoadmapNode[]; phases: { num: 1 | 2 | 3; title: string; locked: boolean }[] } {
-  const mod = getActiveModule() || loadModuleForCareer(null);
-  const progress = getProgress();
-  const done = progress.missionsCompleted;
+export function buildRoadmapForUser(): {
+  roadmap: KokoRoadmap | null;
+  nodes: RoadmapNode[];
+  phases: { num: number; title: string; locked: boolean }[];
+} {
+  const r = loadRoadmap();
+  if (!r) return { roadmap: null, nodes: [], phases: [] };
 
   const nodes: RoadmapNode[] = [];
   let globalIdx = 0;
-  mod.phases.forEach((p, pIdx) => {
-    p.missions.forEach((mission) => {
-      const phase = (pIdx + 1) as 1 | 2 | 3;
-      const status: NodeStatus =
-        globalIdx < done ? "completed" : globalIdx === done ? "current" : "locked";
+  for (const p of r.phases) {
+    for (const m of p.missions) {
+      const status = getMissionStatus(r, p.phase_number, m.mission_number) as NodeStatus;
       nodes.push({
-        id: mission.id,
+        id: missionId(p.phase_number, m.mission_number),
         num: String(globalIdx + 1).padStart(2, "0"),
-        title: mission.title,
-        sub: mission.description,
+        title: m.mission_title,
+        sub: m.mission_description,
         Icon: ICONS[globalIdx % ICONS.length],
-        phase,
+        phase: p.phase_number,
         status,
       });
       globalIdx++;
-    });
-  });
+    }
+  }
 
-  const phases = mod.phases.map((p, i) => ({
-    num: (i + 1) as 1 | 2 | 3,
-    title: p.title + (i > 0 && progress.phase < (i + 1) ? " 🔒" : ""),
-    locked: i > 0 && progress.phase < (i + 1),
+  const phases = r.phases.map((p) => ({
+    num: p.phase_number,
+    title: `Phase ${p.phase_number}: ${p.phase_title}`,
+    locked: isPhaseLocked(r, p.phase_number),
   }));
 
-  return { nodes, phases };
+  return { roadmap: r, nodes, phases };
 }
-
-// Back-compat exports
-export const PHASES = [] as const;
-export const ROADMAP_NODES: RoadmapNode[] = [];

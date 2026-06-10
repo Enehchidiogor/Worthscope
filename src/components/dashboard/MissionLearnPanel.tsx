@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { streamKokoChat, fetchKokoVideos, type KokoMsg, type KokoVideo } from "@/lib/kokoClient";
 import { getProfile, getChosenCareer, markLessonComplete, completeMission } from "@/lib/userState";
+import { markRoadmapMissionComplete } from "@/lib/kokoRoadmap";
 import { supabase } from "@/integrations/supabase/client";
 import { aggregateSignal, type LearningSignal } from "@/lib/learningSignal";
 
@@ -567,6 +568,7 @@ export const MissionLearnPanel = ({ missionId, missionTitle, missionDescription,
         onFinalize={async () => {
           if (missionDone) return;
           setMissionDone(true);
+          markRoadmapMissionComplete(missionId);
           completeMission();
           onMissionComplete?.();
         }}

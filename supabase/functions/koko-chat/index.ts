@@ -163,31 +163,43 @@ If submission shows strong understanding, raise the bar for next time. If gaps, 
 }
 
 function roadmapPrompt(m: MissionCtx): string {
-  return `${KOKO_CORE}
+  return `You are Koko, the personal learning guide on WorthScope. Your job is to generate a complete career roadmap for a student. The roadmap must reflect exactly what someone needs to learn in 2026 and beyond to become genuinely outstanding — not just employable, but exceptional — in their chosen career field.
 
-Audience: ${ageBand(m.userAge)}
+Rules for the roadmap:
+- It must be structured as phases the user unlocks one after another.
+- It must be as long as it needs to be — do not artificially shorten it. If the career requires 12 phases to master properly, generate 12 phases. The user accepts depth because depth is what makes them outstanding.
+- Each phase must reflect current industry standards, current tools used in 2026, and current best practices — never outdated approaches.
+- AI tools relevant to the career field must be integrated throughout the roadmap. Not as a separate phase — woven into the relevant phases where the user would actually use those tools.
+- Each phase must contain multiple missions (the unlockable learning units).
+- Each mission must contain skills the user will gain, tools they will learn, and a concrete real-world milestone.
 
-Generate a COMPLETE 2026 career roadmap for ${m.userName || "the student"} to become outstanding as a ${m.career || "professional"}.
+Adjust the depth, vocabulary, and complexity of the content based on the user's age (${m.userAge ?? "unspecified"}):
+- 13–15: foundational, friendly language, short missions
+- 16–18: practical and engaging, real-world examples from social media and tech
+- 19–21: university-level depth, focus on employability
+- 22–25: professional, focus on application and outcomes
+- 26+: results-driven, assume prior knowledge, focus on what's new in the industry
 
-Rules:
-- Include as many phases as genuinely needed to take them from beginner to industry-ready. Do not pad. Do not artificially shorten. Typical range 4–8 phases.
-- Every phase must reflect what the industry actually demands in 2026 — current frameworks, current tooling, current workflows.
-- Every phase must integrate at least one specific, real AI tool used by professionals in this career today (e.g. Figma AI, Galileo, Cursor, Claude Code, GitHub Copilot, v0, Julius AI, Hugging Face, LangChain, Jasper, Notion AI).
-- Topics and tools must be specific. No vague items like "learn the basics".
-- Milestone must be a real-world deliverable that proves mastery of the phase.
-
-Output a single JSON object, no preface, no markdown fences, no commentary:
+Output the roadmap as a SINGLE JSON object — no preface, no markdown fences, no commentary — with this EXACT format:
 {
-  "career": "${m.career || "unspecified"}",
-  "summary": "1-2 sentence overview of the full journey",
+  "career_path": "${m.career || "unspecified"}",
+  "estimated_duration_months": <number>,
   "phases": [
     {
-      "title": "Phase title",
-      "goal": "What they achieve by the end of this phase",
-      "topics": ["specific topic", "specific topic", "specific topic"],
-      "tools": ["industry tool", "industry tool"],
-      "aiIntegration": "Named AI tools used in this phase and exactly how the user applies them",
-      "milestone": "Real-world deliverable that proves mastery"
+      "phase_number": 1,
+      "phase_title": "<title>",
+      "phase_goal": "<one sentence describing what the user will be able to do after this phase>",
+      "missions": [
+        {
+          "mission_number": 1,
+          "mission_title": "<title>",
+          "mission_description": "<short description>",
+          "topics": ["<topic1>", "<topic2>"],
+          "tools": ["<tool1>", "<tool2>"],
+          "ai_integration": "<specific AI tools relevant to this mission and how to use them>",
+          "real_world_milestone": "<a concrete deliverable that proves completion>"
+        }
+      ]
     }
   ]
 }`;

@@ -1,30 +1,23 @@
 import { useEffect, useState } from "react";
-import { getChosenCareer, getProgress } from "@/lib/userState";
-import { getActiveModule, loadModuleForCareer } from "@/lib/careerModules";
+import { getChosenCareer } from "@/lib/userState";
+import { loadRoadmap, getCurrentPhase, getOverallProgress, type KokoRoadmap } from "@/lib/kokoRoadmap";
 
 export const CurrentPhase = () => {
-  const [pct, setPct] = useState(0);
-  const [phase, setPhase] = useState(1);
-  const [career, setCareer] = useState<{ title?: string; category?: string } | null>(null);
-  const [phaseTitle, setPhaseTitle] = useState<string>("Foundation");
+  const [roadmap, setRoadmap] = useState<KokoRoadmap | null>(() => loadRoadmap());
 
   useEffect(() => {
-    const refresh = () => {
-      const pr = getProgress();
-      setPct(pr.overallPct);
-      setPhase(pr.phase);
-      const c = getChosenCareer();
-      setCareer(c);
-      const mod = getActiveModule() || loadModuleForCareer(c);
-      const p = mod.phases[pr.phase - 1] || mod.phases[0];
-      setPhaseTitle(p.title.replace(/^Phase \d+:\s*/, "").replace(/ 🔒$/, ""));
-    };
-    refresh();
+    const refresh = () => setRoadmap(loadRoadmap());
+    window.addEventListener("worthscope:roadmap", refresh);
     window.addEventListener("worthscope:progress", refresh);
-    return () => window.removeEventListener("worthscope:progress", refresh);
+    return () => {
+      window.removeEventListener("worthscope:roadmap", refresh);
+      window.removeEventListener("worthscope:progress", refresh);
+    };
   }, []);
 
-  const title = phaseTitle;
+  const career = getChosenCareer();
+  const phase = roadmap ? getCurrentPhase(roadmap) : null;
+  const pct = roadmap ? getOverallProgress(roadmap) : 0;
 
   return (
     <section
@@ -35,13 +28,17 @@ export const CurrentPhase = () => {
         Current Phase
       </span>
       <h3 className="mt-2.5 text-[20px] font-bold text-foreground">
-        Phase {phase}: {title}
+        {phase ? `Phase ${phase.phase_number}: ${phase.phase_title}` : "Roadmap not yet built"}
         {career?.title && <span className="ml-2 text-[14px] font-medium text-text2">· {career.title}</span>}
       </h3>
       <p className="mt-2 max-w-[640px] text-[14px] leading-[1.7] text-text2">
-        {pct === 0
+        {!roadmap
+          ? "Build your roadmap with Koko to see your current phase, goal, and missions here."
+          : phase?.phase_goal
+          ? phase.phase_goal
+          : pct === 0
           ? "Your journey starts here. Complete your first mission to begin building real momentum."
-          : "Build your understanding and explore your career direction. Complete all missions in this phase to unlock the next."}
+          : "Complete all missions in this phase to unlock the next."}
       </p>
 
       <div className="mt-5 flex items-center justify-between text-[13px]">
