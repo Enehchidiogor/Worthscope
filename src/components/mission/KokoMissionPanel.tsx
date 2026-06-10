@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { streamKokoChat, type KokoMission, type KokoMsg } from "@/lib/kokoClient";
+import { KokoAvatar } from "@/components/koko/KokoAvatar";
 
 type Props = {
   mission: KokoMission;
