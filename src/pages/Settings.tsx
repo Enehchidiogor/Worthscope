@@ -328,12 +328,47 @@ const Settings = () => {
           {/* ───── Profile header ───── */}
           <div className="ws-fade-up mb-8 flex items-center justify-between" style={{ animationDelay: "0s" }}>
             <div className="flex items-center">
-              <div
-                className="grid h-16 w-16 place-items-center rounded-full text-[24px] font-bold text-white"
-                style={{ background: "linear-gradient(135deg,#3498DB,#5DADE2)" }}
+              <button
+                onClick={handleAvatarClick}
+                aria-label="Change profile picture"
+                className="group relative grid h-20 w-20 place-items-center overflow-hidden rounded-full"
+                style={{
+                  background: gradientFor(displayName),
+                  cursor: "pointer",
+                  border: "none",
+                  padding: 0,
+                }}
               >
-                U
-              </div>
+                <UserAvatar size={80} fallbackInitial={(displayName[0] || "U").toUpperCase()} fallbackName={displayName} />
+                <div
+                  className="absolute inset-0 grid place-items-center opacity-0 transition-opacity duration-200 group-hover:opacity-100"
+                  style={{ background: "rgba(0,0,0,0.45)", borderRadius: "50%" }}
+                >
+                  {uploading ? (
+                    <div
+                      className="h-6 w-6 animate-spin rounded-full border-2 border-white border-t-transparent"
+                      aria-label="Uploading"
+                    />
+                  ) : (
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
+                      <circle cx="12" cy="13" r="4" />
+                    </svg>
+                  )}
+                </div>
+                {uploading && (
+                  <div className="absolute inset-0 grid place-items-center" style={{ background: "rgba(0,0,0,0.45)", borderRadius: "50%" }}>
+                    <div className="h-6 w-6 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                  </div>
+                )}
+              </button>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/png,image/jpeg,image/webp"
+                className="hidden"
+                onChange={handleAvatarFile}
+              />
               <div className="ml-4">
                 <div className="text-[22px] font-bold" style={{ color: textColor }}>
                   {name.split(" ")[0]}
@@ -343,27 +378,59 @@ const Settings = () => {
               </div>
             </div>
             <button
+              onClick={handleAvatarClick}
               className="rounded-[10px] px-5 py-2.5 text-[13px] font-medium transition-colors"
               style={{
-                background: "#EBF5FB",
-                border: "1px solid rgba(52,152,219,0.2)",
-                color: "#3498DB",
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.background = "rgba(52,152,219,0.15)";
-                e.currentTarget.style.borderColor = "#3498DB";
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.background = "#EBF5FB";
-                e.currentTarget.style.borderColor = "rgba(52,152,219,0.2)";
+                background: "rgba(137,90,246,0.1)",
+                border: "1px solid rgba(137,90,246,0.25)",
+                color: "#895AF6",
               }}
             >
-              Edit Profile
+              {uploading ? "Uploading…" : "Change Photo"}
             </button>
           </div>
 
-          {/* Helper for cards */}
-          {(() => null)()}
+          {/* ───── Koko's Avatar (new) ───── */}
+          <section className="ws-fade-up mb-5" style={{ animationDelay: "0.05s" }}>
+            <GroupLabel>Koko's Avatar</GroupLabel>
+            <div
+              className="overflow-hidden rounded-[18px] border border-[#E5E7EB] p-5"
+              style={{ background: cardBg, boxShadow: "0 2px 12px rgba(0,0,0,0.04)" }}
+            >
+              <div className="text-[13px] text-[#6B7280]">
+                Choose how Koko looks across your dashboard
+              </div>
+              <div className="mt-4 flex flex-wrap gap-3">
+                {(Object.keys(KOKO_AVATARS) as KokoAvatarKey[]).map((key) => {
+                  const meta = KOKO_AVATARS[key];
+                  const active = selectedKoko === key;
+                  return (
+                    <button
+                      key={key}
+                      onClick={() => handleKokoSelect(key)}
+                      aria-pressed={active}
+                      title={meta.label}
+                      className="relative grid place-items-center rounded-full transition-all duration-150 hover:scale-[1.05]"
+                      style={{
+                        width: 72,
+                        height: 72,
+                        borderRadius: "50%",
+                        border: active ? "3px solid #895AF6" : "1px solid #E5E7EB",
+                        background: "white",
+                        boxShadow: active ? "0 0 0 6px rgba(137,90,246,0.18)" : "0 1px 4px rgba(0,0,0,0.04)",
+                        cursor: "pointer",
+                      }}
+                    >
+                      <KokoAvatar size={56} avatarKey={key} />
+                    </button>
+                  );
+                })}
+              </div>
+              <div className="mt-4 text-[12px] text-[#6B7280]">
+                Currently selected: <span style={{ color: "#895AF6", fontWeight: 600 }}>{KOKO_AVATARS[selectedKoko].label}</span>
+              </div>
+            </div>
+          </section>
 
           {/* ───── Group 1: Profile ───── */}
           <section className="ws-fade-up mb-5" style={{ animationDelay: "0.1s" }}>
