@@ -52,8 +52,7 @@ export default function SignUp() {
       return;
     }
     if (data.session) {
-      // Signup already captured name/age/education, so skip onboarding
-      // and send the user straight into the assessment.
+      // Signed up — send the user straight into the assessment.
       navigate("/assessment");
     } else {
       toast.success("Check your email to confirm your account.");
