@@ -1,11 +1,10 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import logo from "@/assets/worthscope-logo.png";
 import { SEO } from "@/components/SEO";
 
 /* WorthScope — Stage 1: User Setup Screen
-   Collects identity context ONCE: name only.
-   Age, education level, and class/level are collected during assessment.
+   Collects identity context: name, age range, education level, and class/level.
    Saves to localStorage as worthscope_user_profile. */
 
 const ACCENT = "#3498DB";
@@ -21,11 +20,16 @@ const FONT = "'Poppins', sans-serif";
 
 const STORAGE_KEY = "worthscope_user_profile";
 
+const AGE_RANGES = ["Under 13", "13–17", "18–24", "25–34", "35+"] as const;
+type EducationLevel = "" | "secondary" | "university";
+const SECONDARY_OPTS = ["JSS1", "JSS2", "JSS3", "SS1", "SS2", "SS3"];
+const UNI_OPTS = ["100 Level", "200 Level", "300 Level", "400 Level", "500 Level", "Graduate", "Working Professional"];
+
 type Profile = {
   fullName: string;
   firstName: string;
   ageRange: string;
-  educationLevel: string;
+  educationLevel: EducationLevel;
   classOrLevel: string;
 };
 
@@ -38,7 +42,7 @@ function loadProfile(): Profile {
         fullName: p.fullName || "",
         firstName: p.firstName || "",
         ageRange: p.ageRange || "",
-        educationLevel: p.educationLevel || "",
+        educationLevel: (p.educationLevel as EducationLevel) || "",
         classOrLevel: p.classOrLevel || "",
       };
     }
@@ -53,7 +57,19 @@ export default function Onboarding() {
   const [showGreeting, setShowGreeting] = useState(false);
 
   const validName = p.fullName.trim().length >= 2;
-  const canContinue = validName && !submitting;
+  const validAge = !!p.ageRange;
+  const validLevel = !!p.educationLevel;
+  const validClass = !!p.classOrLevel;
+  const canContinue = validName && validAge && validLevel && validClass && !submitting;
+
+  const classOptions = useMemo(
+    () => (p.educationLevel === "secondary" ? SECONDARY_OPTS : p.educationLevel === "university" ? UNI_OPTS : []),
+    [p.educationLevel]
+  );
+
+  function handleSelectLevel(level: EducationLevel) {
+    setP((prev) => ({ ...prev, educationLevel: level, classOrLevel: "" }));
+  }
 
   function handleContinue() {
     if (!canContinue) return;
@@ -62,9 +78,9 @@ export default function Onboarding() {
     const profile = {
       fullName: p.fullName.trim(),
       firstName,
-      ageRange: "",
-      educationLevel: "",
-      classOrLevel: "",
+      ageRange: p.ageRange,
+      educationLevel: p.educationLevel,
+      classOrLevel: p.classOrLevel,
     };
     try { localStorage.setItem(STORAGE_KEY, JSON.stringify(profile)); } catch {}
     window.setTimeout(() => {
@@ -103,7 +119,6 @@ export default function Onboarding() {
         description="Tell us a little about you so WorthScope can personalize your career assessment and roadmap."
         path="/onboarding"
       />
-      {/* Top bar */}
       <header
         style={{
           height: 80, padding: "0 24px",
@@ -118,7 +133,6 @@ export default function Onboarding() {
       </header>
 
       <main style={{ flex: 1, width: "100%", maxWidth: 560, margin: "0 auto", padding: "48px 32px" }} className="ws-setup-main">
-        {/* Step pills */}
         <div style={{ display: "flex", justifyContent: "center", gap: 8, marginBottom: 14, flexWrap: "wrap" }}>
           <Pill state="active">1 — Tell us about yourself</Pill>
           <Pill state="upcoming">2 — Answer 10 questions</Pill>
@@ -128,7 +142,6 @@ export default function Onboarding() {
           3 simple steps to your personalised career blueprint
         </p>
 
-        {/* Header */}
         <h1 style={{ textAlign: "center", fontWeight: 700, fontSize: 30, letterSpacing: -0.8, color: TEXT, margin: 0 }}>
           Let's Get You Started
         </h1>
@@ -136,7 +149,6 @@ export default function Onboarding() {
           We'll personalize your career path in just a few steps.
         </p>
 
-        {/* Form */}
         <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
           {/* Full Name */}
           <Field label="Full Name" highlight={validName}>
@@ -150,7 +162,78 @@ export default function Onboarding() {
             />
           </Field>
 
-          {/* Continue */}
+          {/* Age range */}
+          <Field label="Age Range" highlight={validAge}>
+            <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+              {AGE_RANGES.map((opt) => {
+                const active = p.ageRange === opt;
+                return (
+                  <button
+                    key={opt}
+                    type="button"
+                    onClick={() => setP({ ...p, ageRange: opt })}
+                    style={{
+                      padding: "10px 16px", borderRadius: 12,
+                      border: `1.5px solid ${active ? ACCENT : BORDER}`,
+                      background: active ? ACCENT_LIGHT : "#fff",
+                      color: active ? ACCENT_DARK : TEXT,
+                      fontFamily: FONT, fontWeight: 600, fontSize: 14,
+                      cursor: "pointer", transition: "all 0.15s ease",
+                    }}
+                  >
+                    {opt}
+                  </button>
+                );
+              })}
+            </div>
+          </Field>
+
+          {/* Education level */}
+          <Field label="Education Level" highlight={validLevel}>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+              {([
+                { id: "secondary", label: "Secondary School" },
+                { id: "university", label: "University / Beyond" },
+              ] as const).map((opt) => {
+                const active = p.educationLevel === opt.id;
+                return (
+                  <button
+                    key={opt.id}
+                    type="button"
+                    onClick={() => handleSelectLevel(opt.id)}
+                    style={{
+                      height: 52, borderRadius: 12,
+                      border: `1.5px solid ${active ? ACCENT : BORDER}`,
+                      background: active ? ACCENT_LIGHT : "#fff",
+                      color: active ? ACCENT_DARK : TEXT,
+                      fontFamily: FONT, fontWeight: 600, fontSize: 14,
+                      cursor: "pointer", transition: "all 0.15s ease",
+                    }}
+                  >
+                    {opt.label}
+                  </button>
+                );
+              })}
+            </div>
+          </Field>
+
+          {/* Class / level */}
+          {p.educationLevel && (
+            <Field label={p.educationLevel === "secondary" ? "Class" : "Level"} highlight={validClass}>
+              <select
+                value={p.classOrLevel}
+                onChange={(e) => setP({ ...p, classOrLevel: e.target.value })}
+                className="ws-input"
+                style={{ ...inputStyle(), appearance: "none", cursor: "pointer" }}
+              >
+                <option value="">Select…</option>
+                {classOptions.map((opt) => (
+                  <option key={opt} value={opt}>{opt}</option>
+                ))}
+              </select>
+            </Field>
+          )}
+
           <button
             disabled={!canContinue}
             onClick={handleContinue}
