@@ -98,6 +98,21 @@ export async function setAvatarUrl(url: string | null): Promise<boolean> {
   return true;
 }
 
+export async function setOnboardingTourCompleted(completed: boolean): Promise<boolean> {
+  const { data: u } = await supabase.auth.getUser();
+  if (!u.user) return false;
+  const { error } = await supabase
+    .from("profiles")
+    .update({ onboarding_tour_completed: completed })
+    .eq("id", u.user.id);
+  if (error) return false;
+  if (cached) {
+    cached = { ...cached, onboarding_tour_completed: completed };
+    broadcast();
+  }
+  return true;
+}
+
 export function useUserProfile() {
   const [p, setP] = useState<UserProfileRecord | null>(cached);
   useEffect(() => {
