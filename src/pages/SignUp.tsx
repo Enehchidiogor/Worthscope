@@ -14,11 +14,6 @@ const TEXT3 = "#9CA3AF";
 const BORDER = "#E5E7EB";
 const FONT = "'DM Sans', sans-serif";
 
-const EDUCATION_OPTIONS = [
-  "JSS1", "JSS2", "JSS3", "SS1", "SS2", "SS3",
-  "100 Level", "200 Level", "300 Level", "400 Level", "500 Level",
-  "Graduate", "Working professional", "Other",
-];
 
 type Strength = { level: 0 | 1 | 2 | 3; label: "" | "Weak" | "Medium" | "Strong"; color: string };
 
