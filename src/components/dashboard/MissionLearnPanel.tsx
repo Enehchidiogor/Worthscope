@@ -262,9 +262,10 @@ export const MissionLearnPanel = ({ missionId, missionTitle, missionDescription 
     }
   };
 
-  /* ---------- Subsection 02: Watch & Learn ---------- */
+  /* ---------- Subsection 02: Watch & Apply ---------- */
   const [video, setVideo] = useState<KokoVideo | null>(null);
   const [videoLoading, setVideoLoading] = useState(false);
+  const [videoCompleted, setVideoCompleted] = useState(false);
   const videoFetchedRef = useRef(false);
 
   useEffect(() => {
