@@ -4,6 +4,7 @@ import type { ComponentType } from "react";
 import { Link } from "react-router-dom";
 import logo from "@/assets/worthscope-logo.png";
 import { getProfile } from "@/lib/userState";
+import { UserAvatar } from "@/components/UserAvatar";
 
 type Item = { label: string; Icon: ComponentType<{ className?: string }>; to: string };
 
