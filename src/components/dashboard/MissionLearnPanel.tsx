@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { streamKokoChat, fetchKokoVideos, type KokoMsg, type KokoVideo } from "@/lib/kokoClient";
-import { getProfile, getChosenCareer, markLessonComplete } from "@/lib/userState";
+import { getProfile, getChosenCareer, markLessonComplete, completeMission } from "@/lib/userState";
 import { supabase } from "@/integrations/supabase/client";
 import { aggregateSignal, type LearningSignal } from "@/lib/learningSignal";
 
@@ -8,6 +8,7 @@ type Props = {
   missionId: string;
   missionTitle: string;
   missionDescription: string;
+  onMissionComplete?: () => void;
 };
 
 type QA = { role: "koko" | "user"; text: string };
