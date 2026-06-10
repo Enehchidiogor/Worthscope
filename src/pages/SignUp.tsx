@@ -40,15 +40,11 @@ export default function SignUp() {
     e.preventDefault();
     if (submitting) return;
     if (!name.trim()) return toast.error("Enter your first name");
-    if (!age || Number(age) < 13) return toast.error("You must be 13 or older");
-    if (!educationLevel) return toast.error("Select your education level");
     setSubmitting(true);
     const { data, error } = await signUpWithEmail({
       email,
       password: pwd,
       name: name.trim(),
-      age: Number(age),
-      educationLevel,
     });
     setSubmitting(false);
     if (error) {
