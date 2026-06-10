@@ -5,3 +5,6 @@ verify_jwt = false
 
 [functions.koko-youtube]
 verify_jwt = false
+
+[functions.jobs-fetch]
+verify_jwt = false

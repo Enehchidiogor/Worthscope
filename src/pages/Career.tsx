@@ -1,15 +1,17 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useCallback } from "react";
 import { Sidebar } from "@/components/dashboard/Sidebar";
 import { MobileTabBar } from "@/components/dashboard/MobileTabBar";
 import { IconBell, IconLock } from "@/components/dashboard/icons";
-import { JobCard } from "@/components/career/JobCard";
-import { JOBS } from "@/components/career/jobsData";
-import { getChosenCareer } from "@/lib/userState";
+import { UnifiedJobCard } from "@/components/career/UnifiedJobCard";
+import { JobDetailModal } from "@/components/career/JobDetailModal";
+import { getChosenCareer, getProgress } from "@/lib/userState";
+import { loadRoadmap, getOverallProgress } from "@/lib/kokoRoadmap";
+import { fetchJobs, type UnifiedJob } from "@/lib/jobsClient";
+import { getActiveModule, loadModuleForCareer } from "@/lib/careerModules";
 import { SEO } from "@/components/SEO";
 
-/* WorthScope — Career Opportunities Page
-   Two complete states (locked / unlocked) toggleable via
-   localStorage key "worthscope_career_unlocked". */
+const UNLOCK_THRESHOLD = 70;
+const ACCENT = "#895AF6";
 
 const FILTERS = [
   { key: "all", label: "All Roles" },
@@ -19,70 +21,107 @@ const FILTERS = [
   { key: "nigeria", label: "Nigeria" },
 ];
 
+const NIGERIAN_CITIES = ["nigeria", "lagos", "abuja", "ibadan", "port harcourt", "kano", "benin"];
+
+function matchesFilter(job: UnifiedJob, filter: string): boolean {
+  const loc = job.location.toLowerCase();
+  const type = job.job_type.toLowerCase();
+  switch (filter) {
+    case "all":
+      return true;
+    case "remote":
+      return type.includes("remote") || loc.includes("remote");
+    case "intern":
+      return type.includes("intern");
+    case "entry":
+      return (
+        type.includes("entry") ||
+        type === "full-time" ||
+        type === "fulltime" ||
+        type === "remote"
+      ) && !type.includes("intern");
+    case "nigeria":
+      return NIGERIAN_CITIES.some((c) => loc.includes(c));
+    default:
+      return true;
+  }
+}
+
 const Career = () => {
-  // ---------- unlock state ----------
-  const [unlocked, setUnlocked] = useState<boolean>(() => {
-    if (typeof window === "undefined") return false;
-    return localStorage.getItem("worthscope_career_unlocked") === "true";
-  });
-
-  // ---------- celebration banner (one-time) ----------
-  const [showBanner, setShowBanner] = useState<boolean>(() => {
-    if (typeof window === "undefined") return false;
-    return localStorage.getItem("worthscope_career_seen") !== "true";
-  });
-
-  // ---------- filter chips ----------
-  const [activeFilter, setActiveFilter] = useState<string>("all");
-
-  // ---------- live progress numbers ----------
-  const [overallPct, setOverallPct] = useState(1);
-  const [missionsDone, setMissionsDone] = useState(0);
+  // ---------- progress + unlock ----------
+  const [overallPct, setOverallPct] = useState(0);
   const [overallFill, setOverallFill] = useState(0);
+  const unlocked = overallPct >= UNLOCK_THRESHOLD;
+
   useEffect(() => {
-    const pr = JSON.parse(localStorage.getItem("worthscope_progress") || "{}");
-    const pct = Math.max(1, Number(pr?.overallPct) || 1);
-    const md = Number(pr?.missionsCompleted) || 0;
-    setOverallPct(pct);
-    setMissionsDone(md);
-    const t = window.setTimeout(() => setOverallFill(pct), 200);
-    return () => clearTimeout(t);
+    const compute = () => {
+      const rm = loadRoadmap();
+      const pct = rm ? getOverallProgress(rm) : Number(getProgress().overallPct) || 0;
+      setOverallPct(pct);
+      window.setTimeout(() => setOverallFill(pct), 200);
+    };
+    compute();
+    window.addEventListener("worthscope:roadmap", compute);
+    window.addEventListener("worthscope:progress", compute);
+    return () => {
+      window.removeEventListener("worthscope:roadmap", compute);
+      window.removeEventListener("worthscope:progress", compute);
+    };
   }, []);
 
-  // ---------- readiness ring stroke ----------
-  const [ringFill, setRingFill] = useState(0);
-  useEffect(() => {
-    if (!unlocked) return;
-    const t = window.setTimeout(() => setRingFill(85), 250);
-    return () => clearTimeout(t);
-  }, [unlocked]);
+  // ---------- filters ----------
+  const [activeFilter, setActiveFilter] = useState<string>("all");
 
-  const chosenCategory = getChosenCareer()?.category;
-  const careerScopedJobs = useMemo(
-    () => (chosenCategory ? JOBS.filter((j) => j.category === chosenCategory) : JOBS),
-    [chosenCategory]
-  );
+  // ---------- top skills (for Koko message + match calc) ----------
+  const topSkills = useMemo(() => {
+    const mod = getActiveModule() || loadModuleForCareer(getChosenCareer());
+    const pr = getProgress();
+    const list = mod.skills
+      .map((s) => ({ name: s.name, pct: pr.skills[s.name] || 0 }))
+      .sort((a, b) => b.pct - a.pct);
+    return list;
+  }, [overallPct]);
+
+  const topTwoSkillNames = topSkills.slice(0, 2).filter((s) => s.pct > 0).map((s) => s.name);
+  const userSkillList = topSkills.map((s) => s.name);
+
+  // ---------- jobs ----------
+  const [jobs, setJobs] = useState<UnifiedJob[]>([]);
+  const [loadingJobs, setLoadingJobs] = useState(false);
+  const [jobsPartial, setJobsPartial] = useState(false);
+  const [jobsErrored, setJobsErrored] = useState(false);
+  const [showFullError, setShowFullError] = useState(false);
+
+  const career = getChosenCareer();
+
+  const loadJobs = useCallback(async () => {
+    if (!unlocked) return;
+    setLoadingJobs(true);
+    setShowFullError(false);
+    const careerKey = (career?.category || career?.title || "").toLowerCase();
+    const res = await fetchJobs({
+      careerPath: careerKey,
+      location: "Nigeria",
+      userSkills: userSkillList,
+    });
+    setJobs(res.jobs);
+    setJobsPartial(res.partial);
+    setJobsErrored(res.errored);
+    if (res.jobs.length === 0) setShowFullError(true);
+    setLoadingJobs(false);
+  }, [unlocked, career?.category, career?.title, userSkillList.join(",")]);
+
+  useEffect(() => {
+    loadJobs();
+  }, [loadJobs]);
+
+  // ---------- view modal ----------
+  const [modalJob, setModalJob] = useState<UnifiedJob | null>(null);
 
   const filteredJobs = useMemo(
-    () => careerScopedJobs.filter((j) => j.filters.includes(activeFilter)),
-    [activeFilter, careerScopedJobs]
+    () => jobs.filter((j) => matchesFilter(j, activeFilter)),
+    [jobs, activeFilter],
   );
-
-  const toggleUnlock = () => {
-    const next = !unlocked;
-    setUnlocked(next);
-    localStorage.setItem("worthscope_career_unlocked", String(next));
-    if (!next) {
-      // re-show banner next time it unlocks
-      localStorage.removeItem("worthscope_career_seen");
-      setShowBanner(true);
-    }
-  };
-
-  const dismissBanner = () => {
-    setShowBanner(false);
-    localStorage.setItem("worthscope_career_seen", "true");
-  };
 
   // ===================================================
   return (
@@ -105,13 +144,13 @@ const Career = () => {
           {unlocked ? (
             <span
               style={{
-                background: "#EBF5FB",
-                border: "1px solid rgba(52,152,219,0.2)",
+                background: "#F3EEFF",
+                border: `1px solid ${ACCENT}33`,
                 borderRadius: 100,
                 padding: "6px 14px",
                 fontWeight: 600,
                 fontSize: 12,
-                color: "#3498DB",
+                color: ACCENT,
               }}
             >
               {filteredJobs.length} roles matched
@@ -122,24 +161,6 @@ const Career = () => {
               Locked
             </span>
           )}
-
-          {/* Demo toggle — easy state switching */}
-          <button
-            onClick={toggleUnlock}
-            title="Toggle locked / unlocked (demo)"
-            style={{
-              background: "transparent",
-              border: "1px dashed #9CA3AF",
-              borderRadius: 8,
-              padding: "5px 10px",
-              fontSize: 11,
-              color: "#6B7280",
-              cursor: "pointer",
-              fontFamily: "inherit",
-            }}
-          >
-            {unlocked ? "Demo: Lock" : "Demo: Unlock"}
-          </button>
 
           <button className="relative" aria-label="Notifications" style={{ color: "#6B7280" }}>
             <IconBell className="h-5 w-5" />
@@ -155,133 +176,35 @@ const Career = () => {
             // STATE B — UNLOCKED
             // ============================================
             <>
-              {/* Celebration banner (one-time) */}
-              {showBanner && (
-                <div
-                  className="ws-fade-up mb-7 flex items-start justify-between gap-4 rounded-[20px] p-6 md:p-7"
-                  style={{
-                    background: "linear-gradient(135deg, #EBF5FB, #F0FFF4)",
-                    border: "1px solid rgba(52,152,219,0.2)",
-                  }}
-                >
-                  <div>
-                    <div style={{ fontWeight: 700, fontSize: 18, color: "#111111" }}>
-                      🎉 Career Opportunities Unlocked!
-                    </div>
-                    <div style={{ fontWeight: 400, fontSize: 14, color: "#6B7280", lineHeight: 1.65, marginTop: 6 }}>
-                      You've completed enough of your journey to access matched job opportunities.
-                      These roles are aligned with your skills and goals.
-                    </div>
-                  </div>
-                  <button
-                    onClick={dismissBanner}
-                    style={{
-                      background: "transparent",
-                      border: "none",
-                      color: "#9CA3AF",
-                      fontWeight: 500,
-                      fontSize: 13,
-                      cursor: "pointer",
-                      whiteSpace: "nowrap",
-                      fontFamily: "inherit",
-                    }}
-                  >
-                    ✕ Got it
-                  </button>
-                </div>
-              )}
-
-              {/* Readiness score card */}
-              <div
-                className="ws-fade-up mb-6 flex flex-col items-center gap-7 rounded-[20px] p-6 md:flex-row md:p-7"
-                style={{
-                  background: "#FFFFFF",
-                  border: "1px solid #E5E7EB",
-                  boxShadow: "0 4px 20px rgba(0,0,0,0.05)",
-                  animationDelay: "0.1s",
-                }}
-              >
-                {/* Ring */}
-                <div className="relative shrink-0" style={{ width: 90, height: 90 }}>
-                  <svg width="90" height="90" viewBox="0 0 90 90">
-                    <circle cx="45" cy="45" r="38" stroke="#E5E7EB" strokeWidth="8" fill="none" />
-                    <circle
-                      cx="45" cy="45" r="38"
-                      stroke="#3498DB" strokeWidth="8" fill="none" strokeLinecap="round"
-                      strokeDasharray={2 * Math.PI * 38}
-                      strokeDashoffset={2 * Math.PI * 38 * (1 - ringFill / 100)}
-                      transform="rotate(-90 45 45)"
-                      style={{ transition: "stroke-dashoffset 1.2s ease" }}
-                    />
-                  </svg>
-                  <div className="absolute inset-0 flex flex-col items-center justify-center">
-                    <span style={{ fontWeight: 700, fontSize: 20, color: "#111111", lineHeight: 1 }}>85%</span>
-                    <span style={{ fontWeight: 400, fontSize: 11, color: "#22C55E", marginTop: 2 }}>Ready</span>
-                  </div>
-                </div>
-
-                <div>
-                  <div
-                    style={{
-                      fontWeight: 600, fontSize: 11, color: "#3498DB",
-                      textTransform: "uppercase", letterSpacing: 1.5,
-                    }}
-                  >
-                    Your Career Readiness
-                  </div>
-                  <div style={{ fontWeight: 700, fontSize: 18, color: "#111111", letterSpacing: -0.3, marginTop: 8 }}>
-                    You're 85% ready for your top matched role
-                  </div>
-                  <div style={{ fontWeight: 400, fontSize: 14, color: "#6B7280", lineHeight: 1.65, marginTop: 6 }}>
-                    Based on your skills, missions, and submitted projects, here are the roles
-                    that match your current profile.
-                  </div>
-                  <div className="mt-3.5 flex flex-wrap gap-2">
-                    {["UI Design", "Problem Solving", "Technical Tools"].map((t) => (
-                      <span
-                        key={t}
-                        style={{
-                          background: "#EBF5FB",
-                          border: "1px solid rgba(52,152,219,0.2)",
-                          borderRadius: 100,
-                          padding: "4px 12px",
-                          fontWeight: 500,
-                          fontSize: 12,
-                          color: "#3498DB",
-                        }}
-                      >
-                        {t}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              </div>
-
-              {/* Koko insight */}
+              {/* Koko message */}
               <div
                 className="ws-fade-up mb-6 flex items-start gap-3 rounded-[14px] p-4 md:p-5"
                 style={{
-                  background: "#EBF5FB",
-                  borderLeft: "4px solid #3498DB",
-                  animationDelay: "0.25s",
+                  background: "#F3EEFF",
+                  borderLeft: `4px solid ${ACCENT}`,
                 }}
               >
                 <div
                   className="grid shrink-0 place-items-center rounded-full"
-                  style={{ width: 36, height: 36, background: "#3498DB", color: "white", fontWeight: 700 }}
+                  style={{ width: 36, height: 36, background: ACCENT, color: "white", fontWeight: 700 }}
                 >
                   K
                 </div>
                 <p style={{ fontWeight: 400, fontSize: 14, color: "#111111", lineHeight: 1.65, margin: 0 }}>
-                  You're ready. These roles align with your UI Design and Problem Solving strengths.
-                  Start with the top match — you're well positioned for it.
+                  You're ready. These roles align with your{" "}
+                  <strong>
+                    {topTwoSkillNames.length >= 2
+                      ? `${topTwoSkillNames[0]} and ${topTwoSkillNames[1]}`
+                      : topTwoSkillNames[0] || "current"}{" "}
+                  </strong>
+                  strengths. Start with the top match — you're well positioned for it.
                 </p>
               </div>
 
               {/* Filter row */}
               <div
                 className="ws-fade-up mb-5 flex items-center gap-2.5 overflow-x-auto md:flex-wrap"
-                style={{ animationDelay: "0.4s" }}
+                style={{ animationDelay: "0.1s" }}
               >
                 <span style={{ fontWeight: 500, fontSize: 13, color: "#6B7280", whiteSpace: "nowrap" }}>
                   Filter by:
@@ -293,9 +216,9 @@ const Career = () => {
                       key={f.key}
                       onClick={() => setActiveFilter(f.key)}
                       style={{
-                        background: active ? "#EBF5FB" : "#F4F9FE",
-                        border: `1px solid ${active ? "#3498DB" : "#E5E7EB"}`,
-                        color: active ? "#3498DB" : "#6B7280",
+                        background: active ? "#F3EEFF" : "#F4F9FE",
+                        border: `1px solid ${active ? ACCENT : "#E5E7EB"}`,
+                        color: active ? ACCENT : "#6B7280",
                         borderRadius: 100,
                         padding: "7px 16px",
                         fontWeight: 500,
@@ -313,9 +236,50 @@ const Career = () => {
                 })}
               </div>
 
+              {jobsPartial && (
+                <div
+                  className="mb-3 rounded-[12px] p-3 text-center"
+                  style={{ background: "#FFF8E1", border: "1px solid #FCD34D44", color: "#92400E", fontSize: 12 }}
+                >
+                  Some additional listings couldn't be loaded right now.
+                </div>
+              )}
+
               {/* Job cards */}
               <div className="flex flex-col gap-4">
-                {filteredJobs.length === 0 ? (
+                {loadingJobs ? (
+                  <div
+                    className="rounded-[16px] p-8 text-center"
+                    style={{ background: "#FFFFFF", border: "1px solid #E5E7EB", color: "#6B7280" }}
+                  >
+                    Loading roles tailored to you…
+                  </div>
+                ) : showFullError ? (
+                  <div
+                    className="rounded-[16px] p-8 text-center"
+                    style={{ background: "#FFFFFF", border: "1px solid #E5E7EB", color: "#6B7280" }}
+                  >
+                    <p style={{ marginBottom: 12 }}>
+                      We're having trouble loading jobs right now. Please try again in a moment.
+                    </p>
+                    <button
+                      onClick={loadJobs}
+                      style={{
+                        background: ACCENT,
+                        color: "white",
+                        border: "none",
+                        borderRadius: 10,
+                        padding: "10px 18px",
+                        fontWeight: 600,
+                        fontSize: 13,
+                        cursor: "pointer",
+                        fontFamily: "inherit",
+                      }}
+                    >
+                      Retry
+                    </button>
+                  </div>
+                ) : filteredJobs.length === 0 ? (
                   <div
                     className="rounded-[16px] p-8 text-center"
                     style={{ background: "#FFFFFF", border: "1px solid #E5E7EB", color: "#6B7280" }}
@@ -323,7 +287,9 @@ const Career = () => {
                     No roles match this filter yet.
                   </div>
                 ) : (
-                  filteredJobs.map((job, i) => <JobCard key={job.id} job={job} index={i} />)
+                  filteredJobs.map((job, i) => (
+                    <UnifiedJobCard key={job.id} job={job} index={i} onView={setModalJob} />
+                  ))
                 )}
               </div>
             </>
@@ -332,7 +298,6 @@ const Career = () => {
             // STATE A — LOCKED
             // ============================================
             <>
-              {/* Locked header */}
               <div className="ws-fade-up mb-8 text-center" style={{ padding: "40px 0" }}>
                 <div style={{ display: "inline-block", animation: "ws-float 3s ease-in-out infinite" }}>
                   <svg width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
@@ -354,12 +319,11 @@ const Career = () => {
                     maxWidth: 440, margin: "10px auto 0", lineHeight: 1.7,
                   }}
                 >
-                  Complete your roadmap to unlock matched job opportunities.
+                  Complete {UNLOCK_THRESHOLD}% of your roadmap to unlock job opportunities.
                   The more you learn, the better the roles you'll see.
                 </p>
               </div>
 
-              {/* Progress to unlock card */}
               <div
                 className="ws-fade-up mx-auto mb-8 rounded-[20px] p-7 md:p-8"
                 style={{
@@ -372,24 +336,17 @@ const Career = () => {
               >
                 <h3 style={{ fontWeight: 700, fontSize: 16, color: "#111111" }}>Your Progress to Unlock</h3>
 
-                <div className="mt-5 flex flex-col gap-4">
-                  <RequirementRow met={overallPct >= 70} label="Roadmap Progress" sub={`${overallPct}% / 70% required`} />
-                  <RequirementRow met={missionsDone >= 6} label="Missions Completed" sub={`${missionsDone} / 6 required`} />
-                  <RequirementRow met={false} label="Project Submitted" sub="0 / 1 required" />
-                </div>
-
-                {/* Overall bar */}
-                <div className="mt-6">
+                <div className="mt-5">
                   <div className="flex items-center justify-between" style={{ fontWeight: 500, fontSize: 13, color: "#111111" }}>
-                    <span>Overall Readiness</span>
-                    <span>{overallPct}%</span>
+                    <span>Roadmap Progress</span>
+                    <span>{overallPct}% / {UNLOCK_THRESHOLD}%</span>
                   </div>
                   <div className="mt-2" style={{ height: 8, background: "#E5E7EB", borderRadius: 100, overflow: "hidden" }}>
                     <div
                       style={{
-                        width: `${overallFill}%`,
+                        width: `${Math.min(100, overallFill)}%`,
                         height: "100%",
-                        background: "#3498DB",
+                        background: ACCENT,
                         borderRadius: 100,
                         transition: "width 1s ease-out",
                       }}
@@ -397,14 +354,13 @@ const Career = () => {
                   </div>
                 </div>
 
-                {/* Koko message */}
                 <div
                   className="mt-4 flex items-start gap-3 rounded-[10px] p-3 md:p-4"
-                  style={{ background: "#EBF5FB" }}
+                  style={{ background: "#F3EEFF" }}
                 >
                   <div
                     className="grid shrink-0 place-items-center rounded-full"
-                    style={{ width: 28, height: 28, background: "#3498DB", color: "white", fontWeight: 700, fontSize: 12 }}
+                    style={{ width: 28, height: 28, background: ACCENT, color: "white", fontWeight: 700, fontSize: 12 }}
                   >
                     K
                   </div>
@@ -413,96 +369,16 @@ const Career = () => {
                   </p>
                 </div>
               </div>
-
-              {/* Blurred teasers */}
-              <div className="mb-3" style={{ fontWeight: 600, fontSize: 13, color: "#9CA3AF", textTransform: "uppercase", letterSpacing: 1.5 }}>
-                What's waiting for you 👀
-              </div>
-              <div className="flex flex-col gap-3">
-                {JOBS.slice(0, 3).map((j) => (
-                  <div
-                    key={j.id}
-                    className="relative overflow-hidden rounded-[16px] p-5 md:p-6"
-                    style={{ background: "#FFFFFF", border: "1px solid #E5E7EB" }}
-                  >
-                    {/* Blurred content */}
-                    <div
-                      style={{
-                        filter: "blur(5px)",
-                        userSelect: "none",
-                        pointerEvents: "none",
-                      }}
-                      className="flex items-start justify-between"
-                    >
-                      <div>
-                        <div style={{ fontWeight: 700, fontSize: 17, color: "#111111" }}>{j.title}</div>
-                        <div style={{ fontWeight: 400, fontSize: 13, color: "#6B7280", marginTop: 2 }}>
-                          {j.company} · {j.tags[0]}
-                        </div>
-                      </div>
-                      <div
-                        style={{
-                          background: "#EBF5FB",
-                          border: "1px solid rgba(52,152,219,0.2)",
-                          borderRadius: 100,
-                          padding: "5px 14px",
-                          fontWeight: 700, fontSize: 14, color: "#3498DB",
-                        }}
-                      >
-                        {j.match}% match
-                      </div>
-                    </div>
-
-                    {/* Lock overlay */}
-                    <div
-                      className="absolute inset-0 flex flex-col items-center justify-center"
-                      style={{ background: "rgba(255,255,255,0.6)", backdropFilter: "blur(4px)" }}
-                    >
-                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <rect x="4" y="11" width="16" height="10" rx="2" />
-                        <path d="M8 11V8a4 4 0 0 1 8 0v3" />
-                      </svg>
-                      <span style={{ fontWeight: 500, fontSize: 13, color: "#9CA3AF", marginTop: 6 }}>
-                        Unlock to view
-                      </span>
-                    </div>
-                  </div>
-                ))}
-              </div>
             </>
           )}
         </div>
       </main>
 
+      <JobDetailModal job={modalJob} userSkills={userSkillList} onClose={() => setModalJob(null)} />
+
       <MobileTabBar />
     </div>
   );
 };
-
-/* Requirement row — used in the locked progress card */
-const RequirementRow = ({ met, label, sub }: { met: boolean; label: string; sub: string }) => (
-  <div className="flex items-center gap-3">
-    <div
-      className="grid shrink-0 place-items-center rounded-full"
-      style={{
-        width: 28, height: 28,
-        background: met ? "#22C55E" : "#F3F4F6",
-        border: met ? "none" : "1.5px solid #E5E7EB",
-      }}
-    >
-      {met ? (
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-          <path d="m5 12 5 5L20 7" />
-        </svg>
-      ) : (
-        <span style={{ width: 10, height: 1.5, background: "#9CA3AF", display: "block" }} />
-      )}
-    </div>
-    <span className="flex-1" style={{ fontWeight: 500, fontSize: 14, color: met ? "#111111" : "#6B7280" }}>
-      {label}
-    </span>
-    <span style={{ fontWeight: 400, fontSize: 12, color: met ? "#3498DB" : "#9CA3AF" }}>{sub}</span>
-  </div>
-);
 
 export default Career;
