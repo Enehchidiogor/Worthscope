@@ -245,7 +245,7 @@ export const KokoFloatingChat = () => {
   return (
     <>
       {/* ───────── Floating button ───────── */}
-      <div className="fixed bottom-7 right-7 z-[500] group">
+      <div data-tour="koko-fab" className="fixed bottom-7 right-7 z-[500] group">
         {/* Auto / hover tooltip (left of button) */}
         {!open && (
           <span

@@ -75,7 +75,7 @@ const Index = () => {
             <CareerSummary />
           </section>
 
-          <div className="mt-6">
+          <div data-tour="career" className="mt-6">
             <CareerOpportunitiesCard />
           </div>
 
