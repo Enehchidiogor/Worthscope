@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { Sidebar } from "@/components/dashboard/Sidebar";
 import { TopBar } from "@/components/dashboard/TopBar";
@@ -6,6 +6,16 @@ import { MobileTabBar } from "@/components/dashboard/MobileTabBar";
 import { InviteParentModal } from "@/components/parent/InviteParentModal";
 import { getProfile } from "@/lib/userState";
 import { SEO } from "@/components/SEO";
+import { UserAvatar, gradientFor } from "@/components/UserAvatar";
+import { KokoAvatar, KOKO_AVATARS } from "@/components/koko/KokoAvatar";
+import { supabase } from "@/integrations/supabase/client";
+import {
+  useUserProfile,
+  updateKokoAvatar,
+  setAvatarUrl,
+  loadUserProfile,
+  type KokoAvatarKey,
+} from "@/lib/profileStore";
 
 /* WorthScope — Settings Page
    5 grouped white cards on a soft-blue page bg.
