@@ -541,6 +541,35 @@ export const MissionLearnPanel = ({ missionId, missionTitle, missionDescription,
         )}
       </section>
 
+      {/* ───── Subsection 03: Assignment ───── */}
+      <AssignmentSection
+        unlocked={videoCompleted}
+        brief={brief}
+        briefLoading={briefLoading}
+        briefErr={briefErr}
+        onGenerate={generateBrief}
+        completed={assignmentCompleted}
+        onComplete={() => setAssignmentCompleted(true)}
+      />
+
+      {/* ───── Subsection 04: Submission ───── */}
+      <SubmissionSection
+        unlocked={assignmentCompleted}
+        submission={submission}
+        setSubmission={setSubmission}
+        submitting={submitting}
+        assessment={assessment}
+        assessmentErr={assessmentErr}
+        onSubmit={submitProject}
+        missionDone={missionDone}
+        onFinalize={async () => {
+          if (missionDone) return;
+          setMissionDone(true);
+          completeMission();
+          onMissionComplete?.();
+        }}
+      />
+
       <style>{`
         @keyframes ws-koko-bounce {
           0%, 80%, 100% { transform: scale(0.6); opacity: 0.4; }
@@ -550,3 +579,133 @@ export const MissionLearnPanel = ({ missionId, missionTitle, missionDescription,
     </div>
   );
 };
+
+/* ───── Stage 3 — Assignment ───── */
+function AssignmentSection({
+  unlocked, brief, briefLoading, briefErr, onGenerate, completed, onComplete,
+}: {
+  unlocked: boolean;
+  brief: string;
+  briefLoading: boolean;
+  briefErr: string | null;
+  onGenerate: () => void;
+  completed: boolean;
+  onComplete: () => void;
+}) {
+  useEffect(() => {
+    if (unlocked && !brief && !briefLoading && !briefErr) onGenerate();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [unlocked]);
+
+  return (
+    <section className={["rounded-xl border p-4 transition-opacity",
+      unlocked ? "border-border bg-bg-elevated/60" : "border-border bg-bg-elevated/30 opacity-60"].join(" ")}>
+      <header className="mb-3 flex items-center gap-2">
+        <span className="text-[11px] font-bold tracking-[1.5px]" style={{ color: KOKO_PURPLE }}>03</span>
+        <h4 className="text-[14px] font-semibold text-foreground">Assignment</h4>
+        {!unlocked && (
+          <span className="ml-auto text-[11px] text-text3">🔒 Watch the video first</span>
+        )}
+      </header>
+
+      {!unlocked ? (
+        <div className="rounded-lg border border-dashed border-border bg-card/40 py-8 text-center text-[12px] text-text3">
+          Locked — complete Subsection 02 to unlock
+        </div>
+      ) : (
+        <>
+          {briefLoading && !brief && (
+            <div className="py-4 text-[13px] text-text2">Koko is preparing your assignment…</div>
+          )}
+          {briefErr && !brief && (
+            <div className="rounded-lg border border-border bg-card px-3 py-2 text-[13px] text-text2">{briefErr}</div>
+          )}
+          {brief && renderMarkdown(brief)}
+
+          {brief && (
+            <div className="mt-4 flex justify-end">
+              <button type="button" onClick={onComplete} disabled={completed}
+                className="rounded-lg px-4 py-2 text-[13px] font-semibold text-white transition-opacity disabled:opacity-60"
+                style={{ background: KOKO_PURPLE }}>
+                {completed ? "✓ Assignment Acknowledged" : "I'm ready to submit →"}
+              </button>
+            </div>
+          )}
+        </>
+      )}
+    </section>
+  );
+}
+
+/* ───── Stage 4 — Submission ───── */
+function SubmissionSection({
+  unlocked, submission, setSubmission, submitting, assessment, assessmentErr, onSubmit, missionDone, onFinalize,
+}: {
+  unlocked: boolean;
+  submission: string;
+  setSubmission: (s: string) => void;
+  submitting: boolean;
+  assessment: string;
+  assessmentErr: string | null;
+  onSubmit: () => void;
+  missionDone: boolean;
+  onFinalize: () => void;
+}) {
+  return (
+    <section className={["rounded-xl border p-4 transition-opacity",
+      unlocked ? "border-border bg-bg-elevated/60" : "border-border bg-bg-elevated/30 opacity-60"].join(" ")}>
+      <header className="mb-3 flex items-center gap-2">
+        <span className="text-[11px] font-bold tracking-[1.5px]" style={{ color: KOKO_PURPLE }}>04</span>
+        <h4 className="text-[14px] font-semibold text-foreground">Submission</h4>
+        {!unlocked && (
+          <span className="ml-auto text-[11px] text-text3">🔒 Finish the assignment first</span>
+        )}
+      </header>
+
+      {!unlocked ? (
+        <div className="rounded-lg border border-dashed border-border bg-card/40 py-8 text-center text-[12px] text-text3">
+          Locked — complete Subsection 03 to unlock
+        </div>
+      ) : (
+        <>
+          <label className="mb-2 block text-[12px] font-semibold text-foreground">
+            Paste a link or describe what you built
+          </label>
+          <textarea
+            value={submission}
+            onChange={(e) => setSubmission(e.target.value)}
+            placeholder="Share a link to your work, or describe what you did and what you learned…"
+            rows={5}
+            className="w-full rounded-lg border border-border bg-card px-3 py-2 text-[13px] text-foreground placeholder:text-text3 focus:outline-none"
+          />
+          <div className="mt-3 flex justify-end">
+            <button type="button" onClick={onSubmit} disabled={submitting || !submission.trim()}
+              className="rounded-lg px-4 py-2 text-[13px] font-semibold text-white transition-opacity disabled:opacity-50"
+              style={{ background: KOKO_PURPLE }}>
+              {submitting ? "Reviewing…" : assessment ? "Resubmit" : "Submit for Koko's review"}
+            </button>
+          </div>
+
+          {assessmentErr && !assessment && (
+            <div className="mt-3 rounded-lg border border-border bg-card px-3 py-2 text-[13px] text-text2">{assessmentErr}</div>
+          )}
+          {assessment && (
+            <div className="mt-4 border-t border-border pt-4">
+              <div className="mb-2 text-[12px] font-bold tracking-wide" style={{ color: KOKO_PURPLE }}>
+                ✦ KOKO'S FEEDBACK
+              </div>
+              {renderMarkdown(assessment)}
+              <div className="mt-4 flex justify-end">
+                <button type="button" onClick={onFinalize} disabled={missionDone}
+                  className="rounded-lg px-4 py-2 text-[13px] font-semibold text-white transition-opacity disabled:opacity-60"
+                  style={{ background: missionDone ? "#16a34a" : KOKO_PURPLE }}>
+                  {missionDone ? "🎉 Mission Completed" : "Complete Mission →"}
+                </button>
+              </div>
+            </div>
+          )}
+        </>
+      )}
+    </section>
+  );
+}
