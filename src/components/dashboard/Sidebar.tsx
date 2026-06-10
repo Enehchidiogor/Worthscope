@@ -56,7 +56,7 @@ export const Sidebar = ({ activePath = "/" }: { activePath?: string }) => {
       </nav>
 
       <Link to="/profile" className="mt-auto flex items-center gap-3 rounded-xl border border-border p-3 transition-colors hover:bg-bg-elevated">
-        <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-accent text-white font-semibold text-[13px]">{initial}</div>
+        <UserAvatar size={36} fallbackInitial={initial} fallbackName={name} />
         <div className="min-w-0">
           <div className="truncate text-[13px] font-medium text-foreground">{name}</div>
           <span className="text-[11px] text-text2 hover:text-accent">View Profile</span>
