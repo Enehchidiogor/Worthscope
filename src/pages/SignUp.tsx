@@ -6,6 +6,7 @@ import { SEO } from "@/components/SEO";
 import { signUpWithEmail } from "@/lib/authClient";
 import { lovable } from "@/integrations/lovable/index";
 import { toast } from "sonner";
+import { notifyWelcome } from "@/lib/notifications";
 
 
 const ACCENT = "#3498DB";
@@ -59,6 +60,7 @@ export default function SignUp() {
     }
     if (data.session) {
       toast.success("Welcome to WorthScope!");
+      notifyWelcome(name.trim()).catch(() => {});
       navigate("/onboarding");
     } else {
       toast.success("Account created. Please check your email to verify, then sign in.");

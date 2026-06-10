@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { generateKokoRoadmap } from "@/lib/kokoRoadmap";
 import { getChosenCareer } from "@/lib/userState";
+import { notifyRoadmapReady } from "@/lib/notifications";
 import { SEO } from "@/components/SEO";
 
 const ACCENT = "#3498DB";
@@ -24,6 +25,7 @@ export default function RoadmapLoading() {
         onDelta: (raw) => setStreaming(raw),
         resetProgress: true,
       });
+      if (career?.title) notifyRoadmapReady(career.title).catch(() => {});
       navigate("/dashboard", { replace: true });
     } catch (e) {
       setErr(e instanceof Error ? e.message : "Something went wrong.");

@@ -4,6 +4,7 @@ import { CareerIcon } from "@/components/career/CareerIcon";
 import { loadResults, type CareerResult } from "@/lib/recommendationEngine";
 import { setChosenCareer } from "@/lib/userState";
 import { persistCareerPath } from "@/lib/authClient";
+import { notifyAssessmentComplete } from "@/lib/notifications";
 import logo from "@/assets/worthscope-logo.png";
 import { SEO } from "@/components/SEO";
 
@@ -50,6 +51,7 @@ export default function CareerResults() {
     });
     // Fire-and-forget — DB write shouldn't block navigation.
     persistCareerPath(r.title).catch(() => {});
+    notifyAssessmentComplete(r.title).catch(() => {});
     // Go to the Koko roadmap generation screen — replaces the old static roadmap.
     navigate("/roadmap-loading");
   };
