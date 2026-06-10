@@ -334,14 +334,9 @@ export const KokoFloatingChat = () => {
           <header className="flex h-[70px] flex-shrink-0 items-center justify-between border-b border-border px-5">
             <div className="flex items-center">
               <div
-                className="grid h-10 w-10 place-items-center rounded-full text-[16px] font-bold text-white"
-                style={{
-                  background: "linear-gradient(135deg,#3498DB,#5DADE2)",
-                  boxShadow: "0 0 12px rgba(52,152,219,0.3)",
-                  animation: "ws-koko-pulse-soft 3s ease-in-out infinite",
-                }}
+                style={{ animation: "ws-koko-pulse-soft 3s ease-in-out infinite" }}
               >
-                K
+                <KokoAvatar size={40} ring="#895AF6" />
               </div>
               <div className="ml-3">
                 <div className="text-[16px] font-bold leading-tight text-foreground">Koko AI</div>
