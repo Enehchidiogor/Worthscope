@@ -4,6 +4,7 @@ import { getProfile, getChosenCareer, markLessonComplete, completeMission } from
 import { markRoadmapMissionComplete } from "@/lib/kokoRoadmap";
 import { supabase } from "@/integrations/supabase/client";
 import { aggregateSignal, type LearningSignal } from "@/lib/learningSignal";
+import { KokoAvatar } from "@/components/koko/KokoAvatar";
 
 type Props = {
   missionId: string;
