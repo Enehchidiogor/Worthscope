@@ -48,14 +48,20 @@ export default function SignUp() {
     });
     setSubmitting(false);
     if (error) {
+      const msg = (error.message || "").toLowerCase();
+      if (msg.includes("already") || msg.includes("registered") || msg.includes("exists")) {
+        toast.error("This email is already registered. Please sign in instead.");
+        navigate("/signin");
+        return;
+      }
       toast.error(error.message || "Couldn't create account");
       return;
     }
     if (data.session) {
-      // Signed up — send the user straight into the assessment.
-      navigate("/assessment");
+      toast.success("Welcome to WorthScope!");
+      navigate("/onboarding");
     } else {
-      toast.success("Check your email to confirm your account.");
+      toast.success("Account created. Please check your email to verify, then sign in.");
       navigate("/signin");
     }
   };

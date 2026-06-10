@@ -5,6 +5,7 @@ import { SEO } from "@/components/SEO";
 import { signInWithEmail, hydrateProfile } from "@/lib/authClient";
 import { lovable } from "@/integrations/lovable/index";
 import { supabase } from "@/integrations/supabase/client";
+import { getProfile, hasResults } from "@/lib/userState";
 import { toast } from "sonner";
 
 
@@ -15,6 +16,13 @@ const TEXT3 = "#9CA3AF";
 const BORDER = "#E5E7EB";
 const FONT = "'DM Sans', sans-serif";
 
+function routeAfterAuth(intended: string): string {
+  if (getProfile() && hasResults()) return intended;
+  if (!getProfile()) return "/onboarding";
+  if (!hasResults()) return "/assessment";
+  return intended;
+}
+
 export default function SignIn() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -22,6 +30,7 @@ export default function SignIn() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [needsVerify, setNeedsVerify] = useState(false);
 
   const intended = (location.state as { from?: string } | null)?.from || "/dashboard";
 
@@ -29,14 +38,44 @@ export default function SignIn() {
     e.preventDefault();
     if (submitting) return;
     setSubmitting(true);
+    setNeedsVerify(false);
     const { data, error } = await signInWithEmail(email, password);
     setSubmitting(false);
     if (error) {
+      const msg = (error.message || "").toLowerCase();
+      const code = (error as { code?: string }).code || "";
+      if (code === "email_not_confirmed" || msg.includes("not confirmed") || msg.includes("not verified")) {
+        setNeedsVerify(true);
+        toast.error("Please verify your email before signing in.");
+        return;
+      }
+      if (code === "invalid_credentials" || msg.includes("invalid login")) {
+        toast.error("Incorrect email or password. Please try again.");
+        return;
+      }
+      if (msg.includes("network") || msg.includes("fetch")) {
+        toast.error("Unable to connect. Please try again.");
+        return;
+      }
       toast.error(error.message || "Couldn't sign in");
       return;
     }
     if (data.user) await hydrateProfile(data.user);
-    navigate(intended, { replace: true });
+    navigate(routeAfterAuth(intended), { replace: true });
+  };
+
+  const onResend = async () => {
+    if (!email) {
+      toast.error("Enter your email first");
+      return;
+    }
+    const { error } = await supabase.auth.resend({
+      type: "signup",
+      email,
+      options: { emailRedirectTo: `${window.location.origin}/signin` },
+    });
+    if (error) toast.error(error.message);
+    else toast.success("Verification email sent. Check your inbox.");
   };
 
   const onGoogle = async () => {
@@ -50,7 +89,7 @@ export default function SignIn() {
     if (result.redirected) return;
     const { data } = await supabase.auth.getUser();
     if (data.user) await hydrateProfile(data.user);
-    navigate(intended, { replace: true });
+    navigate(routeAfterAuth(intended), { replace: true });
   };
 
   return (
@@ -95,6 +134,20 @@ export default function SignIn() {
               </button>
             </div>
           </Field>
+
+          {needsVerify && (
+            <button
+              type="button"
+              onClick={onResend}
+              style={{
+                marginTop: 14, width: "100%", height: 44, background: "#fff",
+                color: ACCENT, border: `1.5px solid ${ACCENT}`, borderRadius: 12,
+                fontFamily: FONT, fontWeight: 600, fontSize: 14, cursor: "pointer",
+              }}
+            >
+              Resend verification email
+            </button>
+          )}
 
           <button
             type="submit"
