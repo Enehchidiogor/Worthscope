@@ -381,12 +381,7 @@ export const KokoFloatingChat = () => {
             {messages.map((m) =>
               m.role === "koko" ? (
                 <div key={m.id} className="mb-4 flex items-start gap-2.5">
-                  <div
-                    className="grid h-7 w-7 flex-shrink-0 place-items-center rounded-full text-[11px] font-bold text-white"
-                    style={{ background: "linear-gradient(135deg,#3498DB,#5DADE2)" }}
-                  >
-                    K
-                  </div>
+                  <KokoAvatar size={28} />
                   <div className="flex max-w-[80%] flex-col">
                     <div
                       className="rounded-[0_14px_14px_14px] border border-border bg-card px-4 py-3 text-[14px] leading-[1.65] text-foreground"
