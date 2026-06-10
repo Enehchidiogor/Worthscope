@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { NotificationsBell } from "@/components/notifications/NotificationsBell";
 import { getProfile, getStreak } from "@/lib/userState";
+import { UserAvatar } from "@/components/UserAvatar";
 
 type Props = {
   title?: string;
