@@ -90,8 +90,38 @@ export function isMissionCompleted(id: string): boolean {
 
 export function markRoadmapMissionComplete(id: string) {
   const d = loadDone();
+  if (d[id]) return; // already done — no duplicate notifications
   d[id] = true;
   saveDone(d);
+
+  // Fire notifications based on the new state (best-effort, never block).
+  try {
+    const roadmap = loadRoadmap();
+    if (!roadmap) return;
+    const parsed = parseMissionId(id);
+    if (!parsed) return;
+
+    const phase = roadmap.phases.find((p) => p.phase_number === parsed.phase);
+    const mission = phase?.missions.find((m) => m.mission_number === parsed.mission);
+    if (!mission) return;
+
+    const after = getCurrentMissionRef(roadmap);
+    notifyMissionComplete(mission.mission_title, after?.mission.mission_title).catch(() => {});
+
+    const phaseDone = phase && phase.missions.every(
+      (m) => loadDone()[missionId(phase.phase_number, m.mission_number)],
+    );
+    if (phaseDone) {
+      const next = roadmap.phases.find((p) => p.phase_number === parsed.phase + 1);
+      if (next) notifyPhaseUnlocked(next.phase_title, next.phase_number).catch(() => {});
+    }
+
+    if (getOverallProgress(roadmap) >= 70) {
+      notifyCareerOpportunitiesUnlocked().catch(() => {});
+    }
+  } catch (e) {
+    console.warn("[kokoRoadmap] notification side-effect failed", e);
+  }
 }
 
 export function resetRoadmapProgress() {
