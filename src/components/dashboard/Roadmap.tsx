@@ -52,7 +52,7 @@ export const Roadmap = () => {
     end = all.length;
     start = Math.max(0, end - 3);
   }
-  const window = all.slice(start, end);
+  const phaseWindow = all.slice(start, end);
 
   return (
     <section
@@ -76,13 +76,13 @@ export const Roadmap = () => {
 
       {/* Desktop: horizontal */}
       <div className="hidden md:block">
-        <div className="relative grid" style={{ gridTemplateColumns: `repeat(${window.length}, 1fr)` }}>
+        <div className="relative grid" style={{ gridTemplateColumns: `repeat(${phaseWindow.length}, 1fr)` }}>
           <div
             aria-hidden
             className="absolute left-[16.6%] right-[16.6%] top-[26px] h-[3px] -translate-y-1/2 rounded-full"
             style={{ background: "var(--gradient-journey)" }}
           />
-          {window.map((p) => {
+          {phaseWindow.map((p) => {
             const pp = getPhaseProgress(roadmap, p.phase_number);
             const locked = isPhaseLocked(roadmap, p.phase_number);
             const isCurrent = p.phase_number === current.phase_number;
