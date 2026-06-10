@@ -8,6 +8,7 @@ import { PhaseLabel } from "@/components/roadmap/PhaseLabel";
 import { RoadmapNodeRow } from "@/components/roadmap/RoadmapNodeRow";
 import { MissionDrawer } from "@/components/roadmap/MissionDrawer";
 import { KokoSidePanel } from "@/components/roadmap/KokoSidePanel";
+import { KokoRoadmap as KokoDynamicRoadmap } from "@/components/roadmap/KokoRoadmap";
 import { buildRoadmapForUser, type RoadmapNode } from "@/components/roadmap/nodesData";
 import { getChosenCareer, completeMission } from "@/lib/userState";
 import { toast } from "@/hooks/use-toast";
@@ -90,6 +91,9 @@ const Roadmap = () => {
             {/* LEFT: roadmap */}
             <section>
               <RoadmapHeader progress={progress} careerTitle={careerTitle} />
+
+              <KokoDynamicRoadmap />
+
 
               {/* Vertical path container */}
               <div className="relative">
