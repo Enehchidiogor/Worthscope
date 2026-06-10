@@ -408,12 +408,7 @@ export const KokoFloatingChat = () => {
             {/* Typing indicator */}
             {typing && (
               <div className="mb-4 flex items-start gap-2.5">
-                <div
-                  className="grid h-7 w-7 flex-shrink-0 place-items-center rounded-full text-[11px] font-bold text-white"
-                  style={{ background: "linear-gradient(135deg,#3498DB,#5DADE2)" }}
-                >
-                  K
-                </div>
+                <KokoAvatar size={28} />
                 <div
                   className="flex items-center gap-1 rounded-[0_14px_14px_14px] border border-border bg-card px-4 py-3.5"
                   style={{ boxShadow: "0 2px 8px rgba(0,0,0,0.05)" }}
