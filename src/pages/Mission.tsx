@@ -1,90 +1,55 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Sidebar } from "@/components/dashboard/Sidebar";
 import { MobileTabBar } from "@/components/dashboard/MobileTabBar";
-import { MissionHeader } from "@/components/mission/MissionHeader";
-import { KokoBanner } from "@/components/mission/KokoBanner";
-import { SectionShell } from "@/components/mission/SectionShell";
-import { LearnContent } from "@/components/mission/LearnContent";
-import { StepsContent } from "@/components/mission/StepsContent";
-import { TaskContent } from "@/components/mission/TaskContent";
-import { SubmitContent } from "@/components/mission/SubmitContent";
-import { StickyCompleteBar } from "@/components/mission/StickyCompleteBar";
-import { KokoMissionPanel } from "@/components/mission/KokoMissionPanel";
-import { IconArrowRight } from "@/components/dashboard/icons";
-import { completeMission, getProgress, getChosenCareer } from "@/lib/userState";
-import { getActiveModule, loadModuleForCareer, flatMissions } from "@/lib/careerModules";
+import { MissionLearnPanel } from "@/components/dashboard/MissionLearnPanel";
+import { IconArrowRight, IconCheck } from "@/components/dashboard/icons";
+import { getProgress, getChosenCareer } from "@/lib/userState";
+import { getActiveModule, loadModuleForCareer } from "@/lib/careerModules";
 import { SEO } from "@/components/SEO";
 
 const Mission = () => {
   const navigate = useNavigate();
 
-  // Resolve the current mission from the active module + progress.
-  const mod = getActiveModule() || loadModuleForCareer(null);
-  const progress = getProgress();
-  const all = flatMissions(mod);
-  const currentIdx = Math.min(progress.missionsCompleted, all.length - 1);
-  const current = all[currentIdx];
-  // Find which phase this mission is in
-  let phaseNum = 1;
-  let inPhaseIdx = 0;
+  const mod = useMemo(() => getActiveModule() || loadModuleForCareer(null), []);
+  const [progress, setProgress] = useState(() => getProgress());
+
+  useEffect(() => {
+    const refresh = () => setProgress(getProgress());
+    window.addEventListener("worthscope:progress", refresh);
+    return () => window.removeEventListener("worthscope:progress", refresh);
+  }, []);
+
+  // Find current phase based on completed missions
+  let phaseIdx = 0;
   let cursor = 0;
   for (let i = 0; i < mod.phases.length; i++) {
     const len = mod.phases[i].missions.length;
-    if (currentIdx < cursor + len) {
-      phaseNum = i + 1;
-      inPhaseIdx = currentIdx - cursor;
+    if (progress.missionsCompleted < cursor + len) {
+      phaseIdx = i;
       break;
     }
     cursor += len;
+    phaseIdx = i;
   }
-  const phaseLabel = `Phase ${phaseNum}: ${mod.phases[phaseNum - 1]?.title.replace(/^Phase \d+:\s*/, "") || ""}`;
-  const phasePill = `Phase ${phaseNum} · Mission ${inPhaseIdx + 1} of ${mod.phases[phaseNum - 1].missions.length}`;
-
-  // Section completion: [Learn, Steps, Task, Submit]
-  const [sectionsDone, setSectionsDone] = useState<boolean[]>([false, false, false, false]);
-  const [submitted, setSubmitted] = useState(false);
-  const [verified, setVerified] = useState(false);
-
-  const setSection = (idx: number, value: boolean) =>
-    setSectionsDone((prev) => prev.map((v, i) => (i === idx ? value : v)));
-
-  const onSubmittedChange = (ok: boolean) => {
-    setSubmitted(ok);
-    setSection(3, ok);
-  };
-
-  const sectionProgress = useMemo(() => {
-    const done = sectionsDone.filter(Boolean).length;
-    return Math.round((done / sectionsDone.length) * 100);
-  }, [sectionsDone]);
-
-  const handleAllComplete = () => {
-    completeMission(current?.skillsGained || {});
-    navigate("/roadmap");
-  };
+  const phase = mod.phases[phaseIdx];
+  const phaseStartIdx = mod.phases.slice(0, phaseIdx).reduce((n, p) => n + p.missions.length, 0);
+  const completedInPhase = Math.max(0, progress.missionsCompleted - phaseStartIdx);
 
   const careerTitle = getChosenCareer()?.title || mod.title;
-  const videoQuery = `${current?.videoTitle || current?.title || "tutorial"} ${careerTitle}`.trim();
-  const kokoMission = {
-    title: current?.title,
-    description: current?.description,
-    career: careerTitle,
-    phase: phaseLabel,
-  };
 
+  const [expandedId, setExpandedId] = useState<string | null>(null);
 
   return (
     <div className="min-h-screen bg-background font-poppins text-foreground">
       <SEO
         title="Missions — WorthScope"
-        description="Active learning missions with lessons from Koko and curated videos for your career path."
+        description="Guided learning missions: learn with Koko, watch & apply, complete the assignment, then submit."
         path="/missions"
       />
       <Sidebar activePath="/missions" />
 
       <div className="md:ml-[220px]">
-        {/* Top bar — back link + mission progress pill */}
         <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-border bg-background/85 px-4 backdrop-blur-xl md:px-8">
           <button
             type="button"
@@ -95,83 +60,87 @@ const Mission = () => {
             Back to Roadmap
           </button>
           <div className="rounded-full border border-accent/20 bg-accent/10 px-3.5 py-1.5 text-[12px] font-semibold text-accent">
-            {phasePill}
+            Phase {phaseIdx + 1} · {Math.min(completedInPhase, phase.missions.length)}/{phase.missions.length} done
           </div>
         </header>
 
         <main className="mx-auto w-full max-w-[860px] px-4 pb-32 pt-8 md:px-8 md:pt-10">
-          <MissionHeader
-            phase={phaseLabel}
-            time="30–45 mins"
-            title={current?.title || "Mission"}
-            subtitle={current?.description || ""}
-            progress={sectionProgress}
-          />
+          <h1 className="text-[24px] font-bold text-foreground">{phase.title}</h1>
+          <p className="mt-2 text-[14px] text-text2">
+            {careerTitle} · Click any mission to start learning. Each mission unlocks step-by-step:
+            Learn with Koko → Watch & Apply → Assignment → Submission.
+          </p>
 
-          <KokoBanner message="Focus on completing each section before moving forward. This mission builds the foundation for everything in Phase 2." />
+          <ul className="mt-6 flex flex-col gap-3">
+            {phase.missions.map((m, idx) => {
+              const isDone = idx < completedInPhase;
+              const isOpen = expandedId === m.id;
+              return (
+                <li
+                  key={m.id}
+                  className={[
+                    "rounded-[16px] border bg-card transition-colors shadow-card",
+                    isDone
+                      ? "border-success/30"
+                      : isOpen
+                      ? "border-accent/40"
+                      : "border-border hover:border-accent/30",
+                  ].join(" ")}
+                >
+                  <button
+                    type="button"
+                    onClick={() => setExpandedId(isOpen ? null : m.id)}
+                    aria-expanded={isOpen}
+                    className="flex w-full items-start gap-3 p-5 text-left"
+                  >
+                    <span
+                      aria-hidden
+                      className={[
+                        "mt-0.5 grid h-6 w-6 shrink-0 place-items-center rounded-full",
+                        isDone ? "bg-success text-white" : "border-2 border-border bg-transparent",
+                      ].join(" ")}
+                    >
+                      {isDone && <IconCheck className="h-3.5 w-3.5" />}
+                    </span>
 
-          <SectionShell
-            number="01"
-            label="Learn"
-            title="Watch & Understand"
-            done={sectionsDone[0]}
-            onToggle={() => setSection(0, !sectionsDone[0])}
-            delay="0.35s"
-          >
-            <LearnContent query={videoQuery} fallbackTitle={current?.videoTitle} />
-          </SectionShell>
+                    <div className="min-w-0 flex-1">
+                      <div className={[
+                        "text-[15px] font-semibold leading-tight",
+                        isDone ? "text-text3 line-through" : "text-foreground",
+                      ].join(" ")}>
+                        {m.title}
+                      </div>
+                      <div className="mt-1 text-[13px] text-text2">{m.description}</div>
+                    </div>
 
-          <SectionShell
-            number="02"
-            label="Guided Steps"
-            title="Follow These Steps"
-            subtitle="Work through each step in order before moving to the task."
-            done={sectionsDone[1]}
-            onToggle={() => setSection(1, !sectionsDone[1])}
-            delay="0.5s"
-          >
-            <StepsContent />
-          </SectionShell>
+                    <svg
+                      aria-hidden width="18" height="18" viewBox="0 0 24 24" fill="none"
+                      stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"
+                      className={["mt-1 shrink-0 text-text2 transition-transform duration-200",
+                        isOpen ? "rotate-180" : "rotate-0"].join(" ")}
+                    >
+                      <polyline points="6 9 12 15 18 9" />
+                    </svg>
+                  </button>
 
-          <SectionShell
-            number="03"
-            label="Your Task"
-            title="Now Apply It"
-            subtitle="Use what you've learned to complete this real task. This will go directly into your portfolio."
-            done={sectionsDone[2]}
-            onToggle={() => setSection(2, !sectionsDone[2])}
-            emphasized
-            delay="0.65s"
-          >
-            <TaskContent />
-          </SectionShell>
-
-          <SectionShell
-            number="04"
-            label="Submit Your Work"
-            title="Share What You Built"
-            subtitle="Upload your work or paste a link. This is what makes your learning real and trackable."
-            done={sectionsDone[3]}
-            onToggle={() => {
-              // Manual toggle should still respect submission state
-              if (submitted) setSection(3, !sectionsDone[3]);
-            }}
-            delay="0.8s"
-          >
-            <SubmitContent onSubmittedChange={onSubmittedChange} />
-          </SectionShell>
-
-          <KokoMissionPanel mission={kokoMission} verified={verified} onVerified={() => setVerified(true)} />
+                  {isOpen && (
+                    <div className="px-5 pb-5">
+                      <MissionLearnPanel
+                        missionId={m.id}
+                        missionTitle={m.title}
+                        missionDescription={m.description}
+                        onMissionComplete={() => setExpandedId(null)}
+                      />
+                    </div>
+                  )}
+                </li>
+              );
+            })}
+          </ul>
         </main>
       </div>
 
       <MobileTabBar />
-
-      <StickyCompleteBar
-        sectionsDone={sectionsDone}
-        verified={verified}
-        onComplete={handleAllComplete}
-      />
     </div>
   );
 };
