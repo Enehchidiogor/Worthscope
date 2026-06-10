@@ -7,6 +7,11 @@
 import { streamKokoChat } from "@/lib/kokoClient";
 import { supabase } from "@/integrations/supabase/client";
 import { getProfile, getChosenCareer } from "@/lib/userState";
+import {
+  notifyMissionComplete,
+  notifyPhaseUnlocked,
+  notifyCareerOpportunitiesUnlocked,
+} from "@/lib/notifications";
 
 export type KokoMission = {
   mission_number: number;
