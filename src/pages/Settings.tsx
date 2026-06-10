@@ -255,6 +255,58 @@ const Settings = () => {
   // Password form
   const [showPw, setShowPw] = useState(false);
 
+  // ───── Avatar + Koko avatar wiring ─────
+  const userProfile = useUserProfile();
+  useEffect(() => { loadUserProfile(); }, []);
+
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [uploading, setUploading] = useState(false);
+
+  const handleAvatarClick = () => fileInputRef.current?.click();
+
+  const handleAvatarFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+    const okTypes = ["image/jpeg", "image/png", "image/webp", "image/jpg"];
+    if (!okTypes.includes(file.type)) {
+      toast.error("Please use a JPG, PNG, or WebP image.");
+      return;
+    }
+    if (file.size > 2 * 1024 * 1024) {
+      toast.error("Image is larger than 2 MB.");
+      return;
+    }
+    setUploading(true);
+    try {
+      const { data: u } = await supabase.auth.getUser();
+      if (!u.user) throw new Error("Not signed in.");
+      const ext = file.name.split(".").pop()?.toLowerCase() || "jpg";
+      const path = `${u.user.id}/avatar.${ext}`;
+      const { error: upErr } = await supabase.storage
+        .from("profile-pictures")
+        .upload(path, file, { upsert: true, contentType: file.type });
+      if (upErr) throw upErr;
+      const ok = await setAvatarUrl(path);
+      if (!ok) throw new Error("Save failed");
+      toast.success("Profile photo updated");
+    } catch (err) {
+      console.error(err);
+      toast.error("Couldn't upload your photo. Try again.");
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleKokoSelect = async (key: KokoAvatarKey) => {
+    const ok = await updateKokoAvatar(key);
+    if (!ok) toast.error("Couldn't update Koko's look. Try again.");
+  };
+
+  const selectedKoko: KokoAvatarKey = userProfile?.koko_avatar || "robot";
+  const displayName = userProfile?.name || initialName || "User";
+
+
   // Page-level overrides removed — global .dark tokens now drive all surfaces
   const pageBg = "hsl(var(--background))";
   const cardBg = "hsl(var(--bg-card))";
