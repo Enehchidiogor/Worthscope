@@ -162,6 +162,37 @@ One personalised line using their name (${m.userName || "friend"}) and tied to b
 If submission shows strong understanding, raise the bar for next time. If gaps, be supportive and specific about what to fix and how.`;
 }
 
+function roadmapPrompt(m: MissionCtx): string {
+  return `${KOKO_CORE}
+
+Audience: ${ageBand(m.userAge)}
+
+Generate a COMPLETE 2026 career roadmap for ${m.userName || "the student"} to become outstanding as a ${m.career || "professional"}.
+
+Rules:
+- Include as many phases as genuinely needed to take them from beginner to industry-ready. Do not pad. Do not artificially shorten. Typical range 4–8 phases.
+- Every phase must reflect what the industry actually demands in 2026 — current frameworks, current tooling, current workflows.
+- Every phase must integrate at least one specific, real AI tool used by professionals in this career today (e.g. Figma AI, Galileo, Cursor, Claude Code, GitHub Copilot, v0, Julius AI, Hugging Face, LangChain, Jasper, Notion AI).
+- Topics and tools must be specific. No vague items like "learn the basics".
+- Milestone must be a real-world deliverable that proves mastery of the phase.
+
+Output a single JSON object, no preface, no markdown fences, no commentary:
+{
+  "career": "${m.career || "unspecified"}",
+  "summary": "1-2 sentence overview of the full journey",
+  "phases": [
+    {
+      "title": "Phase title",
+      "goal": "What they achieve by the end of this phase",
+      "topics": ["specific topic", "specific topic", "specific topic"],
+      "tools": ["industry tool", "industry tool"],
+      "aiIntegration": "Named AI tools used in this phase and exactly how the user applies them",
+      "milestone": "Real-world deliverable that proves mastery"
+    }
+  ]
+}`;
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
@@ -242,6 +273,15 @@ Generate the project brief now.`,
     } else if (intent === "assess") {
       systemContent = assessPrompt(mission, brief, submission);
       userMessages = [{ role: "user", content: "Assess my submission now using the exact required format." }];
+    } else if (intent === "roadmap") {
+      systemContent = roadmapPrompt(mission);
+      userMessages = [{
+        role: "user",
+        content: `User: ${mission.userName || "student"}, age ${mission.userAge ?? "?"}, education ${mission.educationLevel || "?"}.
+Career: ${mission.career || "?"}.
+
+Generate the complete 2026 roadmap now as a single JSON object exactly matching the required schema.`,
+      }];
     } else {
       // legacy chat / stuck / verify
       let context = "";

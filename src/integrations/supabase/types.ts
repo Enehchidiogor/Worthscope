@@ -14,6 +14,33 @@ export type Database = {
   }
   public: {
     Tables: {
+      koko_roadmaps: {
+        Row: {
+          career: string | null
+          created_at: string
+          id: string
+          roadmap_json: Json
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          career?: string | null
+          created_at?: string
+          id?: string
+          roadmap_json: Json
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          career?: string | null
+          created_at?: string
+          id?: string
+          roadmap_json?: Json
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       mission_lessons: {
         Row: {
           completed_at: string | null
