@@ -1,4 +1,5 @@
 import { IconArrowRight, IconChart, IconTarget, IconLock } from "@/components/dashboard/icons";
+import { KokoAvatar } from "@/components/koko/KokoAvatar";
 
 export const KokoSidePanel = () => (
   <aside
@@ -6,9 +7,7 @@ export const KokoSidePanel = () => (
     style={{ animationDelay: "0.5s" }}
   >
     <div className="flex items-center gap-3">
-      <div className="grid h-10 w-10 place-items-center rounded-full bg-gradient-accent text-[15px] font-bold text-white shadow-accent">
-        K
-      </div>
+      <KokoAvatar size={40} />
       <div>
         <div className="text-[15px] font-bold text-foreground">Koko</div>
         <div className="text-[12px] text-text2">AI Career Assistant</div>

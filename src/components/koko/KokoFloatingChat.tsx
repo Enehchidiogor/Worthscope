@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { streamKokoChat, type KokoMsg } from "@/lib/kokoClient";
 import { getChosenCareer } from "@/lib/userState";
+import { KokoAvatar } from "@/components/koko/KokoAvatar";
 
 /* WorthScope — Global Floating Koko Chat
    Lives on every product page. Floating button (bottom-right) opens a
@@ -280,26 +281,22 @@ export const KokoFloatingChat = () => {
         <button
           onClick={handleButtonClick}
           aria-label={open ? "Close Koko chat" : "Open Koko chat"}
-          className="relative grid h-14 w-14 place-items-center rounded-full text-white transition-transform duration-200 active:scale-95"
+          className="relative grid h-14 w-14 place-items-center rounded-full bg-white transition-transform duration-200 active:scale-95"
           style={{
-            background: "linear-gradient(135deg,#3498DB,#5DADE2)",
             boxShadow: strongPulse
-              ? "0 8px 32px rgba(52,152,219,0.6)"
-              : "0 8px 24px rgba(52,152,219,0.4)",
+              ? "0 8px 32px rgba(137,90,246,0.55)"
+              : "0 8px 24px rgba(137,90,246,0.4)",
             animation: pulseAnim,
             transform: open ? "rotate(10deg)" : "rotate(0deg)",
+            border: "2px solid #895AF6",
           }}
         >
           {open ? (
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#895AF6" strokeWidth="2.5" strokeLinecap="round">
               <path d="M6 6l12 12M18 6 6 18" />
             </svg>
           ) : (
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <rect x="4" y="7" width="16" height="12" rx="3" />
-              <path d="M12 3v4M9 12h.01M15 12h.01" />
-              <path d="M9 16c.8.6 1.8 1 3 1s2.2-.4 3-1" />
-            </svg>
+            <KokoAvatar size={48} />
           )}
 
           {unread && !open && (
@@ -337,14 +334,9 @@ export const KokoFloatingChat = () => {
           <header className="flex h-[70px] flex-shrink-0 items-center justify-between border-b border-border px-5">
             <div className="flex items-center">
               <div
-                className="grid h-10 w-10 place-items-center rounded-full text-[16px] font-bold text-white"
-                style={{
-                  background: "linear-gradient(135deg,#3498DB,#5DADE2)",
-                  boxShadow: "0 0 12px rgba(52,152,219,0.3)",
-                  animation: "ws-koko-pulse-soft 3s ease-in-out infinite",
-                }}
+                style={{ animation: "ws-koko-pulse-soft 3s ease-in-out infinite" }}
               >
-                K
+                <KokoAvatar size={40} ring="#895AF6" />
               </div>
               <div className="ml-3">
                 <div className="text-[16px] font-bold leading-tight text-foreground">Koko AI</div>
@@ -389,12 +381,7 @@ export const KokoFloatingChat = () => {
             {messages.map((m) =>
               m.role === "koko" ? (
                 <div key={m.id} className="mb-4 flex items-start gap-2.5">
-                  <div
-                    className="grid h-7 w-7 flex-shrink-0 place-items-center rounded-full text-[11px] font-bold text-white"
-                    style={{ background: "linear-gradient(135deg,#3498DB,#5DADE2)" }}
-                  >
-                    K
-                  </div>
+                  <KokoAvatar size={28} />
                   <div className="flex max-w-[80%] flex-col">
                     <div
                       className="rounded-[0_14px_14px_14px] border border-border bg-card px-4 py-3 text-[14px] leading-[1.65] text-foreground"
@@ -421,12 +408,7 @@ export const KokoFloatingChat = () => {
             {/* Typing indicator */}
             {typing && (
               <div className="mb-4 flex items-start gap-2.5">
-                <div
-                  className="grid h-7 w-7 flex-shrink-0 place-items-center rounded-full text-[11px] font-bold text-white"
-                  style={{ background: "linear-gradient(135deg,#3498DB,#5DADE2)" }}
-                >
-                  K
-                </div>
+                <KokoAvatar size={28} />
                 <div
                   className="flex items-center gap-1 rounded-[0_14px_14px_14px] border border-border bg-card px-4 py-3.5"
                   style={{ boxShadow: "0 2px 8px rgba(0,0,0,0.05)" }}

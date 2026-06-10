@@ -173,30 +173,36 @@ export type Database = {
       profiles: {
         Row: {
           age: number | null
+          avatar_url: string | null
           career_path: string | null
           created_at: string
           education_level: string | null
           id: string
+          koko_avatar: string
           name: string | null
           overall_progress: number
           updated_at: string
         }
         Insert: {
           age?: number | null
+          avatar_url?: string | null
           career_path?: string | null
           created_at?: string
           education_level?: string | null
           id: string
+          koko_avatar?: string
           name?: string | null
           overall_progress?: number
           updated_at?: string
         }
         Update: {
           age?: number | null
+          avatar_url?: string | null
           career_path?: string | null
           created_at?: string
           education_level?: string | null
           id?: string
+          koko_avatar?: string
           name?: string | null
           overall_progress?: number
           updated_at?: string

@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { NotificationsBell } from "@/components/notifications/NotificationsBell";
 import { getProfile, getStreak } from "@/lib/userState";
+import { UserAvatar } from "@/components/UserAvatar";
 
 type Props = {
   title?: string;
@@ -11,11 +12,13 @@ type Props = {
 
 export const TopBar = ({ title = "Dashboard", progress }: Props) => {
   const [initials, setInitials] = useState("U");
+  const [name, setName] = useState("User");
   const [streakCount, setStreakCount] = useState(1);
   useEffect(() => {
     const p = getProfile();
     if (p?.firstName) {
       setInitials((p.firstName[0] + (p.lastName?.[0] || "")).toUpperCase() || "U");
+      setName(p.firstName);
     }
     const refresh = () => setStreakCount(getStreak().count || 1);
     refresh();
@@ -45,10 +48,10 @@ export const TopBar = ({ title = "Dashboard", progress }: Props) => {
         {/* Avatar → Profile */}
         <Link
           to="/profile"
-          className="grid h-9 w-9 place-items-center rounded-full bg-gradient-accent text-[14px] font-semibold text-white transition-shadow hover:shadow-[0_0_0_3px_hsl(var(--accent)/0.3)]"
+          className="rounded-full transition-shadow hover:shadow-[0_0_0_3px_hsl(var(--accent)/0.3)]"
           aria-label="Profile"
         >
-          {initials}
+          <UserAvatar size={36} fallbackInitial={initials} fallbackName={name} />
         </Link>
       </div>
     </header>

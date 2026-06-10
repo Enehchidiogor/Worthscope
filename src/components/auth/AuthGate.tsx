@@ -5,13 +5,17 @@
 import { useEffect } from "react";
 import { Navigate, useLocation } from "react-router-dom";
 import { useAuthSession, hydrateProfile } from "@/lib/authClient";
+import { loadUserProfile } from "@/lib/profileStore";
 
 export const AuthGate = ({ children }: { children: React.ReactNode }) => {
   const { user, loading } = useAuthSession();
   const location = useLocation();
 
   useEffect(() => {
-    if (user) hydrateProfile(user);
+    if (user) {
+      hydrateProfile(user);
+      loadUserProfile(true);
+    }
   }, [user]);
 
   if (loading) return null;

@@ -4,6 +4,7 @@ import { getProfile, getChosenCareer, markLessonComplete, completeMission } from
 import { markRoadmapMissionComplete } from "@/lib/kokoRoadmap";
 import { supabase } from "@/integrations/supabase/client";
 import { aggregateSignal, type LearningSignal } from "@/lib/learningSignal";
+import { KokoAvatar } from "@/components/koko/KokoAvatar";
 
 type Props = {
   missionId: string;
@@ -414,8 +415,7 @@ export const MissionLearnPanel = ({ missionId, missionTitle, missionDescription,
                 {qaMessages.map((m, i) =>
                   m.role === "koko" ? (
                     <div key={i} className="flex items-start gap-2">
-                      <div className="grid h-6 w-6 shrink-0 place-items-center rounded-full text-[10px] font-bold text-white"
-                        style={{ background: `linear-gradient(135deg,${KOKO_PURPLE},#a87bff)` }}>K</div>
+                      <KokoAvatar size={24} />
                       <div className="max-w-[88%] rounded-[0_12px_12px_12px] border border-border bg-card px-3 py-2 text-[13px] leading-[1.6] text-foreground whitespace-pre-wrap">
                         {m.text}
                       </div>
@@ -429,8 +429,7 @@ export const MissionLearnPanel = ({ missionId, missionTitle, missionDescription,
                 )}
                 {qaThinking && (
                   <div className="flex items-start gap-2">
-                    <div className="grid h-6 w-6 shrink-0 place-items-center rounded-full text-[10px] font-bold text-white"
-                      style={{ background: `linear-gradient(135deg,${KOKO_PURPLE},#a87bff)` }}>K</div>
+                    <KokoAvatar size={24} />
                     <div className="flex items-center gap-1 rounded-[0_12px_12px_12px] border border-border bg-card px-3 py-2.5">
                       {[0, 0.15, 0.3].map((d) => (
                         <span key={d} className="inline-block h-1.5 w-1.5 rounded-full bg-text3"
