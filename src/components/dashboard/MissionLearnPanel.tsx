@@ -129,7 +129,7 @@ function renderBlock(
   return null;
 }
 
-export const MissionLearnPanel = ({ missionId, missionTitle, missionDescription }: Props) => {
+export const MissionLearnPanel = ({ missionId, missionTitle, missionDescription, onMissionComplete }: Props) => {
   const profile = getProfile();
   const career = getChosenCareer();
 
