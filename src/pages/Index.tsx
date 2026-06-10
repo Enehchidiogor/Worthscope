@@ -86,6 +86,7 @@ const Index = () => {
 
       <MobileTabBar />
       <WelcomeToast />
+      <OnboardingTour />
     </div>
   );
 };
