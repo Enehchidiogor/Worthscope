@@ -38,8 +38,6 @@ export default function SignUp() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [pwd, setPwd] = useState("");
-  const [age, setAge] = useState<string>("");
-  const [educationLevel, setEducationLevel] = useState<string>("");
   const [submitting, setSubmitting] = useState(false);
   const strength = useMemo(() => evalPwd(pwd), [pwd]);
 
