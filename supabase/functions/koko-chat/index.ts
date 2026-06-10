@@ -273,6 +273,15 @@ Generate the project brief now.`,
     } else if (intent === "assess") {
       systemContent = assessPrompt(mission, brief, submission);
       userMessages = [{ role: "user", content: "Assess my submission now using the exact required format." }];
+    } else if (intent === "roadmap") {
+      systemContent = roadmapPrompt(mission);
+      userMessages = [{
+        role: "user",
+        content: `User: ${mission.userName || "student"}, age ${mission.userAge ?? "?"}, education ${mission.educationLevel || "?"}.
+Career: ${mission.career || "?"}.
+
+Generate the complete 2026 roadmap now as a single JSON object exactly matching the required schema.`,
+      }];
     } else {
       // legacy chat / stuck / verify
       let context = "";
