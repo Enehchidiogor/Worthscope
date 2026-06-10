@@ -111,23 +111,6 @@ export default function SignUp() {
 
           <div style={{ height: 16 }} />
 
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
-            <Field label="Age">
-              <input type="number" min={13} max={99} required value={age}
-                onChange={(e) => setAge(e.target.value)}
-                placeholder="e.g. 16" className="ws-input" style={inputStyle()} />
-            </Field>
-            <Field label="Education level">
-              <select required value={educationLevel} onChange={(e) => setEducationLevel(e.target.value)}
-                className="ws-input" style={{ ...inputStyle(), appearance: "none", paddingRight: 36, cursor: "pointer" }}>
-                <option value="" disabled>Select…</option>
-                {EDUCATION_OPTIONS.map((o) => <option key={o} value={o}>{o}</option>)}
-              </select>
-            </Field>
-          </div>
-
-          <div style={{ height: 16 }} />
-
           <Field label="Email Address">
             <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)}
               placeholder="Enter your email address" className="ws-input" style={inputStyle()} />
