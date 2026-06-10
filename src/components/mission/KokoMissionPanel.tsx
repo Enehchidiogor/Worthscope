@@ -144,7 +144,7 @@ export const KokoMissionPanel = ({ mission, onVerified, verified }: Props) => {
               {messages.map((m, i) => (
                 <div key={i} className={["mb-3 flex", m.role === "user" ? "justify-end" : "items-start gap-2"].join(" ")}>
                   {m.role === "assistant" && (
-                    <div className="grid h-7 w-7 flex-shrink-0 place-items-center rounded-full text-[11px] font-bold text-white" style={{ background: "linear-gradient(135deg,#3498DB,#5DADE2)" }}>K</div>
+                    <KokoAvatar size={28} />
                   )}
                   <div
                     className={[
