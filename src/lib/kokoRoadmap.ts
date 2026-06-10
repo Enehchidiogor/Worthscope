@@ -81,7 +81,7 @@ export async function generateKokoRoadmap(opts?: {
       {
         user_id: u.user.id,
         career: career.title,
-        roadmap_json: parsed as unknown as Record<string, unknown>,
+        roadmap_json: parsed as unknown as never,
       },
       { onConflict: "user_id,career" },
     );
