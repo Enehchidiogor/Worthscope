@@ -19,6 +19,7 @@ import Settings from "./pages/Settings.tsx";
 import ParentView from "./pages/ParentView.tsx";
 import ParentAccess from "./pages/ParentAccess.tsx";
 import Profile from "./pages/Profile.tsx";
+import Notifications from "./pages/Notifications.tsx";
 import NotFound from "./pages/NotFound.tsx";
 import { KokoFloatingChat } from "@/components/koko/KokoFloatingChat";
 import { AuthGate } from "@/components/auth/AuthGate";
@@ -56,6 +57,7 @@ const App = () => (
           <Route path="/roadmap-loading" element={<Gated><RoadmapLoading /></Gated>} />
           <Route path="/settings" element={<Gated><Settings /></Gated>} />
           <Route path="/profile" element={<Gated><Profile /></Gated>} />
+          <Route path="/notifications" element={<Gated><Notifications /></Gated>} />
           <Route path="/koko" element={<Gated><Index /></Gated>} />
 
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
