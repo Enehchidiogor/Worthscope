@@ -48,10 +48,10 @@ export const TopBar = ({ title = "Dashboard", progress }: Props) => {
         {/* Avatar → Profile */}
         <Link
           to="/profile"
-          className="grid h-9 w-9 place-items-center rounded-full bg-gradient-accent text-[14px] font-semibold text-white transition-shadow hover:shadow-[0_0_0_3px_hsl(var(--accent)/0.3)]"
+          className="rounded-full transition-shadow hover:shadow-[0_0_0_3px_hsl(var(--accent)/0.3)]"
           aria-label="Profile"
         >
-          {initials}
+          <UserAvatar size={36} fallbackInitial={initials} fallbackName={name} />
         </Link>
       </div>
     </header>
