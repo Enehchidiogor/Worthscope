@@ -4,7 +4,8 @@ import logo from "@/assets/worthscope-logo.png";
 import { SEO } from "@/components/SEO";
 
 /* WorthScope — Stage 1: User Setup Screen
-   Collects identity context ONCE: name, age, education level, class/level.
+   Collects identity context ONCE: name only.
+   Age, education level, and class/level are collected during assessment.
    Saves to localStorage as worthscope_user_profile. */
 
 const ACCENT = "#3498DB";
@@ -20,14 +21,11 @@ const FONT = "'Poppins', sans-serif";
 
 const STORAGE_KEY = "worthscope_user_profile";
 
-type EducationLevel = "secondary" | "university" | "";
-const AGE_RANGES = ["13–15", "16–18", "19–21", "22–25", "26+"] as const;
-type AgeRange = (typeof AGE_RANGES)[number] | "";
 type Profile = {
   fullName: string;
   firstName: string;
-  ageRange: AgeRange;
-  educationLevel: EducationLevel;
+  ageRange: string;
+  educationLevel: string;
   classOrLevel: string;
 };
 
@@ -39,17 +37,14 @@ function loadProfile(): Profile {
       return {
         fullName: p.fullName || "",
         firstName: p.firstName || "",
-        ageRange: (p.ageRange as AgeRange) || "",
-        educationLevel: (p.educationLevel as EducationLevel) || "",
+        ageRange: p.ageRange || "",
+        educationLevel: p.educationLevel || "",
         classOrLevel: p.classOrLevel || "",
       };
     }
   } catch {}
   return { fullName: "", firstName: "", ageRange: "", educationLevel: "", classOrLevel: "" };
 }
-
-const SECONDARY_OPTS = ["SS1", "SS2", "SS3"];
-const UNI_OPTS = ["100 Level", "200 Level", "300 Level", "400 Level", "500 Level"];
 
 export default function Onboarding() {
   const navigate = useNavigate();
@@ -58,19 +53,7 @@ export default function Onboarding() {
   const [showGreeting, setShowGreeting] = useState(false);
 
   const validName = p.fullName.trim().length >= 2;
-  const validAge = p.ageRange !== "";
-  const validLevel = p.educationLevel !== "";
-  const validClass = p.classOrLevel.trim().length > 0;
-  const canContinue = validName && validAge && validLevel && validClass && !submitting;
-
-  const yearOptions = useMemo(
-    () => (p.educationLevel === "secondary" ? SECONDARY_OPTS : p.educationLevel === "university" ? UNI_OPTS : []),
-    [p.educationLevel],
-  );
-
-  function handleSelectLevel(level: EducationLevel) {
-    setP((prev) => ({ ...prev, educationLevel: level, classOrLevel: "" }));
-  }
+  const canContinue = validName && !submitting;
 
   function handleContinue() {
     if (!canContinue) return;
@@ -79,9 +62,9 @@ export default function Onboarding() {
     const profile = {
       fullName: p.fullName.trim(),
       firstName,
-      ageRange: p.ageRange,
-      educationLevel: p.educationLevel,
-      classOrLevel: p.classOrLevel,
+      ageRange: "",
+      educationLevel: "",
+      classOrLevel: "",
     };
     try { localStorage.setItem(STORAGE_KEY, JSON.stringify(profile)); } catch {}
     window.setTimeout(() => {
@@ -167,100 +150,6 @@ export default function Onboarding() {
             />
           </Field>
 
-          {/* Age + Education Level row */}
-          <div className="ws-row" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
-            <Field label="Age" highlight={validAge}>
-              <select
-                value={p.ageRange}
-                onChange={(e) => setP({ ...p, ageRange: e.target.value as AgeRange })}
-                className="ws-input"
-                style={{ ...inputStyle(), appearance: "none", paddingRight: 36, cursor: "pointer" }}
-              >
-                <option value="" disabled>Select your age range</option>
-                {AGE_RANGES.map((r) => <option key={r} value={r}>{r}</option>)}
-              </select>
-            </Field>
-
-            <Field label="Education Level" highlight={validLevel}>
-              <div style={{ display: "flex", gap: 8 }}>
-                {(["secondary", "university"] as const).map((opt) => {
-                  const active = p.educationLevel === opt;
-                  return (
-                    <button
-                      key={opt}
-                      type="button"
-                      onClick={() => handleSelectLevel(opt)}
-                      style={{
-                        flex: 1, height: 52, borderRadius: 12,
-                        border: `1.5px solid ${active ? ACCENT : BORDER}`,
-                        background: active ? ACCENT_LIGHT : "#fff",
-                        color: active ? ACCENT : TEXT,
-                        fontFamily: FONT, fontWeight: 500, fontSize: 14,
-                        cursor: "pointer", transition: "all 0.2s ease",
-                      }}
-                    >
-                      {opt === "secondary" ? "🎒 Secondary" : "🎓 University"}
-                    </button>
-                  );
-                })}
-              </div>
-            </Field>
-          </div>
-
-          {/* Conditional class/level */}
-          <div
-            style={{
-              overflow: "hidden",
-              maxHeight: p.educationLevel ? 200 : 0,
-              opacity: p.educationLevel ? 1 : 0,
-              transition: "max-height 0.3s ease, opacity 0.3s ease",
-            }}
-          >
-            {p.educationLevel && (
-              <Field
-                label={p.educationLevel === "secondary" ? "What class are you in?" : "What level are you in?"}
-                highlight={validClass}
-              >
-                <div
-                  style={{
-                    display: "grid",
-                    gridTemplateColumns: p.educationLevel === "secondary" ? "repeat(3, 1fr)" : "repeat(5, 1fr)",
-                    gap: 8,
-                  }}
-                  className="ws-class-grid"
-                >
-                  {yearOptions.map((y) => {
-                    const active = p.classOrLevel === y;
-                    return (
-                      <button
-                        key={y}
-                        type="button"
-                        onClick={() => setP({ ...p, classOrLevel: y })}
-                        style={{
-                          position: "relative",
-                          height: 44, borderRadius: 12,
-                          border: `1.5px solid ${active ? ACCENT : BORDER}`,
-                          background: active ? ACCENT_LIGHT : "#fff",
-                          color: active ? ACCENT : TEXT,
-                          fontFamily: FONT, fontWeight: 500, fontSize: 13,
-                          cursor: "pointer", transition: "all 0.18s ease",
-                        }}
-                      >
-                        {y}
-                        {active && (
-                          <span style={{
-                            position: "absolute", top: 4, right: 6,
-                            fontSize: 11, color: ACCENT, fontWeight: 700,
-                          }}>✓</span>
-                        )}
-                      </button>
-                    );
-                  })}
-                </div>
-              </Field>
-            )}
-          </div>
-
           {/* Continue */}
           <button
             disabled={!canContinue}
@@ -310,8 +199,6 @@ export default function Onboarding() {
         }
         @media (max-width: 640px) {
           .ws-setup-main { padding: 28px 20px !important; }
-          .ws-row { grid-template-columns: 1fr !important; }
-          .ws-class-grid { grid-template-columns: repeat(2, 1fr) !important; }
         }
       `}</style>
     </div>
