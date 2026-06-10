@@ -14,11 +14,6 @@ const TEXT3 = "#9CA3AF";
 const BORDER = "#E5E7EB";
 const FONT = "'DM Sans', sans-serif";
 
-const EDUCATION_OPTIONS = [
-  "JSS1", "JSS2", "JSS3", "SS1", "SS2", "SS3",
-  "100 Level", "200 Level", "300 Level", "400 Level", "500 Level",
-  "Graduate", "Working professional", "Other",
-];
 
 type Strength = { level: 0 | 1 | 2 | 3; label: "" | "Weak" | "Medium" | "Strong"; color: string };
 
@@ -38,8 +33,6 @@ export default function SignUp() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [pwd, setPwd] = useState("");
-  const [age, setAge] = useState<string>("");
-  const [educationLevel, setEducationLevel] = useState<string>("");
   const [submitting, setSubmitting] = useState(false);
   const strength = useMemo(() => evalPwd(pwd), [pwd]);
 
@@ -47,15 +40,11 @@ export default function SignUp() {
     e.preventDefault();
     if (submitting) return;
     if (!name.trim()) return toast.error("Enter your first name");
-    if (!age || Number(age) < 13) return toast.error("You must be 13 or older");
-    if (!educationLevel) return toast.error("Select your education level");
     setSubmitting(true);
     const { data, error } = await signUpWithEmail({
       email,
       password: pwd,
       name: name.trim(),
-      age: Number(age),
-      educationLevel,
     });
     setSubmitting(false);
     if (error) {
@@ -63,8 +52,7 @@ export default function SignUp() {
       return;
     }
     if (data.session) {
-      // Signup already captured name/age/education, so skip onboarding
-      // and send the user straight into the assessment.
+      // Signed up — send the user straight into the assessment.
       navigate("/assessment");
     } else {
       toast.success("Check your email to confirm your account.");
@@ -119,23 +107,6 @@ export default function SignUp() {
             <input type="text" required value={name} onChange={(e) => setName(e.target.value)}
               placeholder="Enter your first name" className="ws-input" style={inputStyle()} />
           </Field>
-
-          <div style={{ height: 16 }} />
-
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
-            <Field label="Age">
-              <input type="number" min={13} max={99} required value={age}
-                onChange={(e) => setAge(e.target.value)}
-                placeholder="e.g. 16" className="ws-input" style={inputStyle()} />
-            </Field>
-            <Field label="Education level">
-              <select required value={educationLevel} onChange={(e) => setEducationLevel(e.target.value)}
-                className="ws-input" style={{ ...inputStyle(), appearance: "none", paddingRight: 36, cursor: "pointer" }}>
-                <option value="" disabled>Select…</option>
-                {EDUCATION_OPTIONS.map((o) => <option key={o} value={o}>{o}</option>)}
-              </select>
-            </Field>
-          </div>
 
           <div style={{ height: 16 }} />
 
