@@ -1,27 +1,15 @@
 import { useEffect, useMemo, useState } from "react";
-import { Navigate, useParams, useSearchParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import logo from "@/assets/worthscope-logo.png";
-import { getParentInvite, hasAccessGranted, type ParentInvite } from "@/lib/parentInvite";
+import {
+  fetchParentDashboard,
+  hasAccessGranted,
+  type ParentDashboardPayload,
+} from "@/lib/parentInvite";
 
 /* WorthScope — Parent View
-   Read-only, calm, informational dashboard for parents/guardians. */
-
-type CareerResult = {
-  title: string;
-  description?: string;
-  match: number; // 0-100
-  icon?: string;
-};
-
-type SkillLevel = "Beginner" | "Intermediate" | "Advanced";
-
-type Profile = {
-  firstName?: string;
-  fullName?: string;
-  age?: number | string;
-  educationLevel?: string;
-  classOrLevel?: string;
-};
+   Read-only, calm, informational dashboard for parents/guardians.
+   Loads its data server-side via the parent-dashboard edge function. */
 
 const PARENT = {
   bg: "#F8F9FA",
@@ -30,728 +18,453 @@ const PARENT = {
   text2: "#6B7280",
   text3: "#9CA3AF",
   border: "#E5E7EB",
+  brand: "#895AF6",
+  brandSoft: "#F1ECFE",
   accent: "#3498DB",
   accentL: "#EBF5FB",
   green: "#22C55E",
   amber: "#F59E0B",
+  red: "#EF4444",
+  orange: "#FB923C",
 };
 
-// Default skills (simulated)
-const DEFAULT_SKILLS: { name: string; progress: number; level: SkillLevel }[] = [
-  { name: "UI Design", progress: 40, level: "Intermediate" },
-  { name: "Problem Solving", progress: 65, level: "Intermediate" },
-  { name: "Communication", progress: 30, level: "Beginner" },
-  { name: "Research", progress: 20, level: "Beginner" },
-];
+const FONT = "'Poppins', sans-serif";
 
-const DEFAULT_CAREERS: CareerResult[] = [
-  { title: "UX/UI Designer", description: "Designs digital products people love to use.", match: 92 },
-  { title: "Product Manager", description: "Leads teams to build great products.", match: 85 },
-  { title: "Frontend Developer", description: "Brings designs to life on the web.", match: 78 },
-  { title: "Brand Strategist", description: "Shapes how brands connect with people.", match: 71 },
-];
+const dayLabels = ["M", "T", "W", "T", "F", "S", "S"];
+
+function fmtDate(iso?: string): string {
+  if (!iso) return "Recently";
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return "Recently";
+  return d.toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
+}
+
+function CircularProgress({ value, size = 140 }: { value: number; size?: number }) {
+  const r = (size - 16) / 2;
+  const c = 2 * Math.PI * r;
+  const offset = c - (Math.min(100, Math.max(0, value)) / 100) * c;
+  return (
+    <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
+      <circle cx={size / 2} cy={size / 2} r={r} stroke={PARENT.border} strokeWidth="10" fill="none" />
+      <circle
+        cx={size / 2}
+        cy={size / 2}
+        r={r}
+        stroke={PARENT.brand}
+        strokeWidth="10"
+        fill="none"
+        strokeDasharray={c}
+        strokeDashoffset={offset}
+        strokeLinecap="round"
+        transform={`rotate(-90 ${size / 2} ${size / 2})`}
+        style={{ transition: "stroke-dashoffset 1.2s ease" }}
+      />
+      <text
+        x="50%" y="50%" dominantBaseline="middle" textAnchor="middle"
+        fontFamily={FONT} fontSize="28" fontWeight="700" fill={PARENT.text}
+      >
+        {Math.round(value)}%
+      </text>
+    </svg>
+  );
+}
+
+const Section: React.FC<React.PropsWithChildren<{ title: string; sub?: string }>> = ({ title, sub, children }) => (
+  <section
+    style={{
+      background: PARENT.card, border: `1px solid ${PARENT.border}`,
+      borderRadius: 20, padding: "28px 32px", marginBottom: 24,
+      boxShadow: "0 2px 16px rgba(0,0,0,0.03)",
+    }}
+  >
+    <h2 style={{ fontSize: 18, fontWeight: 700, color: PARENT.text, letterSpacing: "-0.2px" }}>{title}</h2>
+    {sub && <p style={{ fontSize: 14, color: PARENT.text2, lineHeight: 1.6, marginTop: 8 }}>{sub}</p>}
+    <div style={{ marginTop: 18 }}>{children}</div>
+  </section>
+);
+
+function Avatar({ url, name, size = 72 }: { url: string | null; name: string; size?: number }) {
+  const initials = name
+    .split(/\s+/)
+    .map((p) => p[0])
+    .filter(Boolean)
+    .slice(0, 2)
+    .join("")
+    .toUpperCase();
+  return url ? (
+    <img src={url} alt={name} style={{ width: size, height: size, borderRadius: "50%", objectFit: "cover" }} />
+  ) : (
+    <div
+      style={{
+        width: size, height: size, borderRadius: "50%",
+        background: PARENT.brandSoft, color: PARENT.brand,
+        display: "grid", placeItems: "center",
+        fontSize: size * 0.36, fontWeight: 700,
+      }}
+    >
+      {initials || "👤"}
+    </div>
+  );
+}
 
 const ParentView = () => {
-  const { token } = useParams<{ token?: string }>();
-  const [params] = useSearchParams();
-  const isDemo = params.get("student") === "demo";
-
-  const invite: ParentInvite | null = token ? getParentInvite(token) : null;
-
-  const [profile, setProfile] = useState<Profile>({});
-  const [careers, setCareers] = useState<CareerResult[]>([]);
-  const [animBars, setAnimBars] = useState(false);
-
-  // Gate: if a token is in the URL, parent must have passed the access screen this session.
-  const gateBlocked = !!token && (!invite || !hasAccessGranted(token));
+  const { token = "" } = useParams<{ token?: string }>();
+  const [loading, setLoading] = useState(true);
+  const [errorKind, setErrorKind] = useState<"invalid" | "expired" | "revoked" | "gate" | null>(null);
+  const [data, setData] = useState<ParentDashboardPayload | null>(null);
 
   useEffect(() => {
-    // Prefer invite-bound profile (for token links) so the parent always sees the right child
-    if (invite) {
-      setProfile({
-        firstName: invite.studentFirstName,
-        fullName: invite.studentFullName,
-        educationLevel: invite.educationLevel,
-        classOrLevel: invite.classOrLevel,
-      });
-    } else {
-      try {
-        const rawProfile = localStorage.getItem("worthscope_user_profile");
-        if (rawProfile) setProfile(JSON.parse(rawProfile));
-      } catch {/* noop */}
+    if (!token) { setErrorKind("invalid"); setLoading(false); return; }
+    if (!hasAccessGranted(token)) {
+      // Soft gate not yet passed — redirect back to the access screen.
+      window.location.replace(`/parent/${token}`);
+      return;
     }
-
-    try {
-      const rawResults = localStorage.getItem("worthscope_results");
-      if (rawResults) {
-        const parsed = JSON.parse(rawResults);
-        const arr = Array.isArray(parsed) ? parsed : parsed?.careers || parsed?.results;
-        if (Array.isArray(arr) && arr.length > 0) {
-          setCareers(
-            arr.slice(0, 4).map((c: any) => ({
-              title: c.title || c.name || "Career",
-              description: c.description || c.summary || "A great career match based on your strengths.",
-              match: typeof c.match === "number" ? c.match : typeof c.percentage === "number" ? c.percentage : c.score || 75,
-            })),
-          );
-        }
+    let cancelled = false;
+    (async () => {
+      const r: any = await fetchParentDashboard(token);
+      if (cancelled) return;
+      if (r?.ok && r.student) {
+        setData(r.student as ParentDashboardPayload);
+      } else {
+        const err = r?.error;
+        setErrorKind(err === "expired" || err === "revoked" ? err : "invalid");
       }
-    } catch {/* noop */}
+      setLoading(false);
+    })();
+    return () => { cancelled = true; };
+  }, [token]);
 
-    const t = setTimeout(() => setAnimBars(true), 150);
-    return () => clearTimeout(t);
-  }, [invite?.token]);
+  const firstName = data?.firstName || "your child";
 
-  const careersList = careers.length ? careers : DEFAULT_CAREERS;
-  const top = careersList[0];
-  const others = careersList.slice(1, 4);
+  const errorMessage = useMemo(() => {
+    if (!errorKind) return "";
+    if (errorKind === "expired") return "This invitation link has expired.";
+    if (errorKind === "revoked") return "This invitation link is no longer valid. Please ask the student to send a new invitation.";
+    return "This invitation link is no longer valid. Please ask the student to send a new invitation.";
+  }, [errorKind]);
 
-  const firstName = profile.firstName || profile.fullName?.split(" ")[0] || (isDemo ? "Alex" : "your child");
-  const fullName = profile.fullName || (isDemo ? "Alex Johnson" : firstName);
-  const age = profile.age || (isDemo ? 18 : "—");
-  const eduLevel = profile.educationLevel || (isDemo ? "University" : "Student");
-  const classLevel = profile.classOrLevel || (isDemo ? "300 Level" : "");
-
-  // Hardcoded simulated data
-  const data = useMemo(
-    () => ({
-      currentPhase: "Phase 1 — Foundation",
-      roadmapProgress: 30,
-      missionsCompleted: 1,
-      totalMissions: 9,
-      streak: 5,
-      lastActive: "Today",
-      skills: DEFAULT_SKILLS,
-    }),
-    [],
-  );
-
-  if (gateBlocked) {
-    return <Navigate to={`/parent/${token}`} replace />;
+  if (loading) {
+    return (
+      <div style={{ minHeight: "100vh", background: PARENT.bg, fontFamily: FONT, display: "grid", placeItems: "center" }}>
+        <div style={{ color: PARENT.text2, fontSize: 14 }}>Loading dashboard…</div>
+      </div>
+    );
   }
 
+  if (errorKind || !data) {
+    return (
+      <div style={{ minHeight: "100vh", background: PARENT.bg, fontFamily: FONT, display: "grid", placeItems: "center", padding: 24 }}>
+        <div style={{ maxWidth: 480, textAlign: "center" }}>
+          <div style={{ fontSize: 42 }}>🔗</div>
+          <h1 style={{ fontWeight: 700, fontSize: 24, color: PARENT.text, marginTop: 8 }}>{errorMessage}</h1>
+        </div>
+      </div>
+    );
+  }
+
+  const phaseTotal = Math.max(data.currentPhase.total || 1, data.currentPhase.number || 1);
+
   return (
-    <div className="min-h-screen font-poppins" style={{ background: PARENT.bg, color: PARENT.text }}>
-      {/* ───── TOP BAR ───── */}
+    <div style={{ minHeight: "100vh", background: PARENT.bg, fontFamily: FONT, color: PARENT.text }}>
+      {/* HEADER */}
       <header
-        className="absolute top-0 left-0 right-0 z-[100] flex items-center justify-between"
         style={{
-          height: 80,
-          background: "transparent",
-          padding: "0 32px",
-          animation: "ws-fade 0.4s ease both",
+          height: 80, padding: "0 32px", display: "flex", alignItems: "center", justifyContent: "space-between",
+          background: PARENT.card, borderBottom: `1px solid ${PARENT.border}`, position: "sticky", top: 0, zIndex: 10,
         }}
       >
-        <div className="flex items-center gap-2">
-          <img src={logo} alt="WorthScope" style={{ height: 72, width: "auto", objectFit: "contain" }} />
-        </div>
-
+        <img src={logo} alt="WorthScope" style={{ height: 64, width: "auto", objectFit: "contain" }} />
         <div
-          className="hidden items-center gap-1.5 sm:flex"
           style={{
-            background: PARENT.accentL,
-            border: "1px solid rgba(52,152,219,0.2)",
-            borderRadius: 100,
-            padding: "5px 16px",
+            display: "inline-flex", alignItems: "center", gap: 8,
+            background: PARENT.brandSoft, border: `1px solid ${PARENT.brand}33`,
+            borderRadius: 100, padding: "6px 14px",
+            color: PARENT.brand, fontSize: 12, fontWeight: 600,
           }}
         >
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={PARENT.accent} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7S2 12 2 12z" />
-            <circle cx="12" cy="12" r="3" />
-          </svg>
-          <span style={{ color: PARENT.accent, fontSize: 12, fontWeight: 600 }}>Parent View</span>
-        </div>
-
-        <div
-          className="flex items-center gap-1.5"
-          style={{
-            background: "#F3F4F6",
-            border: `1px solid ${PARENT.border}`,
-            borderRadius: 100,
-            padding: "5px 14px",
-          }}
-        >
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={PARENT.text3} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-            <rect x="4" y="11" width="16" height="10" rx="2" />
-            <path d="M8 11V8a4 4 0 0 1 8 0v3" />
-          </svg>
-          <span style={{ color: PARENT.text3, fontSize: 11, fontWeight: 500 }}>Read Only</span>
+          <span>👁️</span> Parent View — Read Only
         </div>
       </header>
 
-      <main
-        className="mx-auto"
-        style={{ maxWidth: 900, padding: "120px 32px 40px" }}
-      >
-        {/* ───── SECTION 1 — WELCOME ───── */}
-        <section className="ws-fade-up" style={{ animationDelay: "0.1s", marginBottom: 32 }}>
-          <h1 style={{ fontSize: 26, fontWeight: 700, color: PARENT.text, letterSpacing: "-0.5px" }}>
-            Viewing {firstName}'s Career Journey
-          </h1>
-          <p style={{ fontSize: 15, color: PARENT.text2, lineHeight: 1.7, marginTop: 8, maxWidth: 560 }}>
-            {firstName} is building their career foundation with WorthScope. Here's an overview of their progress.
-          </p>
-
-          <div className="flex flex-wrap" style={{ gap: 10, marginTop: 16 }}>
-            {[
-              { e: "👤", t: fullName },
-              { e: "🎓", t: classLevel ? `${eduLevel} — ${classLevel}` : eduLevel },
-              { e: "📅", t: `Age ${age}` },
-              { e: "🕐", t: "Last active: Today" },
-            ].map((c, i) => (
-              <span
-                key={i}
-                className="inline-flex items-center"
-                style={{
-                  background: PARENT.card,
-                  border: `1px solid ${PARENT.border}`,
-                  borderRadius: 100,
-                  padding: "6px 14px",
-                  fontSize: 12,
-                  fontWeight: 500,
-                  color: PARENT.text2,
-                  gap: 6,
-                }}
-              >
-                <span>{c.e}</span>
-                <span>{c.t}</span>
-              </span>
-            ))}
-          </div>
-
-          <div
-            style={{
-              height: 1,
-              background: "linear-gradient(90deg, transparent, rgba(52,152,219,0.15), transparent)",
-              margin: "24px 0",
-            }}
-          />
-        </section>
-
-        {/* ───── SECTION 2 — CAREER MATCHES ───── */}
+      <main className="mx-auto" style={{ maxWidth: 880, padding: "32px 24px 24px" }}>
+        {/* TOP — Student summary */}
         <section
-          className="ws-fade-up"
           style={{
-            animationDelay: "0.2s",
-            background: PARENT.card,
-            border: `1px solid ${PARENT.border}`,
-            borderRadius: 20,
-            padding: "28px 32px",
-            boxShadow: "0 4px 20px rgba(0,0,0,0.05)",
-            marginBottom: 24,
+            background: PARENT.card, border: `1px solid ${PARENT.border}`,
+            borderRadius: 24, padding: "28px 32px",
+            boxShadow: "0 4px 24px rgba(0,0,0,0.04)", marginBottom: 24,
           }}
         >
-          <div className="flex items-center justify-between">
-            <h2 style={{ fontSize: 18, fontWeight: 700, color: PARENT.text }}>Career Matches</h2>
-            <span
-              style={{
-                background: PARENT.accentL,
-                color: PARENT.accent,
-                border: "1px solid rgba(52,152,219,0.2)",
-                fontSize: 11,
-                fontWeight: 500,
-                borderRadius: 100,
-                padding: "4px 12px",
-              }}
-            >
-              AI-Generated · Personalised
-            </span>
-          </div>
-
-          <p style={{ fontSize: 13, color: PARENT.text2, lineHeight: 1.65, marginTop: 10, marginBottom: 20 }}>
-            These are the career paths that best match {firstName}'s strengths, interests, and personality based on their assessment.
-          </p>
-
-          {/* TOP MATCH */}
-          <div
-            style={{
-              background: "linear-gradient(135deg, #EBF5FB 0%, #F0F8FF 100%)",
-              border: "1px solid rgba(52,152,219,0.2)",
-              borderLeft: `4px solid ${PARENT.accent}`,
-              borderRadius: 14,
-              padding: "20px 24px",
-              marginBottom: 16,
-            }}
-          >
-            <div className="flex items-center" style={{ gap: 20 }}>
-              <div
-                className="grid place-items-center flex-shrink-0"
-                style={{ width: 48, height: 48, borderRadius: "50%", background: PARENT.accent }}
-              >
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M12 2 4 7v6c0 5 4 9 8 9s8-4 8-9V7l-8-5z" />
-                </svg>
-              </div>
-              <div className="min-w-0 flex-1">
-                <div style={{ color: PARENT.accent, fontSize: 10, fontWeight: 600, letterSpacing: "1.5px", textTransform: "uppercase" }}>
-                  Top Match
-                </div>
-                <div style={{ fontSize: 20, fontWeight: 700, color: PARENT.text, marginTop: 4 }}>{top.title}</div>
-                <div style={{ fontSize: 13, color: PARENT.text2, marginTop: 4 }}>{top.description}</div>
-              </div>
-              <div className="text-right" style={{ flexShrink: 0 }}>
-                <div style={{ fontSize: 32, fontWeight: 800, color: PARENT.accent, lineHeight: 1 }}>{top.match}%</div>
-                <div style={{ fontSize: 12, color: PARENT.text3, marginTop: 4 }}>match</div>
-              </div>
-            </div>
-            <div style={{ marginTop: 14 }}>
-              <div className="flex justify-between" style={{ fontSize: 12, fontWeight: 500, color: PARENT.text2, marginBottom: 6 }}>
-                <span>Match Strength</span>
-                <span>{top.match}%</span>
-              </div>
-              <div style={{ height: 6, background: PARENT.border, borderRadius: 100, overflow: "hidden" }}>
-                <div
-                  style={{
-                    height: "100%",
-                    background: PARENT.accent,
-                    borderRadius: 100,
-                    width: animBars ? `${top.match}%` : "0%",
-                    transition: "width 1.2s ease",
-                  }}
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* OTHER MATCHES */}
-          {others.map((c, idx) => (
-            <div
-              key={idx}
-              className="flex items-center"
-              style={{
-                gap: 14,
-                padding: "14px 0",
-                borderBottom: idx === others.length - 1 ? "none" : `1px solid ${PARENT.border}`,
-              }}
-            >
-              <div
-                className="grid place-items-center flex-shrink-0"
-                style={{
-                  width: 40,
-                  height: 40,
-                  borderRadius: "50%",
-                  background: "#F4F9FE",
-                  border: `1px solid ${PARENT.border}`,
-                  color: PARENT.text2,
-                  fontSize: 12,
-                  fontWeight: 700,
-                }}
-              >
-                #{idx + 2}
-              </div>
-              <div className="min-w-0 flex-1">
-                <div style={{ fontSize: 15, fontWeight: 600, color: PARENT.text }}>{c.title}</div>
-                <div style={{ fontSize: 12, color: PARENT.text2 }}>{c.description}</div>
-                <div style={{ marginTop: 8, height: 4, background: PARENT.border, borderRadius: 100, overflow: "hidden" }}>
-                  <div
-                    style={{
-                      height: "100%",
-                      background: "linear-gradient(90deg, #3498DB, #5DADE2)",
-                      borderRadius: 100,
-                      width: animBars ? `${c.match}%` : "0%",
-                      transition: "width 0.9s ease",
-                      transitionDelay: `${0.1 + idx * 0.1}s`,
-                    }}
-                  />
-                </div>
-              </div>
-              <div style={{ fontSize: 18, fontWeight: 700, color: PARENT.accent, flexShrink: 0 }}>{c.match}%</div>
-            </div>
-          ))}
-
-          <p style={{ fontSize: 12, color: PARENT.text3, marginTop: 16 }}>
-            ℹ️ These results are based on {firstName}'s answers to the career assessment. Results improve as they complete more missions.
-          </p>
-        </section>
-
-        {/* ───── SECTION 3 — Roadmap + Activity ───── */}
-        <section
-          className="ws-fade-up grid grid-cols-1 md:grid-cols-2"
-          style={{ animationDelay: "0.4s", gap: 20, marginBottom: 24 }}
-        >
-          {/* Roadmap */}
-          <div
-            style={{
-              background: PARENT.card,
-              border: `1px solid ${PARENT.border}`,
-              borderRadius: 20,
-              padding: 24,
-            }}
-          >
-            <div style={{ fontSize: 16, fontWeight: 700, color: PARENT.text }}>Roadmap Progress</div>
-            <div style={{ fontSize: 13, color: PARENT.text3 }}>Career journey phases</div>
-
-            <div style={{ marginTop: 20 }}>
-              <div style={{ fontSize: 22, fontWeight: 700, color: PARENT.accent }}>{data.roadmapProgress}% Complete</div>
-              <div style={{ marginTop: 8, height: 8, background: PARENT.border, borderRadius: 100, overflow: "hidden" }}>
-                <div
-                  style={{
-                    height: "100%",
-                    background: PARENT.accent,
-                    borderRadius: 100,
-                    width: animBars ? `${data.roadmapProgress}%` : "0%",
-                    transition: "width 1.2s ease",
-                  }}
-                />
-              </div>
-            </div>
-
-            <div className="flex flex-col" style={{ gap: 12, marginTop: 20 }}>
-              {/* Phase 1 */}
-              <div className="flex items-center" style={{ gap: 12 }}>
+          <div className="flex flex-col items-start gap-5 md:flex-row md:items-center">
+            <Avatar url={data.avatarUrl} name={data.fullName} size={84} />
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <h1 style={{ fontSize: 28, fontWeight: 700, color: PARENT.text, letterSpacing: "-0.5px", lineHeight: 1.2 }}>
+                {data.fullName}
+              </h1>
+              <p style={{ fontSize: 15, color: PARENT.text2, lineHeight: 1.6, marginTop: 6 }}>
+                Following their journey to become a <strong style={{ color: PARENT.brand }}>{data.careerTitle}</strong>
+              </p>
+              <div className="mt-3 flex flex-wrap" style={{ gap: 10 }}>
                 <span
                   style={{
-                    width: 10,
-                    height: 10,
-                    borderRadius: "50%",
-                    background: PARENT.accent,
-                    animation: "ws-pulse-glow 2s ease-in-out infinite",
-                    flexShrink: 0,
-                  }}
-                />
-                <span style={{ fontSize: 14, fontWeight: 600, color: PARENT.text, flex: 1 }}>Phase 1 — Foundation</span>
-                <span
-                  style={{
-                    fontSize: 11,
-                    fontWeight: 500,
-                    color: PARENT.accent,
-                    background: PARENT.accentL,
-                    borderRadius: 100,
-                    padding: "3px 10px",
+                    background: PARENT.brandSoft, color: PARENT.brand,
+                    border: `1px solid ${PARENT.brand}33`,
+                    borderRadius: 100, padding: "5px 14px", fontSize: 13, fontWeight: 600,
                   }}
                 >
-                  In Progress
+                  Currently in Phase {data.currentPhase.number} of {phaseTotal} — {data.currentPhase.title}
+                </span>
+                <span
+                  style={{
+                    background: "#F3F4F6", color: PARENT.text2,
+                    borderRadius: 100, padding: "5px 14px", fontSize: 13, fontWeight: 500,
+                  }}
+                >
+                  🕐 Last active {data.lastActive.toLowerCase()}
                 </span>
               </div>
-
-              {/* Phase 2 */}
-              <div className="flex items-center" style={{ gap: 12 }}>
-                <span style={{ width: 10, height: 10, borderRadius: "50%", background: PARENT.border, flexShrink: 0 }} />
-                <span style={{ fontSize: 14, fontWeight: 600, color: PARENT.text3, flex: 1 }}>Phase 2 — Exploration</span>
-                <span
-                  style={{
-                    fontSize: 11,
-                    fontWeight: 500,
-                    color: PARENT.text3,
-                    background: "#F3F4F6",
-                    borderRadius: 100,
-                    padding: "3px 10px",
-                  }}
-                >
-                  Locked 🔒
-                </span>
-              </div>
-
-              {/* Phase 3 */}
-              <div className="flex items-center" style={{ gap: 12, opacity: 0.7 }}>
-                <span style={{ width: 10, height: 10, borderRadius: "50%", background: PARENT.border, flexShrink: 0 }} />
-                <span style={{ fontSize: 14, fontWeight: 600, color: PARENT.text3, flex: 1 }}>Phase 3 — Mastery</span>
-                <span
-                  style={{
-                    fontSize: 11,
-                    fontWeight: 500,
-                    color: PARENT.text3,
-                    background: "#F3F4F6",
-                    borderRadius: 100,
-                    padding: "3px 10px",
-                  }}
-                >
-                  Locked 🔒
-                </span>
-              </div>
-            </div>
-
-            <div style={{ borderTop: `1px solid ${PARENT.border}`, marginTop: 16, paddingTop: 16 }}>
-              <div style={{ fontSize: 13, fontWeight: 500, color: PARENT.text2 }}>
-                {data.missionsCompleted} of {data.totalMissions} missions completed
-              </div>
-              <div style={{ marginTop: 8, height: 4, background: PARENT.border, borderRadius: 100, overflow: "hidden" }}>
-                <div
-                  style={{
-                    height: "100%",
-                    background: PARENT.green,
-                    width: animBars ? `${(data.missionsCompleted / data.totalMissions) * 100}%` : "0%",
-                    transition: "width 1s ease",
-                  }}
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Activity */}
-          <div
-            style={{
-              background: PARENT.card,
-              border: `1px solid ${PARENT.border}`,
-              borderRadius: 20,
-              padding: 24,
-            }}
-          >
-            <div style={{ fontSize: 16, fontWeight: 700, color: PARENT.text }}>Recent Activity</div>
-
-            <div style={{ marginTop: 16 }}>
-              {[
-                { l: "🔥 Current Streak", r: `${data.streak} Days`, c: "#FB923C" },
-                { l: "✅ Missions Completed", r: `${data.missionsCompleted} / ${data.totalMissions}`, c: PARENT.accent },
-                { l: "🕐 Last Active", r: data.lastActive, c: PARENT.green },
-                { l: "📊 Overall Progress", r: `${data.roadmapProgress}%`, c: PARENT.accent },
-              ].map((row, i, arr) => (
-                <div
-                  key={i}
-                  className="flex items-center justify-between"
-                  style={{
-                    height: 48,
-                    borderBottom: i === arr.length - 1 ? "none" : `1px solid ${PARENT.border}`,
-                  }}
-                >
-                  <span style={{ fontSize: 14, fontWeight: 500, color: PARENT.text }}>{row.l}</span>
-                  <span style={{ fontSize: 14, fontWeight: 700, color: row.c }}>{row.r}</span>
-                </div>
-              ))}
-            </div>
-
-            <div
-              style={{
-                background: "rgba(34,197,94,0.06)",
-                borderRadius: 10,
-                padding: "10px 14px",
-                marginTop: 16,
-                fontSize: 12,
-                color: PARENT.green,
-                lineHeight: 1.6,
-              }}
-            >
-              ✨ {firstName} has been consistently active. That's a great sign.
             </div>
           </div>
         </section>
 
-        {/* ───── SECTION 4 — Skills ───── */}
-        <section
-          className="ws-fade-up"
-          style={{
-            animationDelay: "0.6s",
-            background: PARENT.card,
-            border: `1px solid ${PARENT.border}`,
-            borderRadius: 20,
-            padding: "28px 32px",
-            marginBottom: 24,
-          }}
-        >
-          <div className="flex items-center justify-between">
-            <div style={{ fontSize: 16, fontWeight: 700, color: PARENT.text }}>Skills Being Developed</div>
-            <div style={{ fontSize: 13, color: PARENT.text3 }}>{data.skills.length} skills tracked</div>
-          </div>
-          <p style={{ fontSize: 13, color: PARENT.text2, lineHeight: 1.6, marginTop: 8, marginBottom: 20 }}>
-            These are the skills {firstName} is actively building as part of their career roadmap.
-          </p>
-
-          {data.skills.map((s, i, arr) => {
-            const levelColors =
-              s.level === "Advanced"
-                ? { bg: "rgba(34,197,94,0.08)", c: "#22C55E" }
-                : s.level === "Intermediate"
-                  ? { bg: "rgba(245,158,11,0.08)", c: "#F59E0B" }
-                  : { bg: "rgba(239,68,68,0.08)", c: "#EF4444" };
-            return (
-              <div
-                key={s.name}
-                className="flex flex-col items-stretch md:flex-row md:items-center"
-                style={{
-                  padding: "16px 0",
-                  borderBottom: i === arr.length - 1 ? "none" : `1px solid ${PARENT.border}`,
-                  gap: 12,
-                }}
-              >
-                <div className="md:flex-shrink-0" style={{ width: 180 }}>
-                  <div style={{ fontSize: 14, fontWeight: 600, color: PARENT.text }}>{s.name}</div>
-                  <span
-                    style={{
-                      display: "inline-block",
-                      marginTop: 4,
-                      fontSize: 11,
-                      fontWeight: 500,
-                      borderRadius: 100,
-                      padding: "2px 10px",
-                      background: levelColors.bg,
-                      color: levelColors.c,
-                    }}
-                  >
-                    {s.level}
-                  </span>
+        {/* SECTION 1 — Overall progress */}
+        <Section title="Overall progress">
+          {data.roadmap.totalMissions === 0 ? (
+            <p style={{ fontSize: 15, color: PARENT.text2, lineHeight: 1.7 }}>
+              {firstName} is just getting started. Check back soon to see their progress.
+            </p>
+          ) : (
+            <div className="flex flex-col items-center gap-6 md:flex-row md:items-center md:gap-10">
+              <CircularProgress value={data.roadmap.pct} size={150} />
+              <div style={{ flex: 1 }}>
+                <div style={{ fontSize: 22, fontWeight: 700, color: PARENT.text }}>
+                  {data.roadmap.missionsCompleted} of {data.roadmap.totalMissions} missions completed
                 </div>
-                <div style={{ flex: 1, padding: "0 20px" }}>
-                  <div style={{ height: 6, background: PARENT.border, borderRadius: 100, overflow: "hidden" }}>
+                <div style={{ fontSize: 14, color: PARENT.text2, marginTop: 6 }}>
+                  Estimated {data.roadmap.estMonthsLeft} month{data.roadmap.estMonthsLeft === 1 ? "" : "s"} until completion at current pace
+                </div>
+                <p style={{ fontSize: 15, color: PARENT.text, marginTop: 14, lineHeight: 1.65 }}>
+                  {firstName} is making steady progress on their journey to become a <strong>{data.careerTitle}</strong>.
+                </p>
+              </div>
+            </div>
+          )}
+        </Section>
+
+        {/* SECTION 2 — Streak (only if there is one) */}
+        {data.streak.show && (
+          <Section title="Streak & consistency">
+            <div className="flex flex-col gap-5 md:flex-row md:items-center md:justify-between">
+              <div>
+                <div style={{ fontSize: 30, fontWeight: 700, color: PARENT.orange, display: "flex", alignItems: "center", gap: 8 }}>
+                  <span>🔥</span> {data.streak.count} day streak
+                </div>
+                <div style={{ fontSize: 14, color: PARENT.text2, marginTop: 6 }}>
+                  Active {data.streak.weekActive} of the last 7 days · Completed {data.streak.monthlyCompleted} mission{data.streak.monthlyCompleted === 1 ? "" : "s"} this month
+                </div>
+              </div>
+              <div className="flex items-center" style={{ gap: 8 }}>
+                {data.streak.weekDays.map((active, i) => (
+                  <div key={i} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 6 }}>
                     <div
                       style={{
-                        height: "100%",
-                        background: "linear-gradient(90deg, #3498DB, #5DADE2)",
-                        width: animBars ? `${s.progress}%` : "0%",
-                        transition: "width 1.1s ease",
-                        transitionDelay: `${i * 0.1}s`,
+                        width: 30, height: 30, borderRadius: "50%",
+                        background: active ? PARENT.orange : "#F3F4F6",
+                        border: active ? "none" : `1px solid ${PARENT.border}`,
+                        boxShadow: active ? "0 0 10px rgba(251,146,60,0.35)" : "none",
                       }}
                     />
+                    <span style={{ fontSize: 11, color: PARENT.text3, fontWeight: 500 }}>{dayLabels[i]}</span>
                   </div>
-                </div>
-                <div className="text-right md:flex-shrink-0" style={{ width: 60 }}>
-                  <span style={{ fontSize: 15, fontWeight: 700, color: PARENT.accent }}>{s.progress}%</span>
-                </div>
+                ))}
               </div>
-            );
-          })}
+            </div>
+          </Section>
+        )}
 
-          <p style={{ fontSize: 12, color: PARENT.text3, marginTop: 12 }}>
-            Skill levels update as {firstName} completes missions and activities on WorthScope.
-          </p>
-        </section>
+        {/* SECTION 3 — Skills */}
+        <Section title={`Skills ${firstName} is building`}>
+          {data.skills.length === 0 ? (
+            <p style={{ fontSize: 14, color: PARENT.text2 }}>
+              Skills will appear here as {firstName} completes missions.
+            </p>
+          ) : (
+            <div className="flex flex-col" style={{ gap: 18 }}>
+              {data.skills.map((s) => {
+                const lvl =
+                  s.level === "Advanced" ? { bg: "rgba(34,197,94,0.1)", c: PARENT.green } :
+                  s.level === "Intermediate" ? { bg: "rgba(245,158,11,0.1)", c: PARENT.amber } :
+                  { bg: "rgba(59,130,246,0.1)", c: "#3B82F6" };
+                return (
+                  <div key={s.name}>
+                    <div className="flex items-center justify-between" style={{ marginBottom: 8 }}>
+                      <div className="flex items-center" style={{ gap: 10 }}>
+                        <span style={{ fontSize: 15, fontWeight: 600, color: PARENT.text }}>{s.name}</span>
+                        <span style={{
+                          background: lvl.bg, color: lvl.c,
+                          borderRadius: 100, padding: "2px 10px", fontSize: 11, fontWeight: 600,
+                        }}>
+                          {s.level}
+                        </span>
+                      </div>
+                      <span style={{ fontSize: 14, fontWeight: 700, color: PARENT.brand }}>{s.value}%</span>
+                    </div>
+                    <div style={{ height: 8, background: "#F3F4F6", borderRadius: 100, overflow: "hidden" }}>
+                      <div
+                        style={{
+                          height: "100%",
+                          width: `${Math.min(100, s.value)}%`,
+                          background: `linear-gradient(90deg, ${PARENT.brand}, #B392F8)`,
+                          borderRadius: 100,
+                          transition: "width 1s ease",
+                        }}
+                      />
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </Section>
 
-        {/* ───── SECTION 5 — How to Support ───── */}
-        <section
-          className="ws-fade-up"
-          style={{
-            animationDelay: "0.8s",
-            background: "linear-gradient(135deg, #F0FFF4, #EBF5FB)",
-            border: "1px solid rgba(34,197,94,0.15)",
-            borderRadius: 20,
-            padding: "28px 32px",
-            marginBottom: 24,
-          }}
-        >
-          <div style={{ fontSize: 18, fontWeight: 700, color: PARENT.text }}>How to Support {firstName}</div>
-          <p style={{ fontSize: 14, color: PARENT.text2, marginTop: 6, lineHeight: 1.65 }}>
-            The way you engage with their journey matters more than the results.
-          </p>
-
-          <div className="flex flex-col" style={{ gap: 14, marginTop: 24 }}>
-            {[
-              { t: "Encourage exploration, not pressure", s: `Ask "what did you learn today?" instead of "what career will you choose?"` },
-              { t: "Celebrate small wins", s: "Every mission completed is real progress. Acknowledge it." },
-              { t: "Avoid forcing a specific career", s: `The assessment is a guide, not a verdict. Let ${firstName} explore.` },
-              { t: "Support skill-building", s: "Help them find time, resources, or tools to practice what they're learning." },
-              { t: "Ask questions, not demands", s: "Show curiosity about their roadmap. It builds confidence and trust." },
-            ].map((it, i) => (
-              <div key={i} className="flex items-start" style={{ gap: 14 }}>
-                <div
-                  className="grid place-items-center flex-shrink-0 text-white"
+        {/* SECTION 4 — Recent achievements */}
+        <Section title="Recent achievements">
+          {data.recentMissions.length === 0 ? (
+            <p style={{ fontSize: 14, color: PARENT.text2 }}>
+              {firstName} is just getting started. Check back soon to see their progress.
+            </p>
+          ) : (
+            <ol className="flex flex-col" style={{ gap: 16, listStyle: "none", padding: 0, margin: 0 }}>
+              {data.recentMissions.map((m, i) => (
+                <li
+                  key={i}
                   style={{
-                    width: 28,
-                    height: 28,
-                    borderRadius: "50%",
-                    background: PARENT.accent,
-                    fontSize: 13,
-                    fontWeight: 700,
+                    background: "#FAFAFB", border: `1px solid ${PARENT.border}`,
+                    borderRadius: 14, padding: "16px 18px",
                   }}
                 >
-                  {i + 1}
-                </div>
-                <div>
-                  <div style={{ fontSize: 14, fontWeight: 600, color: PARENT.text }}>{it.t}</div>
-                  <div style={{ fontSize: 13, color: PARENT.text2, lineHeight: 1.6, marginTop: 3 }}>{it.s}</div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
+                  <div className="flex items-start justify-between" style={{ gap: 12 }}>
+                    <div>
+                      <div style={{ fontSize: 15, fontWeight: 600, color: PARENT.text }}>{m.title}</div>
+                      <div style={{ fontSize: 12, color: PARENT.text3, marginTop: 3 }}>{m.phase}</div>
+                    </div>
+                    <span style={{
+                      flexShrink: 0, fontSize: 12, color: PARENT.green, fontWeight: 600,
+                      background: "rgba(34,197,94,0.1)", borderRadius: 100, padding: "4px 10px",
+                    }}>
+                      ✓ {fmtDate(m.completedAt)}
+                    </span>
+                  </div>
+                  {m.quote && (
+                    <div
+                      style={{
+                        marginTop: 10, padding: "10px 14px",
+                        background: PARENT.brandSoft, borderLeft: `3px solid ${PARENT.brand}`,
+                        borderRadius: 8, fontSize: 13, color: PARENT.text2, lineHeight: 1.55,
+                      }}
+                    >
+                      <strong style={{ color: PARENT.brand }}>Koko:</strong> {m.quote}
+                    </div>
+                  )}
+                </li>
+              ))}
+            </ol>
+          )}
+        </Section>
 
-        {/* ───── SECTION 6 — What Happens Next ───── */}
-        <section
-          className="ws-fade-up"
-          style={{
-            animationDelay: "1s",
-            background: PARENT.card,
-            border: `1px solid ${PARENT.border}`,
-            borderRadius: 20,
-            padding: "24px 28px",
-            marginBottom: 32,
-          }}
-        >
-          <div style={{ fontSize: 16, fontWeight: 700, color: PARENT.text }}>
-            What Happens Next on {firstName}'s Journey
+        {/* SECTION 5 — Coming up next */}
+        <Section title="Coming up next">
+          {data.upcomingMissions.length === 0 ? (
+            <p style={{ fontSize: 14, color: PARENT.text2 }}>
+              {firstName} has completed every mission in their roadmap. 🎉
+            </p>
+          ) : (
+            <ol className="flex flex-col" style={{ gap: 14, listStyle: "none", padding: 0, margin: 0 }}>
+              {data.upcomingMissions.map((m, i) => (
+                <li
+                  key={i}
+                  style={{
+                    border: `1px solid ${PARENT.border}`, borderRadius: 14,
+                    padding: "16px 18px", display: "flex", alignItems: "flex-start", gap: 14,
+                  }}
+                >
+                  <div
+                    style={{
+                      width: 32, height: 32, borderRadius: "50%",
+                      background: PARENT.brandSoft, color: PARENT.brand,
+                      display: "grid", placeItems: "center", fontSize: 14, fontWeight: 700, flexShrink: 0,
+                    }}
+                  >
+                    {i + 1}
+                  </div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontSize: 15, fontWeight: 600, color: PARENT.text }}>{m.title}</div>
+                    <div style={{ fontSize: 12, color: PARENT.text3, marginTop: 2 }}>{m.phase}</div>
+                    <div style={{ fontSize: 13, color: PARENT.text2, marginTop: 8, lineHeight: 1.55 }}>{m.why}</div>
+                  </div>
+                </li>
+              ))}
+            </ol>
+          )}
+        </Section>
+
+        {/* SECTION 6 — Career goal */}
+        <Section title="Career goal">
+          <div style={{ fontSize: 22, fontWeight: 700, color: PARENT.brand }}>{data.careerTitle}</div>
+          {data.careerDescription && (
+            <p style={{ fontSize: 14, color: PARENT.text2, lineHeight: 1.65, marginTop: 8 }}>
+              {data.careerDescription}
+            </p>
+          )}
+
+          <div style={{ marginTop: 20 }}>
+            <div style={{ fontSize: 13, fontWeight: 600, color: PARENT.text, marginBottom: 8 }}>
+              What this career involves
+            </div>
+            <ul className="flex flex-col" style={{ gap: 8, padding: 0, margin: 0, listStyle: "none" }}>
+              {data.careerExamples.map((ex, i) => (
+                <li
+                  key={i}
+                  style={{
+                    fontSize: 14, color: PARENT.text2, lineHeight: 1.6,
+                    paddingLeft: 22, position: "relative",
+                  }}
+                >
+                  <span style={{ position: "absolute", left: 0, color: PARENT.brand }}>•</span> {ex}
+                </li>
+              ))}
+            </ul>
           </div>
 
-          <div className="mt-4 flex flex-col md:flex-row">
-            {[
-              {
-                icon: (
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={PARENT.accent} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6" />
-                    <line x1="8" y1="2" x2="8" y2="18" />
-                    <line x1="16" y1="6" x2="16" y2="22" />
-                  </svg>
-                ),
-                t: "Complete Phase 1",
-                s: "9 missions total. 1 done so far.",
-              },
-              {
-                icon: (
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={PARENT.accent} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <rect x="3" y="11" width="18" height="11" rx="2" />
-                    <path d="M7 11V7a5 5 0 0 1 9.9-1" />
-                  </svg>
-                ),
-                t: "Unlock Phase 2",
-                s: "Career Exploration starts here.",
-              },
-              {
-                icon: (
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={PARENT.accent} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <circle cx="12" cy="12" r="10" />
-                    <circle cx="12" cy="12" r="6" />
-                    <circle cx="12" cy="12" r="2" />
-                  </svg>
-                ),
-                t: "Career Blueprint Ready",
-                s: "Full roadmap, skills, and job opportunities.",
-              },
-            ].map((it, i) => (
-              <div
-                key={i}
-                className="flex flex-col"
-                style={{
-                  flex: 1,
-                  padding: "16px 20px",
-                  borderTop: i === 0 ? "none" : `1px solid ${PARENT.border}`,
-                }}
-              >
-                <div className="hidden md:block" style={{ height: 0 }} />
-                {it.icon}
-                <div style={{ fontSize: 14, fontWeight: 600, color: PARENT.text, marginTop: 10 }}>{it.t}</div>
-                <div style={{ fontSize: 13, color: PARENT.text2, marginTop: 4 }}>{it.s}</div>
-              </div>
-            ))}
-          </div>
-        </section>
+          {data.careerReason && (
+            <div
+              style={{
+                marginTop: 20, padding: "14px 18px",
+                background: PARENT.brandSoft, borderRadius: 12,
+                fontSize: 14, color: PARENT.text2, lineHeight: 1.6,
+              }}
+            >
+              <strong style={{ color: PARENT.brand }}>Why this matches {firstName}: </strong>
+              {data.careerReason}
+            </div>
+          )}
+        </Section>
       </main>
 
-      {/* ───── FOOTER ───── */}
       <footer
-        className="flex flex-wrap items-center justify-between"
         style={{
-          background: PARENT.card,
-          borderTop: `1px solid ${PARENT.border}`,
-          padding: "20px 32px",
-          gap: 12,
+          background: PARENT.card, borderTop: `1px solid ${PARENT.border}`,
+          padding: "24px 32px", textAlign: "center",
         }}
       >
-        <div>
-          <div style={{ fontSize: 15, fontWeight: 700, color: PARENT.accent }}>WorthScope</div>
-          <div style={{ fontSize: 12, color: PARENT.text3 }}>Parent View — Read Only</div>
+        <div style={{ fontSize: 13, color: PARENT.text2, lineHeight: 1.6 }}>
+          You're viewing {data.fullName}'s progress as their parent or guardian. This is a read-only view.
         </div>
-        <div className="flex items-center" style={{ gap: 6, fontSize: 12, color: PARENT.text3 }}>
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <rect x="4" y="11" width="16" height="10" rx="2" />
-            <path d="M8 11V8a4 4 0 0 1 8 0v3" />
-          </svg>
-          <span>This view is secure and read-only.</span>
+        <div style={{ fontSize: 11, color: PARENT.text3, marginTop: 6 }}>
+          Powered by WorthScope · 🔒 You can only view information. Nothing can be changed.
         </div>
       </footer>
-
-      {/* desktop column dividers for "What's next" */}
-      <style>{`
-        @media (min-width: 768px) {
-          section [style*="What Happens Next"] ~ * { }
-        }
-      `}</style>
     </div>
   );
 };

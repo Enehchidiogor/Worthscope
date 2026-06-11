@@ -18,6 +18,11 @@ import {
   setOnboardingTourCompleted,
   type KokoAvatarKey,
 } from "@/lib/profileStore";
+import {
+  listParentInvites,
+  revokeParentInvite,
+  type ParentInviteRow,
+} from "@/lib/parentInvite";
 
 /* WorthScope — Settings Page
    5 grouped white cards on a soft-blue page bg.
@@ -253,10 +258,29 @@ const Settings = () => {
   const [deleteModal, setDeleteModal] = useState(false);
   const [logoutModal, setLogoutModal] = useState(false);
   const [inviteOpen, setInviteOpen] = useState(false);
+  const [parentInvites, setParentInvites] = useState<ParentInviteRow[]>([]);
+  const [revokingId, setRevokingId] = useState<string | null>(null);
   const [deleteConfirmText, setDeleteConfirmText] = useState("");
   const [deleting, setDeleting] = useState(false);
   const [loggingOut, setLoggingOut] = useState(false);
   const navigate = useNavigate();
+
+  const refreshInvites = async () => {
+    const rows = await listParentInvites();
+    setParentInvites(rows.filter((r) => !r.revoked_at));
+  };
+
+  useEffect(() => { refreshInvites(); }, []);
+
+  const formatViewed = (iso: string | null) => {
+    if (!iso) return "Not yet viewed";
+    const diff = Date.now() - new Date(iso).getTime();
+    const d = Math.floor(diff / 86400000);
+    if (d <= 0) return "Viewed today";
+    if (d === 1) return "Viewed yesterday";
+    if (d < 7) return `Viewed ${d} days ago`;
+    return `Viewed on ${new Date(iso).toLocaleDateString()}`;
+  };
 
   const handleLogout = async () => {
     setLoggingOut(true);
@@ -701,15 +725,14 @@ const Settings = () => {
                   </svg>
                 }
                 label="Parent / Guardian Access"
-                sub="Invite someone to view your career progress"
+                sub={parentInvites.length === 0
+                  ? "Invite someone to view your career progress"
+                  : `${parentInvites.length} active invite${parentInvites.length === 1 ? "" : "s"}`}
                 onClick={() => setInviteOpen(true)}
-                hasBorder={false}
+                hasBorder={parentInvites.length > 0}
                 right={
                   <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setInviteOpen(true);
-                    }}
+                    onClick={(e) => { e.stopPropagation(); setInviteOpen(true); }}
                     className="rounded-[8px] font-medium transition-colors"
                     style={{
                       background: "#EBF5FB",
@@ -718,15 +741,61 @@ const Settings = () => {
                       fontSize: 12,
                       padding: "6px 14px",
                     }}
-                    onMouseEnter={(e) => (e.currentTarget.style.background = "rgba(52,152,219,0.15)")}
-                    onMouseLeave={(e) => (e.currentTarget.style.background = "#EBF5FB")}
                   >
-                    Invite
+                    {parentInvites.length === 0 ? "Invite" : "Re-invite"}
                   </button>
                 }
               />
+
+              {parentInvites.map((inv, idx) => (
+                <div
+                  key={inv.id}
+                  className="flex items-center justify-between"
+                  style={{
+                    padding: "14px 18px",
+                    borderTop: idx === 0 ? "1px solid #F3F4F6" : "1px solid #F3F4F6",
+                    gap: 12,
+                  }}
+                >
+                  <div style={{ minWidth: 0, flex: 1 }}>
+                    <div style={{ fontSize: 13, fontWeight: 600, color: "#111", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                      {inv.parent_email || inv.parent_label || "Shared link"}
+                    </div>
+                    <div style={{ fontSize: 11, color: "#9CA3AF", marginTop: 2 }}>
+                      {formatViewed(inv.last_viewed_at)} · Expires {new Date(inv.expires_at).toLocaleDateString()}
+                    </div>
+                  </div>
+                  <button
+                    disabled={revokingId === inv.id}
+                    onClick={async () => {
+                      setRevokingId(inv.id);
+                      const ok = await revokeParentInvite(inv.id);
+                      setRevokingId(null);
+                      if (ok) {
+                        toast.success("Access removed.");
+                        refreshInvites();
+                      } else {
+                        toast.error("Could not remove access.");
+                      }
+                    }}
+                    className="rounded-[8px] font-medium transition-colors"
+                    style={{
+                      background: "rgba(239,68,68,0.08)",
+                      border: "1px solid rgba(239,68,68,0.25)",
+                      color: "#EF4444",
+                      fontSize: 12,
+                      padding: "6px 12px",
+                      cursor: revokingId === inv.id ? "wait" : "pointer",
+                      flexShrink: 0,
+                    }}
+                  >
+                    {revokingId === inv.id ? "Removing…" : "Remove access"}
+                  </button>
+                </div>
+              ))}
             </div>
           </section>
+
 
           {/* ───── Group 7: Help ───── */}
           <section className="ws-fade-up mb-5" style={{ animationDelay: "0.7s" }}>
@@ -761,7 +830,7 @@ const Settings = () => {
         </main>
       </div>
 
-      <InviteParentModal open={inviteOpen} onClose={() => setInviteOpen(false)} />
+      <InviteParentModal open={inviteOpen} onClose={() => setInviteOpen(false)} onInvited={refreshInvites} />
 
       <MobileTabBar />
 
