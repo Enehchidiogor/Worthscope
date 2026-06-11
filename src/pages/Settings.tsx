@@ -18,6 +18,11 @@ import {
   setOnboardingTourCompleted,
   type KokoAvatarKey,
 } from "@/lib/profileStore";
+import {
+  listParentInvites,
+  revokeParentInvite,
+  type ParentInviteRow,
+} from "@/lib/parentInvite";
 
 /* WorthScope — Settings Page
    5 grouped white cards on a soft-blue page bg.
