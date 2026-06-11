@@ -253,6 +253,57 @@ const Settings = () => {
   const [deleteModal, setDeleteModal] = useState(false);
   const [logoutModal, setLogoutModal] = useState(false);
   const [inviteOpen, setInviteOpen] = useState(false);
+  const [deleteConfirmText, setDeleteConfirmText] = useState("");
+  const [deleting, setDeleting] = useState(false);
+  const [loggingOut, setLoggingOut] = useState(false);
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    setLoggingOut(true);
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+      try {
+        Object.keys(localStorage)
+          .filter((k) => k.startsWith("worthscope_"))
+          .forEach((k) => localStorage.removeItem(k));
+      } catch {}
+      setLogoutModal(false);
+      navigate("/signin", { replace: true });
+    } catch {
+      toast.error("Couldn't log you out. Please try again.");
+    } finally {
+      setLoggingOut(false);
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    if (deleteConfirmText !== "DELETE") return;
+    setDeleting(true);
+    try {
+      const { data: sessionData } = await supabase.auth.getSession();
+      const token = sessionData.session?.access_token;
+      if (!token) throw new Error("no-session");
+      const { data, error } = await supabase.functions.invoke("delete-user-account", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (error || (data as any)?.error) throw error || new Error((data as any).error);
+      try {
+        Object.keys(localStorage)
+          .filter((k) => k.startsWith("worthscope_"))
+          .forEach((k) => localStorage.removeItem(k));
+      } catch {}
+      await supabase.auth.signOut();
+      setDeleteModal(false);
+      toast.success("Your account has been deleted. We're sorry to see you go.");
+      navigate("/", { replace: true });
+    } catch {
+      toast.error("Couldn't delete your account right now. Please contact support.");
+    } finally {
+      setDeleting(false);
+    }
+  };
+
 
   // Password form
   const [showPw, setShowPw] = useState(false);
