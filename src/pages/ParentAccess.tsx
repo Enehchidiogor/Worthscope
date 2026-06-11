@@ -1,11 +1,11 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import logo from "@/assets/worthscope-logo.png";
-import { getParentInvite, markAccessGranted, type ParentInvite } from "@/lib/parentInvite";
+import { markAccessGranted, validateParentToken } from "@/lib/parentInvite";
 
 /* WorthScope — Parent Access (Lightweight Gate)
-   Step between "parent opens link" and "parent dashboard".
-   Verifies the invite token and asks for the child's first name as a soft check. */
+   Verifies the invite token server-side and asks for the child's first
+   name as a soft second check. */
 
 const C = {
   bg: "#F8F9FA",
@@ -25,61 +25,78 @@ const FONT = "'Poppins', sans-serif";
 export default function ParentAccess() {
   const { token = "" } = useParams<{ token: string }>();
   const navigate = useNavigate();
-  const [invite, setInvite] = useState<ParentInvite | null>(null);
-  const [checked, setChecked] = useState(false);
+  const [checking, setChecking] = useState(true);
+  const [tokenError, setTokenError] = useState<"invalid" | "expired" | "revoked" | null>(null);
+  const [studentFirstName, setStudentFirstName] = useState<string>("");
   const [firstName, setFirstName] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
+  // Initial token check (without name) just to learn validity & first name to greet
   useEffect(() => {
-    setInvite(getParentInvite(token));
-    setChecked(true);
+    let cancelled = false;
+    (async () => {
+      const r = await validateParentToken(token);
+      if (cancelled) return;
+      if (r.ok) {
+        setStudentFirstName(r.firstName);
+      } else if (r.error === "expired" || r.error === "revoked") {
+        setTokenError(r.error);
+      } else {
+        setTokenError("invalid");
+      }
+      setChecking(false);
+    })();
+    return () => { cancelled = true; };
   }, [token]);
 
-  const expectedFirstName = useMemo(
-    () => (invite?.studentFirstName || "").trim().toLowerCase(),
-    [invite],
-  );
-
-  function handleEnter() {
-    if (!invite) return;
+  async function handleEnter() {
     setError("");
-    const guess = firstName.trim().toLowerCase();
-    if (!guess) {
-      setError("Please enter the child's first name.");
-      return;
-    }
-    if (expectedFirstName && guess !== expectedFirstName) {
-      setError("That name doesn't match our records.");
-      return;
-    }
+    const guess = firstName.trim();
+    if (!guess) { setError("Please enter the child's first name."); return; }
     setLoading(true);
-    markAccessGranted(token);
-    setTimeout(() => navigate(`/parent-view/${token}`), 350);
+    const r = await validateParentToken(token, guess);
+    setLoading(false);
+    if (r.ok) {
+      markAccessGranted(token);
+      navigate(`/parent-view/${token}`);
+    } else if (r.error === "name_mismatch") {
+      setError("That name doesn't match our records.");
+    } else if (r.error === "expired" || r.error === "revoked") {
+      setTokenError(r.error);
+    } else {
+      setError("This link is no longer valid.");
+    }
   }
 
-  // Invalid / expired token
-  if (checked && !invite) {
+  if (checking) {
+    return (
+      <div style={{ minHeight: "100vh", background: C.bg, fontFamily: FONT, display: "grid", placeItems: "center" }}>
+        <div style={{ color: C.text2, fontSize: 14 }}>Verifying link…</div>
+      </div>
+    );
+  }
+
+  if (tokenError) {
+    const msg =
+      tokenError === "expired" ? "This invitation link has expired." :
+      tokenError === "revoked" ? "This invitation link has been revoked." :
+      "This invitation link is no longer valid.";
     return (
       <div style={{ minHeight: "100vh", background: C.bg, fontFamily: FONT, display: "grid", placeItems: "center", padding: 24 }}>
-        <div style={{ maxWidth: 440, textAlign: "center" }}>
+        <div style={{ maxWidth: 460, textAlign: "center" }}>
           <div style={{ fontSize: 42 }}>🔗</div>
-          <h1 style={{ fontWeight: 700, fontSize: 24, color: C.text, marginTop: 8 }}>
-            This link is invalid or has expired
-          </h1>
+          <h1 style={{ fontWeight: 700, fontSize: 24, color: C.text, marginTop: 8 }}>{msg}</h1>
           <p style={{ fontWeight: 400, fontSize: 14, color: C.text2, marginTop: 10, lineHeight: 1.6 }}>
-            Ask your child to generate a fresh invite link from their WorthScope dashboard.
+            Please ask the student to send a new invitation from their WorthScope dashboard.
           </p>
         </div>
       </div>
     );
   }
 
-  if (!invite) return null;
-
   return (
     <div style={{ minHeight: "100vh", background: C.bg, fontFamily: FONT, color: C.text, position: "relative" }}>
-      {/* Transparent header with logo only */}
       <header
         style={{
           position: "absolute", top: 0, left: 0, right: 0, height: 80,
@@ -101,10 +118,7 @@ export default function ParentAccess() {
         >
           <div style={{ display: "grid", placeItems: "center", marginBottom: 14 }}>
             <div
-              style={{
-                width: 56, height: 56, borderRadius: "50%", background: C.accentL,
-                display: "grid", placeItems: "center",
-              }}
+              style={{ width: 56, height: 56, borderRadius: "50%", background: C.accentL, display: "grid", placeItems: "center" }}
             >
               <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke={C.accent} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7S2 12 2 12z" />
@@ -120,27 +134,6 @@ export default function ParentAccess() {
             You've been invited to view progress on WorthScope. This is a private, read-only view.
           </p>
 
-          {/* Preview info */}
-          <div
-            style={{
-              background: C.accentL, border: "1px solid rgba(52,152,219,0.18)",
-              borderRadius: 14, padding: "16px 18px", marginTop: 22,
-            }}
-          >
-            <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: "1.5px", textTransform: "uppercase", color: C.accent }}>
-              You're viewing
-            </div>
-            <div style={{ fontSize: 18, fontWeight: 700, color: C.text, marginTop: 6 }}>
-              {invite.studentFullName}
-            </div>
-            {(invite.educationLevel || invite.classOrLevel) && (
-              <div style={{ fontSize: 13, color: C.text2, marginTop: 4 }}>
-                {[invite.educationLevel, invite.classOrLevel].filter(Boolean).join(" — ")}
-              </div>
-            )}
-          </div>
-
-          {/* Soft security gate */}
           <label style={{ display: "block", fontWeight: 600, fontSize: 13, color: C.text, marginTop: 22, marginBottom: 8 }}>
             Enter your child's first name to continue
           </label>
@@ -158,9 +151,7 @@ export default function ParentAccess() {
               transition: "border-color 0.2s, box-shadow 0.2s",
             }}
           />
-          {error && (
-            <div style={{ fontSize: 12, color: C.red, marginTop: 6 }}>{error}</div>
-          )}
+          {error && (<div style={{ fontSize: 12, color: C.red, marginTop: 6 }}>{error}</div>)}
 
           <button
             onClick={handleEnter}
@@ -172,23 +163,13 @@ export default function ParentAccess() {
               cursor: loading ? "wait" : "pointer",
               transition: "background 0.2s, box-shadow 0.2s, transform 0.18s",
             }}
-            onMouseEnter={(e) => {
-              if (loading) return;
-              e.currentTarget.style.background = C.accentDark;
-              e.currentTarget.style.boxShadow = "0 8px 24px rgba(52,152,219,0.35)";
-              e.currentTarget.style.transform = "translateY(-1px)";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.background = C.accent;
-              e.currentTarget.style.boxShadow = "none";
-              e.currentTarget.style.transform = "translateY(0)";
-            }}
           >
-            {loading ? "Loading..." : "View Dashboard →"}
+            {loading ? "Verifying…" : "View Dashboard →"}
           </button>
 
           <p style={{ textAlign: "center", fontSize: 11, color: C.text3, marginTop: 16, lineHeight: 1.6 }}>
             🔒 You can only view information. Nothing can be changed from this view.
+            {studentFirstName ? <><br />Hint: This invite is for the parent or guardian of {studentFirstName}.</> : null}
           </p>
         </div>
       </main>
