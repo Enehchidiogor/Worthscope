@@ -6,6 +6,7 @@ import { useEffect } from "react";
 import { Navigate, useLocation } from "react-router-dom";
 import { useAuthSession, hydrateProfile } from "@/lib/authClient";
 import { loadUserProfile } from "@/lib/profileStore";
+import { hydrateStudentStateFromServer, installStudentStateAutoSync } from "@/lib/studentState";
 
 export const AuthGate = ({ children }: { children: React.ReactNode }) => {
   const { user, loading } = useAuthSession();
@@ -15,6 +16,10 @@ export const AuthGate = ({ children }: { children: React.ReactNode }) => {
     if (user) {
       hydrateProfile(user);
       loadUserProfile(true);
+      // Pull cross-device journey state, then start auto-sync on every change.
+      hydrateStudentStateFromServer().finally(() => {
+        installStudentStateAutoSync();
+      });
     }
   }, [user]);
 
@@ -24,3 +29,4 @@ export const AuthGate = ({ children }: { children: React.ReactNode }) => {
   }
   return <>{children}</>;
 };
+
