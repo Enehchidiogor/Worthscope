@@ -36,14 +36,14 @@ export default function ParentAccess() {
   useEffect(() => {
     let cancelled = false;
     (async () => {
-      const r = await validateParentToken(token);
+      const r: any = await validateParentToken(token);
       if (cancelled) return;
-      if (r.ok) {
+      if (r?.ok) {
         setStudentFirstName(r.firstName);
-      } else if (r.error === "expired" || r.error === "revoked") {
-        setTokenError(r.error);
       } else {
-        setTokenError("invalid");
+        const err = r?.error;
+        if (err === "expired" || err === "revoked") setTokenError(err);
+        else setTokenError("invalid");
       }
       setChecking(false);
     })();
@@ -55,18 +55,17 @@ export default function ParentAccess() {
     const guess = firstName.trim();
     if (!guess) { setError("Please enter the child's first name."); return; }
     setLoading(true);
-    const r = await validateParentToken(token, guess);
+    const r: any = await validateParentToken(token, guess);
     setLoading(false);
-    if (r.ok) {
+    if (r?.ok) {
       markAccessGranted(token);
       navigate(`/parent-view/${token}`);
-    } else if (r.error === "name_mismatch") {
-      setError("That name doesn't match our records.");
-    } else if (r.error === "expired" || r.error === "revoked") {
-      setTokenError(r.error);
-    } else {
-      setError("This link is no longer valid.");
+      return;
     }
+    const err = r?.error;
+    if (err === "name_mismatch") setError("That name doesn't match our records.");
+    else if (err === "expired" || err === "revoked") setTokenError(err);
+    else setError("This link is no longer valid.");
   }
 
   if (checking) {
