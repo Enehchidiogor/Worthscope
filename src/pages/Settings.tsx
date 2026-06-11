@@ -258,10 +258,29 @@ const Settings = () => {
   const [deleteModal, setDeleteModal] = useState(false);
   const [logoutModal, setLogoutModal] = useState(false);
   const [inviteOpen, setInviteOpen] = useState(false);
+  const [parentInvites, setParentInvites] = useState<ParentInviteRow[]>([]);
+  const [revokingId, setRevokingId] = useState<string | null>(null);
   const [deleteConfirmText, setDeleteConfirmText] = useState("");
   const [deleting, setDeleting] = useState(false);
   const [loggingOut, setLoggingOut] = useState(false);
   const navigate = useNavigate();
+
+  const refreshInvites = async () => {
+    const rows = await listParentInvites();
+    setParentInvites(rows.filter((r) => !r.revoked_at));
+  };
+
+  useEffect(() => { refreshInvites(); }, []);
+
+  const formatViewed = (iso: string | null) => {
+    if (!iso) return "Not yet viewed";
+    const diff = Date.now() - new Date(iso).getTime();
+    const d = Math.floor(diff / 86400000);
+    if (d <= 0) return "Viewed today";
+    if (d === 1) return "Viewed yesterday";
+    if (d < 7) return `Viewed ${d} days ago`;
+    return `Viewed on ${new Date(iso).toLocaleDateString()}`;
+  };
 
   const handleLogout = async () => {
     setLoggingOut(true);
