@@ -830,7 +830,7 @@ const Settings = () => {
         </main>
       </div>
 
-      <InviteParentModal open={inviteOpen} onClose={() => setInviteOpen(false)} />
+      <InviteParentModal open={inviteOpen} onClose={() => setInviteOpen(false)} onInvited={refreshInvites} />
 
       <MobileTabBar />
 
