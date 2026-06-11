@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { Sidebar } from "@/components/dashboard/Sidebar";
 import { TopBar } from "@/components/dashboard/TopBar";
@@ -252,6 +253,57 @@ const Settings = () => {
   const [deleteModal, setDeleteModal] = useState(false);
   const [logoutModal, setLogoutModal] = useState(false);
   const [inviteOpen, setInviteOpen] = useState(false);
+  const [deleteConfirmText, setDeleteConfirmText] = useState("");
+  const [deleting, setDeleting] = useState(false);
+  const [loggingOut, setLoggingOut] = useState(false);
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    setLoggingOut(true);
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+      try {
+        Object.keys(localStorage)
+          .filter((k) => k.startsWith("worthscope_"))
+          .forEach((k) => localStorage.removeItem(k));
+      } catch {}
+      setLogoutModal(false);
+      navigate("/signin", { replace: true });
+    } catch {
+      toast.error("Couldn't log you out. Please try again.");
+    } finally {
+      setLoggingOut(false);
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    if (deleteConfirmText !== "DELETE") return;
+    setDeleting(true);
+    try {
+      const { data: sessionData } = await supabase.auth.getSession();
+      const token = sessionData.session?.access_token;
+      if (!token) throw new Error("no-session");
+      const { data, error } = await supabase.functions.invoke("delete-user-account", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (error || (data as any)?.error) throw error || new Error((data as any).error);
+      try {
+        Object.keys(localStorage)
+          .filter((k) => k.startsWith("worthscope_"))
+          .forEach((k) => localStorage.removeItem(k));
+      } catch {}
+      await supabase.auth.signOut();
+      setDeleteModal(false);
+      toast.success("Your account has been deleted. We're sorry to see you go.");
+      navigate("/", { replace: true });
+    } catch {
+      toast.error("Couldn't delete your account right now. Please contact support.");
+    } finally {
+      setDeleting(false);
+    }
+  };
+
 
   // Password form
   const [showPw, setShowPw] = useState(false);
@@ -729,33 +781,57 @@ const Settings = () => {
         </button>
       </Modal>
 
-      <Modal open={deleteModal} onClose={() => setDeleteModal(false)}>
-        <h3 className="text-[20px] font-bold text-[#111]">Are you sure?</h3>
+      <Modal open={deleteModal} onClose={() => { setDeleteModal(false); setDeleteConfirmText(""); }}>
+        <h3 className="text-[20px] font-bold text-[#111]">Delete your account?</h3>
         <p className="mt-3 text-[14px] text-[#6B7280]">
-          This will permanently delete your account and all your roadmap progress. This cannot be undone.
+          This will permanently delete your account, your roadmap, your progress, and everything Koko has created for you. This cannot be undone.
         </p>
+        <p className="mt-4 text-[13px] font-medium text-[#374151]">
+          Type <span className="font-bold text-[#EF4444]">DELETE</span> to confirm:
+        </p>
+        <input
+          type="text"
+          value={deleteConfirmText}
+          onChange={(e) => setDeleteConfirmText(e.target.value)}
+          placeholder="DELETE"
+          autoFocus={false}
+          className="mt-2 w-full rounded-lg border border-[#E5E7EB] bg-white px-3 py-2.5 text-[14px] outline-none focus:border-[#EF4444]"
+        />
         <div className="mt-6 flex gap-3">
-          <button onClick={() => setDeleteModal(false)} className="flex-1 rounded-lg border border-[#E5E7EB] bg-white py-2.5 text-[14px] font-medium text-[#6B7280] hover:bg-[#F9FAFB]">
+          <button
+            autoFocus
+            onClick={() => { setDeleteModal(false); setDeleteConfirmText(""); }}
+            className="flex-1 rounded-lg border border-[#E5E7EB] bg-white py-2.5 text-[14px] font-medium text-[#6B7280] hover:bg-[#F9FAFB]"
+          >
             Cancel
           </button>
-          <button onClick={() => setDeleteModal(false)} className="flex-1 rounded-lg bg-[#EF4444] py-2.5 text-[14px] font-semibold text-white hover:bg-[#dc2626]">
-            Yes, Delete
+          <button
+            onClick={handleDeleteAccount}
+            disabled={deleteConfirmText !== "DELETE" || deleting}
+            className="flex-1 rounded-lg bg-[#EF4444] py-2.5 text-[14px] font-semibold text-white transition-opacity hover:bg-[#dc2626] disabled:cursor-not-allowed disabled:opacity-40"
+          >
+            {deleting ? "Deleting…" : "Permanently delete account"}
           </button>
         </div>
       </Modal>
 
       <Modal open={logoutModal} onClose={() => setLogoutModal(false)}>
-        <h3 className="text-[20px] font-bold text-[#111]">Log out of WorthScope?</h3>
+        <h3 className="text-[20px] font-bold text-[#111]">Are you sure you want to log out?</h3>
         <p className="mt-3 text-[14px] text-[#6B7280]">You can log back in any time to continue your journey.</p>
         <div className="mt-6 flex gap-3">
           <button onClick={() => setLogoutModal(false)} className="flex-1 rounded-lg border border-[#E5E7EB] bg-white py-2.5 text-[14px] font-medium text-[#6B7280] hover:bg-[#F9FAFB]">
             Cancel
           </button>
-          <button onClick={() => setLogoutModal(false)} className="flex-1 rounded-lg bg-[#EF4444] py-2.5 text-[14px] font-semibold text-white hover:bg-[#dc2626]">
-            Log Out
+          <button
+            onClick={handleLogout}
+            disabled={loggingOut}
+            className="flex-1 rounded-lg bg-[#EF4444] py-2.5 text-[14px] font-semibold text-white hover:bg-[#dc2626] disabled:opacity-50"
+          >
+            {loggingOut ? "Logging out…" : "Log Out"}
           </button>
         </div>
       </Modal>
+
     </div>
   );
 };
