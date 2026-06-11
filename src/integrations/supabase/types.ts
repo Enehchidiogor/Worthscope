@@ -206,6 +206,50 @@ export type Database = {
         }
         Relationships: []
       }
+      parent_invites: {
+        Row: {
+          created_at: string
+          expires_at: string
+          id: string
+          last_viewed_at: string | null
+          parent_email: string | null
+          parent_label: string | null
+          revoked_at: string | null
+          student_user_id: string
+          token: string
+        }
+        Insert: {
+          created_at?: string
+          expires_at?: string
+          id?: string
+          last_viewed_at?: string | null
+          parent_email?: string | null
+          parent_label?: string | null
+          revoked_at?: string | null
+          student_user_id: string
+          token: string
+        }
+        Update: {
+          created_at?: string
+          expires_at?: string
+          id?: string
+          last_viewed_at?: string | null
+          parent_email?: string | null
+          parent_label?: string | null
+          revoked_at?: string | null
+          student_user_id?: string
+          token?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "parent_invites_student_user_id_fkey"
+            columns: ["student_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           age: number | null
@@ -247,6 +291,59 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      student_state: {
+        Row: {
+          active_career_module: string | null
+          assessment_results: Json | null
+          chosen_career: Json | null
+          completed_missions: Json
+          created_at: string
+          current_streak: number
+          last_visit_date: string | null
+          roadmap_done: Json
+          signup_date: string | null
+          skills: Json
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          active_career_module?: string | null
+          assessment_results?: Json | null
+          chosen_career?: Json | null
+          completed_missions?: Json
+          created_at?: string
+          current_streak?: number
+          last_visit_date?: string | null
+          roadmap_done?: Json
+          signup_date?: string | null
+          skills?: Json
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          active_career_module?: string | null
+          assessment_results?: Json | null
+          chosen_career?: Json | null
+          completed_missions?: Json
+          created_at?: string
+          current_streak?: number
+          last_visit_date?: string | null
+          roadmap_done?: Json
+          signup_date?: string | null
+          skills?: Json
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "student_state_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_roles: {
         Row: {
