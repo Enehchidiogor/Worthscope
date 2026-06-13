@@ -13,6 +13,7 @@ export type KokoMission = {
   description?: string;
   career?: string;
   phase?: string;
+  progress?: number;
   userName?: string;
   userAge?: number;
   educationLevel?: string;

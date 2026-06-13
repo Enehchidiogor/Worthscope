@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { streamKokoChat, type KokoMsg } from "@/lib/kokoClient";
-import { getChosenCareer } from "@/lib/userState";
+import { getChosenCareer, getProgress, getMissionsForCareer } from "@/lib/userState";
 import { KokoAvatar } from "@/components/koko/KokoAvatar";
 
 /* WorthScope — Global Floating Koko Chat
@@ -173,7 +173,16 @@ export const KokoFloatingChat = () => {
       .map((m) => ({ role: m.role === "koko" ? "assistant" : "user", content: m.text }));
 
     const career = getChosenCareer()?.title;
-    const mission = career ? { career } : undefined;
+    const prog = getProgress();
+    const allMissions = getMissionsForCareer();
+    const currentMission = allMissions.length
+      ? allMissions[Math.min(prog.missionsCompleted, allMissions.length - 1)]
+      : undefined;
+    const mission = {
+      ...(career ? { career } : {}),
+      progress: prog.overallPct,
+      title: currentMission?.title,
+    };
     let acc = "";
     let started = false;
 

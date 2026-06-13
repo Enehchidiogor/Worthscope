@@ -1,10 +1,9 @@
 import { useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import logo from "@/assets/worthscope-logo.png";
-import { Field, inputStyle, eyeBtn, googleBtn, Divider, EyeIcon, GoogleG, SharedAuthStyles } from "./SignIn";
+import { Field, inputStyle, eyeBtn, EyeIcon, SharedAuthStyles } from "./SignIn";
 import { SEO } from "@/components/SEO";
 import { signUpWithEmail } from "@/lib/authClient";
-import { lovable } from "@/integrations/lovable/index";
 import { toast } from "sonner";
 import { notifyWelcome } from "@/lib/notifications";
 
@@ -67,19 +66,6 @@ export default function SignUp() {
       navigate("/signin");
     }
   };
-
-  const onGoogle = async () => {
-    const result = await lovable.auth.signInWithOAuth("google", {
-      redirect_uri: window.location.origin,
-    });
-    if (result.error) {
-      toast.error("Google sign-in failed");
-      return;
-    }
-    if (result.redirected) return;
-    navigate("/assessment");
-  };
-
 
   const barColor = (idx: number) => (strength.level > idx ? strength.color : BORDER);
 
@@ -161,13 +147,6 @@ export default function SignUp() {
             }}
           >
             {submitting ? "Creating account…" : "Begin Journey"}
-          </button>
-
-          <Divider />
-
-          <button type="button" onClick={onGoogle} className="ws-google" style={googleBtn()}>
-            <GoogleG />
-            <span>Continue with Google</span>
           </button>
 
           <p style={{ marginTop: 20, textAlign: "center", fontSize: 14, color: TEXT }}>

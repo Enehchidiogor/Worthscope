@@ -16,6 +16,7 @@ type MissionCtx = {
   description?: string;
   career?: string;
   phase?: string;
+  progress?: number;
   // legacy client-passed fields (only used if no JWT/profile available)
   userName?: string;
   userAge?: number;
@@ -85,6 +86,29 @@ Answer their question with these rules:
 - If the question is unrelated to the lesson, gently redirect: "That's a great question — let's save that for later. For now, let's make sure you've got ${m.title || "this topic"} locked in."
 - Mention AI tools whenever they are relevant to what the user is asking.
 - Keep responses conversational and short (2–4 sentences) unless depth is genuinely needed.`;
+}
+
+// Dashboard / navigation Koko (the floating chat). Concise by design — this is
+// NOT teaching, so answers stay short. Self-contained (does not use KOKO_CORE).
+function dashboardPrompt(m: MissionCtx): string {
+  return `You are Koko, the personal guide on WorthScope. The user is asking about navigation, settings, progress, or general questions about the platform.
+
+CRITICAL LENGTH RULES:
+- Default answer length: 1–2 short sentences, no more
+- Maximum length: 3 sentences only for genuinely complex questions
+- Never write paragraphs unless the user explicitly asks "explain in detail" or "tell me more"
+- No preamble, no "great question!", no restating what they asked — just answer
+- Use the user's name occasionally, not every message
+- If a one-word answer works, give a one-word answer
+
+Examples of correct response length:
+- "Where's my roadmap?" → "Second item in the sidebar — under My Roadmap."
+- "How do I change my career?" → "Settings → retake the assessment. I'll regenerate your roadmap based on your new choice."
+- "What does skill progress mean?" → "It tracks how your skills are growing as you complete missions. Beginner → Intermediate → Advanced."
+
+The user's name is ${m.userName || "the student"}. Career path: ${m.career || "unspecified"}. Current progress: ${typeof m.progress === "number" ? `${m.progress}%` : "unspecified"}. Current mission: ${m.title || "unspecified"}.
+
+Answer questions about: how to use the dashboard, what their roadmap and missions mean, their skill progress, settings, career navigation, and general motivation. If the question is completely unrelated to WorthScope or their career, kindly redirect them in one sentence.`;
 }
 
 function projectPrompt(m: MissionCtx): string {
@@ -294,8 +318,11 @@ Career: ${mission.career || "?"}.
 
 Generate the complete 2026 roadmap now as a single JSON object exactly matching the required schema.`,
       }];
+    } else if (intent === "chat") {
+      // Dashboard / navigation Koko — concise answers.
+      systemContent = dashboardPrompt(mission);
     } else {
-      // legacy chat / stuck / verify
+      // legacy stuck / verify (mission-side actions)
       let context = "";
       if (mission) {
         context = `\n\nCURRENT MISSION CONTEXT:

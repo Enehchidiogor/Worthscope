@@ -3,7 +3,6 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import logo from "@/assets/worthscope-logo.png";
 import { SEO } from "@/components/SEO";
 import { signInWithEmail, hydrateProfile } from "@/lib/authClient";
-import { lovable } from "@/integrations/lovable/index";
 import { supabase } from "@/integrations/supabase/client";
 import { getProfile, hasResults } from "@/lib/userState";
 import { toast } from "sonner";
@@ -78,20 +77,6 @@ export default function SignIn() {
     else toast.success("Verification email sent. Check your inbox.");
   };
 
-  const onGoogle = async () => {
-    const result = await lovable.auth.signInWithOAuth("google", {
-      redirect_uri: window.location.origin,
-    });
-    if (result.error) {
-      toast.error("Google sign-in failed");
-      return;
-    }
-    if (result.redirected) return;
-    const { data } = await supabase.auth.getUser();
-    if (data.user) await hydrateProfile(data.user);
-    navigate(routeAfterAuth(intended), { replace: true });
-  };
-
   return (
     <div style={{ minHeight: "100vh", background: "#fff", fontFamily: FONT, color: TEXT, position: "relative" }}>
       <div style={{ position: "absolute", top: 0, left: 0, padding: "20px 28px", opacity: 0, animation: "ws-logo 0.3s ease forwards" }}>
@@ -163,13 +148,6 @@ export default function SignIn() {
             {submitting ? "Signing in…" : "Sign In"}
           </button>
 
-          <Divider />
-
-          <button type="button" onClick={onGoogle} className="ws-google" style={googleBtn()}>
-            <GoogleG />
-            <span>Continue with Google</span>
-          </button>
-
           <p style={{ marginTop: 24, textAlign: "center", fontSize: 14, color: TEXT }}>
             Don't have an account?{" "}
             <Link to="/signup" style={{ color: ACCENT, fontWeight: 600, textDecoration: "none" }}>
@@ -214,25 +192,6 @@ export function eyeBtn(): React.CSSProperties {
   };
 }
 
-export function googleBtn(): React.CSSProperties {
-  return {
-    width: "100%", height: 56, background: "#fff", border: `1.5px solid ${BORDER}`,
-    borderRadius: 14, display: "flex", alignItems: "center", justifyContent: "center", gap: 12,
-    fontFamily: FONT, fontWeight: 500, fontSize: 15, color: TEXT, cursor: "pointer",
-    transition: "all 0.18s ease",
-  };
-}
-
-export function Divider() {
-  return (
-    <div style={{ display: "flex", alignItems: "center", gap: 12, margin: "24px 0" }}>
-      <div style={{ flex: 1, height: 1, background: BORDER }} />
-      <span style={{ fontSize: 13, color: TEXT3 }}>or continue with</span>
-      <div style={{ flex: 1, height: 1, background: BORDER }} />
-    </div>
-  );
-}
-
 export function EyeIcon({ off }: { off: boolean }) {
   return off ? (
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
@@ -247,17 +206,6 @@ export function EyeIcon({ off }: { off: boolean }) {
   );
 }
 
-export function GoogleG() {
-  return (
-    <svg width="22" height="22" viewBox="0 0 48 48" aria-hidden="true">
-      <path fill="#FFC107" d="M43.611 20.083H42V20H24v8h11.303c-1.649 4.657-6.08 8-11.303 8-6.627 0-12-5.373-12-12s5.373-12 12-12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4 12.955 4 4 12.955 4 24s8.955 20 20 20 20-8.955 20-20c0-1.341-.138-2.65-.389-3.917z" />
-      <path fill="#FF3D00" d="M6.306 14.691l6.571 4.819C14.655 15.108 18.961 12 24 12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4 16.318 4 9.656 8.337 6.306 14.691z" />
-      <path fill="#4CAF50" d="M24 44c5.166 0 9.86-1.977 13.409-5.192l-6.19-5.238C29.211 35.091 26.715 36 24 36c-5.202 0-9.619-3.317-11.283-7.946l-6.522 5.025C9.505 39.556 16.227 44 24 44z" />
-      <path fill="#1976D2" d="M43.611 20.083H42V20H24v8h11.303c-.792 2.237-2.231 4.166-4.087 5.571l6.19 5.238C36.971 39.205 44 34 44 24c0-1.341-.138-2.65-.389-3.917z" />
-    </svg>
-  );
-}
-
 export function SharedAuthStyles() {
   return (
     <style>{`
@@ -266,7 +214,6 @@ export function SharedAuthStyles() {
       .ws-input:focus { border-color: ${ACCENT} !important; box-shadow: 0 0 0 4px rgba(52,152,219,0.1); }
       .ws-submit:hover { background: ${ACCENT_DARK} !important; box-shadow: 0 8px 24px rgba(52,152,219,0.35); transform: translateY(-1px); }
       .ws-submit:active { transform: translateY(0); }
-      .ws-google:hover { background: #F9FAFB !important; border-color: #D1D5DB !important; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
     `}</style>
   );
 }
