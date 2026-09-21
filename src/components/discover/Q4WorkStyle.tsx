@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import type { WorkStyle } from "@/lib/careerIntelligence";
 import { PAPER, LINE, BLUE_BRIGHT, FONT } from "@/components/experience/theme";
 import { StepFrame, NavRow } from "./shared";
+import { eyebrowFor } from "./flow";
 
 type PairKey = keyof WorkStyle;
 
@@ -48,7 +49,7 @@ export default function Q4WorkStyle({
   }
 
   return (
-    <StepFrame eyebrow={`Question 4 of 6 — ${i + 1}/${PAIRS.length}`} title={pair.prompt}>
+    <StepFrame eyebrow={eyebrowFor("q4", ` — choice ${i + 1}/${PAIRS.length}`)} title={pair.prompt}>
       <div style={{ display: "grid", gap: 12 }}>
         {[pair.a, pair.b].map((opt) => (
           <motion.button

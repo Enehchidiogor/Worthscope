@@ -7,6 +7,7 @@
 import { supabase } from "@/integrations/supabase/client";
 import { streamKokoChat } from "@/lib/kokoClient";
 import { scoreAllCareers, type Answers } from "@/lib/recommendationEngine";
+import { STRENGTHS, EXPERIENCE, SCENARIOS, DISLIKES, parseScores, type ScoredOption } from "@/lib/careerQuestions";
 
 export type CareerIntent =
   | "choosing"
@@ -47,6 +48,14 @@ export type CareerIntelligenceProfile = {
   careerValues: CareerValue[];
   commitment: Commitment;
   additionalContext: string;
+  /** School subjects the person is strongest in (ids from careerQuestions STRENGTHS). */
+  strengths: string[];
+  /** Things they have already tried (ids from EXPERIENCE). */
+  experience: string[];
+  /** Scenario id -> chosen option id. */
+  scenarios: Record<string, string>;
+  /** Things they would dislike doing all day (ids from DISLIKES). */
+  dislikes: string[];
   assessmentStatus: "in_progress" | "completed";
 };
 
@@ -69,6 +78,10 @@ export function emptyProfile(): CareerIntelligenceProfile {
       hasConstraints: false,
     },
     additionalContext: "",
+    strengths: [],
+    experience: [],
+    scenarios: {},
+    dislikes: [],
     assessmentStatus: "in_progress",
   };
 }
@@ -90,7 +103,8 @@ export function loadWIP(): { profile: CareerIntelligenceProfile; step: string } 
     const raw = localStorage.getItem(WIP_KEY);
     const step = localStorage.getItem(WIP_STEP_KEY);
     if (!raw || !step) return null;
-    return { profile: JSON.parse(raw), step };
+    // Merge over defaults so progress saved before new questions existed still loads.
+    return { profile: { ...emptyProfile(), ...JSON.parse(raw) }, step };
   } catch {
     return null;
   }
@@ -156,6 +170,15 @@ function describeProfile(p: CareerIntelligenceProfile): string {
   const commitments = (Object.keys(p.commitment) as (keyof Commitment)[]).filter((k) => p.commitment[k]).map((k) => commitmentLabels[k]);
   lines.push(`Commitment/reality: ${commitments.join("; ") || "none specified"}`);
   if (p.additionalContext) lines.push(`Anything else they want considered: ${p.additionalContext}`);
+  const label = (list: ScoredOption[], ids: string[]) => ids.map((id) => list.find((o) => o.id === id)?.label).filter(Boolean).join("; ");
+  lines.push(`School subjects they are strongest in: ${label(STRENGTHS, p.strengths) || "none selected"}`);
+  lines.push(`Things they have already actually tried or done: ${label(EXPERIENCE, p.experience) || "none of the listed things"}`);
+  const scenarioLines = SCENARIOS.map((s) => {
+    const opt = s.options.find((o) => o.id === p.scenarios[s.id]);
+    return opt ? `- "${s.prompt}" → ${opt.label}` : null;
+  }).filter(Boolean);
+  lines.push(`How they say they'd act in real situations:\n${scenarioLines.join("\n") || "(not answered)"}`);
+  lines.push(`Things they would dislike doing all day: ${label(DISLIKES, p.dislikes) || "nothing in particular"}`);
   return lines.join("\n");
 }
 
@@ -294,6 +317,31 @@ export function fallbackPrediction(p: CareerIntelligenceProfile): CareerPredicti
     const m = valueMap[v.value];
     if (m) bump(m[0], v.rank === 1 ? 5 : v.rank === 2 ? 4 : v.rank === 3 ? 3 : 2, m[1]);
   }
+  // 6) Evidence of ability and real behaviour: strengths, what they've done,
+  //    how they'd act in real situations. These say more than self-labels.
+  const applyOptions = (list: ScoredOption[], ids: string[], reason: (o: ScoredOption) => string) => {
+    for (const id of ids) {
+      const o = list.find((x) => x.id === id);
+      if (!o) continue;
+      for (const [title, pts] of parseScores(o.scores)) bump(title, pts, reason(o));
+    }
+  };
+  applyOptions(STRENGTHS, p.strengths, (o) => `you're strong in ${o.label.toLowerCase()}`);
+  applyOptions(EXPERIENCE, p.experience, (o) => `you've already ${o.label.charAt(0).toLowerCase()}${o.label.slice(1)}`);
+  for (const s of SCENARIOS) {
+    const o = s.options.find((x) => x.id === p.scenarios[s.id]);
+    if (o) for (const [title, pts] of parseScores(o.scores)) bump(title, pts, `in real situations you'd ${o.label.charAt(0).toLowerCase()}${o.label.slice(1)}`);
+  }
+  // 7) Dislikes push careers DOWN (no "why" text — only positives are explained).
+  for (const id of p.dislikes) {
+    const o = DISLIKES.find((x) => x.id === id);
+    if (!o) continue;
+    for (const [title, pts] of parseScores(o.scores)) {
+      const e = (adj[title] ||= { pts: 0, why: [] });
+      e.pts += pts;
+    }
+  }
+
   const ranked = scores
     .map((s) => {
       const e = adj[s.title];
@@ -301,12 +349,16 @@ export function fallbackPrediction(p: CareerIntelligenceProfile): CareerPredicti
     })
     .sort((a, b) => b.total - a.total);
   const results = ranked.slice(0, 3);
-  const gap = results[0].total - (ranked[3]?.total ?? 0);
-  const rich = p.preferredActivities.length + p.thinkingStyle.length + p.careerValues.length + (freeText.length > 40 ? 2 : 0);
+  const lead = results[0].total - (ranked[1]?.total ?? 0);
+  const spread = results[0].total - (ranked[3]?.total ?? 0);
+  const answeredScenarios = SCENARIOS.filter((s) => p.scenarios[s.id]).length;
+  const rich =
+    p.preferredActivities.length + p.thinkingStyle.length + p.careerValues.length + p.strengths.length + p.experience.length +
+    answeredScenarios + (freeText.length > 40 ? 2 : 0);
   const confidence: CareerPrediction["confidence"] =
-    lowConfidence || rich < 5 || gap < 8
+    rich < 6 || spread < 15
       ? { level: "exploratory", note: "Your answers point in a few directions at once, so treat these as ideas to test, not conclusions." }
-      : gap > 22
+      : lead >= 12 && spread >= 30
         ? { level: "strong", note: "Several of your answers pointed the same way." }
         : { level: "moderate", note: "There's a clear lean, but a couple of these are close — try a small project in each." };
   const c = p.commitment;

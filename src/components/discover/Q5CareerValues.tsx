@@ -2,19 +2,21 @@ import { useState } from "react";
 import type { CareerValue } from "@/lib/careerIntelligence";
 import { PAPER, PAPER_DIM, PAPER_FAINT, LINE, BLUE_BRIGHT, FONT } from "@/components/experience/theme";
 import { StepFrame, OptionCard, NavRow, CardGrid } from "./shared";
+import { eyebrowFor } from "./flow";
 
-const VALUES = [
-  "High earning potential",
-  "Job security",
-  "Creative freedom",
-  "Work-life balance",
-  "Making a real impact",
-  "Continuous learning",
-  "Leadership opportunities",
-  "Flexibility & remote work",
-  "Recognition & status",
-  "Innovation & cutting-edge work",
-  "Helping others directly",
+// `name` is what gets saved and scored; `info` is the plain-language explanation.
+const VALUES: { name: string; info: string }[] = [
+  { name: "High earning potential", info: "Earning a lot of money, even if the work is demanding. Higher-paying careers often need more training or carry more risk." },
+  { name: "Job security", info: "Knowing your job is stable and you'll always be able to find work." },
+  { name: "Creative freedom", info: "Having room to use your own ideas and style instead of following strict instructions." },
+  { name: "Work-life balance", info: "Enough free time for family, friends and hobbies, so work doesn't take over your life." },
+  { name: "Making a real impact", info: "Feeling that your work truly changes something for people or your community." },
+  { name: "Continuous learning", info: "Always learning new things instead of doing the exact same thing for years." },
+  { name: "Leadership opportunities", info: "The chance to lead people, make big decisions and be responsible for results." },
+  { name: "Flexibility & remote work", info: "Choosing when and where you work, including from home or while travelling." },
+  { name: "Recognition & status", info: "Being respected and known for what you do, with people noticing your achievements." },
+  { name: "Innovation & cutting-edge work", info: "Working with the newest technology and ideas before everyone else does." },
+  { name: "Helping others directly", info: "Working face to face with people who need support, like teaching, guiding or caring for them." },
 ];
 
 const MAX = 5;
@@ -49,11 +51,11 @@ export default function Q5CareerValues({
   }
 
   return (
-    <StepFrame eyebrow="Question 5 of 6" title="What matters most to you?" subtitle={`Tap up to ${MAX} — you'll rank them next.`} wide>
-      <CardGrid columns={2}>
-        {VALUES.map((v) => {
-          const sel = picked.find((p) => p.value === v);
-          return <OptionCard key={v} label={v} selected={!!sel} badge={sel?.rank} onClick={() => toggle(v)} />;
+    <StepFrame eyebrow={eyebrowFor("q5")} title="What matters most to you?" subtitle={`Tap up to ${MAX} — you'll rank them next.`} wide>
+      <CardGrid columns={2} align="start">
+        {VALUES.map(({ name, info }) => {
+          const sel = picked.find((p) => p.value === name);
+          return <OptionCard key={name} label={name} info={info} selected={!!sel} badge={sel?.rank} onClick={() => toggle(name)} />;
         })}
       </CardGrid>
 

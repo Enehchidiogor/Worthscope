@@ -4,6 +4,7 @@ import { PAPER, PAPER_DIM, PAPER_FAINT, LINE, BLUE_BRIGHT, FONT } from "@/compon
 import { streamKokoChat, type KokoMission } from "@/lib/kokoClient";
 import { useDictationField } from "@/lib/useDictationField";
 import { StepFrame, NavRow } from "./shared";
+import { eyebrowFor } from "./flow";
 
 export default function Q1PersonalContext({
   value,
@@ -62,7 +63,7 @@ export default function Q1PersonalContext({
 
   if (followup) {
     return (
-      <StepFrame eyebrow="Question 1 of 6" title="One more thing" subtitle={followup}>
+      <StepFrame eyebrow={eyebrowFor("q1")} title="One more thing" subtitle={followup}>
         <textarea
           value={followupAnswer}
           onChange={(e) => setFollowupAnswer(e.target.value)}
@@ -76,7 +77,7 @@ export default function Q1PersonalContext({
   }
 
   return (
-    <StepFrame eyebrow="Question 1 of 6" title="Tell Koko about yourself." subtitle="Interests, what you're good at, what pulls your attention — write however much feels natural.">
+    <StepFrame eyebrow={eyebrowFor("q1")} title="Tell Koko about yourself." subtitle="Interests, what you're good at, what pulls your attention — write however much feels natural.">
       <div style={{ position: "relative" }}>
         <textarea
           value={text}

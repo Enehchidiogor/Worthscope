@@ -30,10 +30,11 @@ import Q4WorkStyle from "@/components/discover/Q4WorkStyle";
 import Q5CareerValues from "@/components/discover/Q5CareerValues";
 import Q6Commitment from "@/components/discover/Q6Commitment";
 import AnalyzingStep from "@/components/discover/AnalyzingStep";
+import MultiPickStep from "@/components/discover/MultiPickStep";
+import ScenariosStep from "@/components/discover/ScenariosStep";
+import { STRENGTHS, EXPERIENCE, DISLIKES } from "@/lib/careerQuestions";
+import { eyebrowFor, isQuestionStep, nextAfter, prevBefore, questionNumber, TOTAL_QUESTIONS, type Step } from "@/components/discover/flow";
 
-type Step = "welcome" | "q0" | "q1" | "q2" | "q3" | "q4" | "q5" | "q6" | "analyzing";
-
-const STEP_INDEX: Record<Step, number> = { welcome: 0, q0: 0, q1: 1, q2: 2, q3: 3, q4: 4, q5: 5, q6: 6, analyzing: 6 };
 
 type StoredProfile = { firstName?: string; ageRange?: string; educationLevel?: string; age?: number };
 
@@ -64,7 +65,7 @@ function DiscoverInner() {
 
   useEffect(() => {
     const wip = loadWIP();
-    if (wip && wip.step !== "welcome" && wip.step !== "analyzing") {
+    if (wip && (wip.step === "q0" || isQuestionStep(wip.step))) {
       setProfile(wip.profile);
       setStep(wip.step as Step);
     }
@@ -98,12 +99,12 @@ function DiscoverInner() {
 
   return (
     <div style={{ minHeight: "100vh", position: "relative", fontFamily: FONT, overflowX: "clip" as "hidden", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: step === "welcome" || step === "analyzing" ? "center" : "flex-start", padding: "56px 24px 80px" }}>
-      <SEO title="Career Discovery — WorthScope" description="Answer six thoughtful questions so Koko can map your career direction." path="/discover" />
+      <SEO title="Career Discovery — WorthScope" description="Answer a few thoughtful questions so Koko can map your career direction." path="/discover" />
 
       <AmbientBackground />
 
       <div style={{ position: "relative", zIndex: 1, width: "100%" }}>
-        {showProgress && <ProgressBar step={STEP_INDEX[step]} />}
+        {showProgress && <ProgressBar step={questionNumber(step as Parameters<typeof questionNumber>[0])} total={TOTAL_QUESTIONS} />}
 
         <AnimatePresence mode="wait">
           {step === "welcome" && (
@@ -124,8 +125,8 @@ function DiscoverInner() {
               key="q1"
               value={profile.personalContext}
               mission={mission}
-              onBack={() => advance("q0")}
-              onContinue={(text) => advance("q2", { personalContext: text })}
+              onBack={() => advance(prevBefore("q1"))}
+              onContinue={(text) => advance(nextAfter("q1"), { personalContext: text })}
             />
           )}
 
@@ -133,8 +134,8 @@ function DiscoverInner() {
             <Q2ThinkingStyle
               key="q2"
               value={profile.thinkingStyle}
-              onBack={() => advance("q1")}
-              onContinue={(v: ThinkingStyleTrait[]) => advance("q3", { thinkingStyle: v })}
+              onBack={() => advance(prevBefore("q2"))}
+              onContinue={(v: ThinkingStyleTrait[]) => advance(nextAfter("q2"), { thinkingStyle: v })}
             />
           )}
 
@@ -142,8 +143,49 @@ function DiscoverInner() {
             <Q3Activities
               key="q3"
               value={profile.preferredActivities}
-              onBack={() => advance("q2")}
-              onContinue={(v: string[]) => advance("q4", { preferredActivities: v })}
+              onBack={() => advance(prevBefore("q3"))}
+              onContinue={(v: string[]) => advance(nextAfter("q3"), { preferredActivities: v })}
+            />
+          )}
+
+          {step === "s1" && (
+            <MultiPickStep
+              key="s1"
+              eyebrow={eyebrowFor("s1")}
+              title="What are you strongest at in school?"
+              subtitle="Pick up to 3 subjects where you do best or enjoy the most."
+              hint="Not sure? Think about the subjects where you get good marks or lose track of time."
+              options={STRENGTHS}
+              value={profile.strengths}
+              max={3}
+              onBack={() => advance(prevBefore("s1"))}
+              onContinue={(ids) => advance(nextAfter("s1"), { strengths: ids })}
+            />
+          )}
+
+          {step === "s2" && (
+            <MultiPickStep
+              key="s2"
+              eyebrow={eyebrowFor("s2")}
+              title="What have you already tried?"
+              subtitle="Pick everything you've actually done, even a little, even just for fun."
+              hint="What you've really done tells Koko more than what you think you'd like."
+              options={EXPERIENCE}
+              value={profile.experience}
+              max={6}
+              optional
+              onBack={() => advance(prevBefore("s2"))}
+              onContinue={(ids) => advance(nextAfter("s2"), { experience: ids })}
+            />
+          )}
+
+          {step === "s3" && (
+            <ScenariosStep
+              key="s3"
+              eyebrow={eyebrowFor("s3")}
+              value={profile.scenarios}
+              onBack={() => advance(prevBefore("s3"))}
+              onContinue={(v) => advance(nextAfter("s3"), { scenarios: v })}
             />
           )}
 
@@ -151,8 +193,8 @@ function DiscoverInner() {
             <Q4WorkStyle
               key="q4"
               value={profile.workStyle}
-              onBack={() => advance("q3")}
-              onContinue={(v: WorkStyle) => advance("q5", { workStyle: v })}
+              onBack={() => advance(prevBefore("q4"))}
+              onContinue={(v: WorkStyle) => advance(nextAfter("q4"), { workStyle: v })}
             />
           )}
 
@@ -160,8 +202,23 @@ function DiscoverInner() {
             <Q5CareerValues
               key="q5"
               value={profile.careerValues}
-              onBack={() => advance("q4")}
-              onContinue={(v: CareerValue[]) => advance("q6", { careerValues: v })}
+              onBack={() => advance(prevBefore("q5"))}
+              onContinue={(v: CareerValue[]) => advance(nextAfter("q5"), { careerValues: v })}
+            />
+          )}
+
+          {step === "s4" && (
+            <MultiPickStep
+              key="s4"
+              eyebrow={eyebrowFor("s4")}
+              title="What would you hate doing all day?"
+              subtitle="Pick up to 3. Knowing what to avoid is as useful as knowing what you love."
+              options={DISLIKES}
+              value={profile.dislikes}
+              max={3}
+              optional
+              onBack={() => advance(prevBefore("s4"))}
+              onContinue={(ids) => advance(nextAfter("s4"), { dislikes: ids })}
             />
           )}
 
@@ -170,7 +227,7 @@ function DiscoverInner() {
               key="q6"
               commitment={profile.commitment}
               additionalContext={profile.additionalContext}
-              onBack={() => advance("q5")}
+              onBack={() => advance(prevBefore("q6"))}
               onContinue={(commitment: Commitment, additionalContext: string) => {
                 const finalProfile = { ...profile, commitment, additionalContext, assessmentStatus: "completed" as const };
                 setProfile(finalProfile);
@@ -179,7 +236,6 @@ function DiscoverInner() {
               }}
             />
           )}
-
           {step === "analyzing" && (
             <AnalyzingStep key="analyzing" profile={profile} onDone={handlePrediction} onError={handlePredictionError} />
           )}

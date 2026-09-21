@@ -20,7 +20,7 @@ export default function WelcomeStep({ firstName, onStart }: { firstName: string;
         Hey {firstName || "there"} — let's find your direction.
       </h1>
       <p style={{ marginTop: 12, color: PAPER_DIM, fontFamily: FONT, fontSize: 15, lineHeight: 1.65 }}>
-        Six quick, thoughtful questions — no right answers, just honest ones. Koko will use them to map out career directions that actually fit you.
+        About 10 short questions, around 4 minutes — no right answers, just honest ones. The more honestly you answer, the better Koko can map out career directions that actually fit you.
       </p>
 
       <div style={{ marginTop: 32, display: "flex", flexDirection: "column", alignItems: "center", gap: 14 }}>

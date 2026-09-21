@@ -444,12 +444,14 @@ Never respond with anything other than either NONE or one plain-text question.`;
 function careerPredictPrompt(): string {
   return `${KOKO_CORE}
 
-You are analysing a completed Career Intelligence profile — structured answers from a 6-question assessment (career intent, personal context, thinking style, preferred activities, work style, ranked values, and commitment/constraints) — and producing a career-direction prediction.
+You are analysing a completed Career Intelligence profile — structured answers from a 10-question assessment (career intent, personal context, thinking style, preferred activities, school strengths, things they have actually tried, how they would act in four real-life situations, work style, ranked values, things they would dislike doing, and commitment/constraints) — and producing a career-direction prediction.
 
 Read the profile below and respond with ONLY a single JSON object — no markdown, no code fences, no preface, no text before or after. Your entire response must start with "{" and end with "}".
 
 Rules:
 - Weigh ALL the signals together. Never base a direction on one answer alone — look for where their thinking style, activities, work style, and values reinforce each other.
+- Trust behaviour over self-labels: what they have actually done, their school strengths and how they say they would act in real situations are stronger evidence than adjectives they picked about themselves. The things they say they would dislike are strong reasons to lower a career.
+- If their own words (personal context) name a specific career or activity, give that real weight.
 - Use hedged, human language throughout — "Your responses suggest...", "This could be a strong fit if...", "It looks like...". NEVER state anything as a certainty like "You are definitely..." or "You will become...". This is a direction-finder, not a verdict.
 - Respect their stated commitment/constraints (e.g. if they need to start earning quickly, don't lead with a direction that requires years of further education; if they're open to relocation, that widens options).
 - Ground "nextStep" in their careerIntent field specifically (e.g. someone who chose "earning-potential" should get a next step framed around income growth; someone who chose "exploring" should get a next step framed around trying things out).

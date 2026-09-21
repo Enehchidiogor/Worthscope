@@ -4,6 +4,7 @@ import type { Commitment } from "@/lib/careerIntelligence";
 import { PAPER, PAPER_DIM, PAPER_FAINT, LINE, BLUE_BRIGHT, FONT } from "@/components/experience/theme";
 import { useDictationField } from "@/lib/useDictationField";
 import { StepFrame, NavRow } from "./shared";
+import { eyebrowFor } from "./flow";
 
 const OPTIONS: { key: keyof Commitment; label: string }[] = [
   { key: "furtherEducation", label: "I'm open to pursuing another degree" },
@@ -39,7 +40,7 @@ export default function Q6Commitment({
   const { listening, error: micError, toggle: toggleDictation, supported: micSupported } = useDictationField(() => notesRef.current, setNotes);
 
   return (
-    <StepFrame eyebrow="Question 6 of 6" title="What's your real-world commitment?" subtitle="Select whatever's true for you — there's no wrong combination.">
+    <StepFrame eyebrow={eyebrowFor("q6")} title="What's your real-world commitment?" subtitle="Select whatever's true for you — there's no wrong combination.">
       <div style={{ display: "grid", gap: 10 }}>
         {OPTIONS.map((o) => (
           <label
