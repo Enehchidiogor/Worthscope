@@ -4,6 +4,52 @@
 
 import { createClient } from "npm:@supabase/supabase-js@2";
 
+// Inlined (was ../_shared/career-slug.ts) so this edge function is fully
+// self-contained — a missing shared import must never break the whole function
+// (which is what took down roadmap generation). Lookup is case-insensitive.
+const CAREER_SLUG_MAP: Record<string, string> = {
+  "ui/ux designer": "ui-ux-designer",
+  "product designer": "product-designer",
+  "frontend developer": "frontend-developer",
+  "full stack developer": "full-stack-developer",
+  "cloud engineer": "cloud-engineer",
+  "devops engineer": "devops-engineer",
+  "cybersecurity analyst": "cybersecurity-analyst",
+  "data analyst": "data-analyst",
+  "data scientist": "data-scientist",
+  "ai/ml engineer": "ai-ml-engineer",
+  "entrepreneur": "entrepreneur",
+  "business analyst": "business-analyst",
+  "digital marketer": "digital-marketer",
+  "product manager": "product-manager",
+  "graphic designer": "graphic-designer",
+  "project manager": "project-manager",
+  // CRS canonical alias (recommendationEngine.ts) → closest curriculum.
+  "software developer": "full-stack-developer",
+};
+
+// Closed vocabulary for the "discover" flow's extraction step — must mirror
+// the keys of Q1/Q3/Q4/Q5/Q6/Q7/Q8_SIGNALS in src/lib/recommendationEngine.ts.
+// Duplicated here rather than imported (this is a separate Deno runtime, and
+// per this file's own philosophy above, a shared-import failure must never
+// take down the whole function). The client-side sanitizer in
+// src/lib/discoveryVocab.ts is the real safety net if these two drift.
+const SUBJECT_KEYWORDS = ["mathematics", "further", "physics", "chemistry", "biology", "sciences", "computer", "ict", "technology", "data processing", "data / analytics", "analytics", "engineering", "technical drawing", "design", "creative", "arts", "literature", "economics", "business", "management", "social science", "health", "biological", "statistics", "data science", "psychology", "mass communication", "fine arts", "architecture", "accounting", "government", "journalism", "communication", "media", "technology & software", "design & creativity", "data & ai", "business & entrepreneurship", "communication & media", "creating apps", "coding", "building systems", "cloud technology", "cybersecurity", "ui/ux design", "graphic design", "product design", "branding", "motion design", "data analysis", "artificial intelligence", "machine learning", "research", "entrepreneurship", "marketing", "product management", "project management", "business analysis", "mechanical engineering", "electrical engineering", "civil engineering", "robotics", "content creation", "social media", "brand strategy", "communications"];
+const ACTIVITY_KEYWORDS = ["creating or designing", "designing or creating", "visuals", "solving", "logical problems", "building or fixing", "fixing systems", "analyzing information", "analyzing", "leading", "organizing", "communicating", "persuading", "learning", "working with others", "working independently"];
+const WORK_TYPE_KEYWORDS = ["create digital products", "creating digital products", "apps, websites", "apps or websites", "design experiences", "designing user experiences", "user experiences", "visuals that people interact", "work with data", "working with data", "data, patterns", "data and insights", "build or maintain technical", "technical systems", "building systems", "infrastructure", "protect systems", "protecting systems", "networks, and user data", "run, grow, or launch", "running or growing", "launch a business", "growing a business", "work with people through", "content, media, or marketing", "working with people", "people and communication", "build systems", "technical problems", "design and create", "visual experiences", "analyse data", "analyze data", "communicate", "digital problems", "human problems", "business problems", "security problems", "physical problems", "scientific problems"];
+const TASK_KEYWORDS = ["designing interfaces", "interfaces, screens", "interfaces or visuals", "screens, or visuals", "writing code", "code or scripts", "setting up and managing systems", "systems or servers", "setting up systems", "cloud tools", "finding patterns", "patterns or insights", "patterns in data", "managing projects", "roadmaps, or products", "managing", "selling, pitching", "selling", "marketing ideas", "designing apps", "interfaces", "creating content", "visuals", "logical", "researching", "analysing"];
+const OUTPUT_KEYWORDS = ["beautiful", "beautiful, polished", "visual design or brand", "working app", "working application", "software product", "secure, protected", "secure system", "protected system", "system or network", "data insight", "dashboard", "financial model", "report", "successful business", "business, product, or brand", "business or product", "physical machine", "structure, or engineered", "engineered system", "audience, community", "media presence", "scalable", "cloud/infrastructure", "finished app", "software people use", "visual experience", "built from scratch", "report or insight", "drove a real decision", "person or community", "helped", "content or ideas", "secure", "structure", "creating something people love using", "building a powerful solution", "keeping people safe", "discovering valuable insights", "growing a successful business", "leading a team to achieve a goal"];
+const PERSONALITY_KEYWORDS = ["creative", "expressive", "logical", "analytical", "social", "strategic", "detail", "outgoing", "quiet", "observant", "practical", "hands-on", "curious", "exploratory", "detail-oriented", "visual design", "storytelling", "product ideas", "systems", "automation", "data", "business insights", "ai", "leadership", "communication", "community building", "business growth", "product strategy", "project planning", "design precision", "security", "data accuracy", "quality assurance"];
+const DIFFERENTIATOR_KEYWORDS = ["looks", "design how something looks", "works", "design how something works", "build the system", "code, infrastructure", "analyze and improve", "performance", "manage and organize", "grow and reach", "audience", "protect", "secure systems", "design and build physical", "hardware", "the creator", "the builder", "the analyst", "the protector", "the leader", "the engineer"];
+
+function normaliseCareerSlug(careerPath: string | null | undefined): string {
+  if (!careerPath) return "";
+  const key = careerPath.trim().toLowerCase();
+  if (CAREER_SLUG_MAP[key]) return CAREER_SLUG_MAP[key];
+  // Fallback: derive a slug; if it doesn't match a row the caller falls back.
+  return key.replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+}
+
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers":
@@ -17,6 +63,7 @@ type MissionCtx = {
   career?: string;
   phase?: string;
   progress?: number;
+  attempts?: number;
   // legacy client-passed fields (only used if no JWT/profile available)
   userName?: string;
   userAge?: number;
@@ -56,6 +103,29 @@ function ageBand(age?: number): string {
   if (age <= 21) return "Ages 19–21: Clear and practical. University-level vocabulary fine. Focus on how topics connect to actual career outcomes. Professional but warm.";
   if (age <= 25) return "Ages 22–25: Results-oriented. Focus on application, outcomes, employability. Skip the basics unless asked. Treat like a junior colleague.";
   return "Ages 26+: Efficient. Assume prior knowledge. Get to the point. Focus on what changed in the industry and what they need to update or learn.";
+}
+
+// Builds the curriculum-reference block injected into Koko's system prompt so
+// it teaches from the real WorthScope curriculum, not generic LLM knowledge.
+// Returns "" when no curriculum exists for the career (Koko falls back to
+// general knowledge unchanged).
+type CurriculumRow = { full_content: string; is_complete: boolean } | null;
+function buildCurriculumContext(career: string | undefined, age: number | undefined, cur: CurriculumRow): string {
+  if (!cur) return "";
+  if (!cur.is_complete) {
+    return `\n\nNOTE: The curriculum reference for ${career} is still being finalised. Teach from general industry knowledge. The FIRST time it's relevant in this conversation, tell the user ONCE (kindly): the full ${career} curriculum is still being finalised so you're teaching from general knowledge for now. Do NOT repeat that disclaimer if it already appears earlier in the conversation.`;
+  }
+  return `\n\n=== CURRICULUM REFERENCE FOR ${career} (user age: ${age ?? "unspecified"}) ===
+${cur.full_content}
+=== END CURRICULUM REFERENCE ===
+
+HOW TO USE THE CURRICULUM REFERENCE:
+1. This is your PRIMARY source of truth. Use its exact tooling (e.g. "Tailwind CSS v4", not Bootstrap), salary figures (Naira + USD), Nigerian employer names, phase structure, AI-tool recommendations, and industry vocabulary.
+2. Match the user's age bracket (13–15, 16–18, 19–21, 22–25, 26+). Use the matching section. Never teach university-level content to a 14-year-old.
+3. Introduce jargon gradually — explain simple concepts simply first; don't drop big corporate terms before the basics.
+4. Use general knowledge ONLY to fill gaps the reference doesn't cover, and NEVER contradict the reference.
+5. Prefer Nigerian examples (Paystack, Flutterwave, GTBank, Bolt, Jumia) over American ones where relevant.
+6. Never invent salary figures, employer names, or certifications — if unsure, stick to what's in the reference.`;
 }
 
 function lessonPrompt(m: MissionCtx): string {
@@ -152,38 +222,114 @@ Name the tool and exactly how to use it for this project.
 - ...`;
 }
 
-function assessPrompt(m: MissionCtx, brief: string, submission: string): string {
+function assessPrompt(): string {
+  return `You are Koko, a senior professional in the user's chosen career field, reviewing the user's project submission for one of their missions on WorthScope. Your job is to give an honest, professional assessment — not to make them feel good about subpar work.
+
+CRITICAL RULES:
+
+1. RELEVANCE CHECK FIRST
+Before assessing quality, check if the submission actually addresses the assignment.
+- If the submission is nonsense, random text, copy-pasted code from unrelated sources, off-topic, or shows no genuine effort: mark it as NOT PASSED and give specific guidance.
+- A few red flags to watch for: code in a language unrelated to the mission, content that doesn't reference what was asked, random files that look pasted from elsewhere, single-word answers, gibberish, lorem ipsum.
+- If the submission does not clearly and specifically attempt THIS project brief, relevance_score MUST be below 40 — no matter how polished or technically impressive the content looks on its own.
+- DO NOT give a passing grade to anything that fails the relevance check.
+
+2. QUALITY CHECK SECOND
+If the submission is genuinely on-topic, then assess:
+- Did it complete what was asked?
+- Did it demonstrate understanding of the concept being taught?
+- Is the execution at the level expected for the user's age and education?
+- Did the user use the AI tools recommended for that mission?
+
+3. FEEDBACK TONE — ADAPT TO USER AGE
+- Ages 13–15: gentle, encouraging, never harsh. "This isn't quite what we were looking for — let me show you what's missing. Don't worry, this is exactly how learning works."
+- Ages 16–18: clear and honest, supportive but direct. "This doesn't fully match the assignment. Here's what's missing and how to fix it."
+- Ages 19–21: professional and constructive. "This submission has gaps. Here's specifically what needs to change."
+- Ages 22–25: direct, like a colleague reviewing work. "This isn't there yet. Specifically: [issues]. Try again."
+- Ages 26+: peer-level honesty. "This needs more work before it's at the level you're aiming for. Here's what's missing."
+
+NEVER condescend to younger users. NEVER coddle older users.
+
+4. RESPONSE STRUCTURE
+Always return assessment as structured feedback with these exact fields:
+
+{
+  "passed": true | false,
+  "relevance_score": 0-100,
+  "quality_score": 0-100,
+  "what_you_did_well": "<specific things, only if genuinely true — never invent positives>",
+  "what_needs_improvement": "<specific actionable feedback, with examples>",
+  "one_focus_for_next_attempt": "<the single most important thing to fix>",
+  "encouragement": "<one personalised sentence — only positive if effort was genuine>"
+}
+
+5. THE PASSING THRESHOLD
+- passed: false if relevance_score < 60 OR quality_score < 50
+- passed: true only if BOTH scores are at or above their threshold
+- Be honest about scores. Do not inflate scores to avoid hurting feelings.
+
+6. SPECIFIC EXAMPLES TO HANDLE CORRECTLY
+- User pastes random code from an unrelated VS Code file → passed: false, relevance_score very low, explain what was actually needed
+- User writes "I don't know what to do" → passed: false, but kind and encouraging, suggest they ask Koko a question first
+- User writes a genuine attempt with mistakes → passed: maybe, depending on effort and understanding, give constructive feedback either way
+- User writes excellent on-topic work → passed: true, celebrate genuinely, push them with one stretch suggestion
+
+7. NEVER PRETEND TO BE IMPRESSED BY RUBBISH
+If the submission is bad, say so kindly but clearly. The user trusts you to teach them — lying to them about their work betrays that trust.
+
+Your output must be valid JSON in the exact structure described above. No markdown, no preamble, no code fences, just the JSON object.`;
+}
+
+function discoverPrompt(m: MissionCtx): string {
   return `${KOKO_CORE}
 
-Audience: ${ageBand(m.userAge)}
-Learning signal: ${m.learningSignal || "on track"}.
+Audience guidance for this user: ${ageBand(m.userAge)}
 
-The user has just submitted work for the mission "${m.title}" on their journey to become a ${m.career || "professional"}.
+You are texting back and forth with ${m.userName || "the student"} like a friend, to get a feel for who they are before pointing them toward a career direction. They already said they're ready to start — do NOT greet them again or ask if they're ready, just go straight into your first question.
 
-Project brief given to them:
-"""
-${brief}
-"""
+Over the course of the conversation, naturally learn (one at a time, never more than one per message):
+- What subjects or topics genuinely interest them
+- What activities they enjoy (in or out of school)
+- What kind of work they picture themselves doing
+- What they'd actually enjoy doing day-to-day, given the choice
+- What kind of output or result they'd be proud to have made
+- A few personality traits that come through in how they talk
+- If there's one thing that matters most to them in choosing a direction
+- Any goals, worries, or a specific career they already have in mind
 
-Their submission:
-"""
-${submission}
-"""
+HOW TO TALK — this matters a lot:
+- Plain text only — this is a text message, not a document. Never use markdown (no **bold**, no bullet points, no headers, no asterisks at all).
+- Text like a friend chatting, not an interviewer or a teacher. Short and casual beats thorough and polished every time.
+- Every message: max 1-2 short sentences, then ONE simple, concrete question. No stacked/compound questions ("what do you like and why and what else" is three questions — never do that).
+- Skip the setup. Don't explain why you're asking or preview what's coming — just ask.
+- Use plain, everyday words a teenager would text a friend. No "articulate", "leverage", "passion points" — just normal language.
+- If you want to react to their last answer, react in a few words ("oh nice", "okay that's a good one", "love that") then immediately ask the next question in that same message — don't send a reaction and a question as two separate walls of text.
+- If an answer is short or vague, that's fine — don't push for more detail, just move to the next question.
 
-Assess their work in this EXACT markdown format, no preface:
-### What you did well
-- specific, genuine, not generic praise
+After roughly 6-8 of their replies, once you genuinely have a sense of them, say so in one short line and tell them they can see their results whenever they're ready — no need to summarise what they said back to them.`;
+}
 
-### What needs improvement
-- honest but kind, specific actionable guidance
+function discoverExtractPrompt(): string {
+  return `STOP. Ignore every previous instruction about being Koko, a tutor, or a conversational guide. Everything above this message was a conversation between Koko and a student — you are no longer part of it. You are now ONLY a JSON extraction tool with exactly one job.
 
-### Focus on this next
-The single most important next step for them.
+You are extracting a structured profile from that career-discovery conversation. Read the full conversation above and respond with ONLY a single JSON object — no markdown, no preface, no code fences, no advice, no mission suggestions, no follow-up questions, nothing before or after the JSON. Your entire response must start with "{" and end with "}".
 
-### Encouragement
-One personalised line using their name (${m.userName || "friend"}) and tied to becoming a ${m.career || "professional"}.
+For each of these six fields, choose ONLY from the exact options listed — do not invent new phrases, do not paraphrase, do not combine words from different options. If nothing in the conversation clearly matches an option, leave that field empty rather than guessing.
 
-If submission shows strong understanding, raise the bar for next time. If gaps, be supportive and specific about what to fix and how.`;
+"strongSubjects": array, choose any that fit from: ${JSON.stringify(SUBJECT_KEYWORDS)}
+"activities": array, choose any that fit from: ${JSON.stringify(ACTIVITY_KEYWORDS)}
+"workTypes": array, choose any that fit from: ${JSON.stringify(WORK_TYPE_KEYWORDS)}
+"taskInterests": array, choose any that fit from: ${JSON.stringify(TASK_KEYWORDS)}
+"outputPreferences": array, choose any that fit from: ${JSON.stringify(OUTPUT_KEYWORDS)}
+"personalityTraits": array, choose any that fit from: ${JSON.stringify(PERSONALITY_KEYWORDS)}
+"differentiation": choose AT MOST ONE from: ${JSON.stringify(DIFFERENTIATOR_KEYWORDS)}, or null if unclear
+
+Then, in your own words (free text, not from the lists above):
+"goalOrConcern": a short summary of what they said about their goals, worries, or what they want to become (string, can be empty)
+"statedCareer": a specific career they explicitly named wanting, or null
+
+Output exactly this shape and nothing else:
+{"strongSubjects":[],"activities":[],"workTypes":[],"taskInterests":[],"outputPreferences":[],"personalityTraits":[],"differentiation":null,"goalOrConcern":"","statedCareer":null}`;
 }
 
 function roadmapPrompt(m: MissionCtx): string {
@@ -229,6 +375,64 @@ Output the roadmap as a SINGLE JSON object — no preface, no markdown fences, n
 }`;
 }
 
+// ---------------------------------------------------------------------------
+// Career Intelligence onboarding (src/pages/Discover.tsx + src/lib/careerIntelligence.ts).
+// A separate, parallel flow from "discover"/"discover-extract" above — richer
+// structured questions client-side, only these two intents are AI-driven.
+// ---------------------------------------------------------------------------
+
+function careerFollowupPrompt(m: MissionCtx): string {
+  return `${KOKO_CORE}
+
+Audience guidance for this user: ${ageBand(m.userAge)}
+
+${m.userName || "The student"} just answered an open question about themselves — their interests, what they're good at, what they're drawn to — as the first step of a career-direction assessment.
+
+Your ONLY job: decide whether their answer is missing something that would materially change the career prediction you'll make later. Most answers are fine as-is — do NOT ask a follow-up just to gather more detail or out of curiosity.
+
+If their answer is vague, contradictory, or leaves out something clearly important (e.g. they only described what they dislike, or gave a one-word answer), respond with exactly ONE short, casual, concrete clarifying question — nothing else, no preamble, no markdown.
+
+If their answer already gives enough to work with, respond with exactly the single word:
+NONE
+
+Never respond with anything other than either NONE or one plain-text question.`;
+}
+
+function careerPredictPrompt(): string {
+  return `${KOKO_CORE}
+
+You are analysing a completed Career Intelligence profile — structured answers from a 6-question assessment (career intent, personal context, thinking style, preferred activities, work style, ranked values, and commitment/constraints) — and producing a career-direction prediction.
+
+Read the profile below and respond with ONLY a single JSON object — no markdown, no code fences, no preface, no text before or after. Your entire response must start with "{" and end with "}".
+
+Rules:
+- Weigh ALL the signals together. Never base a direction on one answer alone — look for where their thinking style, activities, work style, and values reinforce each other.
+- Use hedged, human language throughout — "Your responses suggest...", "This could be a strong fit if...", "It looks like...". NEVER state anything as a certainty like "You are definitely..." or "You will become...". This is a direction-finder, not a verdict.
+- Respect their stated commitment/constraints (e.g. if they need to start earning quickly, don't lead with a direction that requires years of further education; if they're open to relocation, that widens options).
+- Ground "nextStep" in their careerIntent field specifically (e.g. someone who chose "earning-potential" should get a next step framed around income growth; someone who chose "exploring" should get a next step framed around trying things out).
+
+Output exactly this shape and nothing else:
+{
+  "profileSummary": "<2-3 sentence hedged summary of who they seem to be, in second person>",
+  "strongestSignals": [
+    { "title": "<short label for a signal>", "explanation": "<one sentence on why it stood out>" }
+  ],
+  "careerDirections": [
+    {
+      "title": "<specific career or field, not generic>",
+      "whyItFits": "<hedged explanation tying back to 2+ of their specific answers>",
+      "whatYoullNeed": "<concrete skills or knowledge to build>",
+      "potentialChallenge": "<one honest, non-discouraging challenge to expect>"
+    }
+  ],
+  "readiness": { "category": "Exploring" | "Building" | "Developing" | "Job-Ready", "reasoning": "<one hedged sentence>" },
+  "nextStep": { "label": "<short label>", "cta": "<one short sentence telling them what to do next>" },
+  "confidence": { "level": "strong" | "moderate" | "exploratory", "note": "<one honest sentence: use 'exploratory' when the answers point in several directions or are thin>" }
+}
+
+"strongestSignals" should have 3-5 entries. "careerDirections" should have about 3 entries, ordered strongest fit first.`;
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
@@ -246,6 +450,9 @@ Deno.serve(async (req) => {
     const mission = (body.mission || {}) as MissionCtx;
     const brief: string = body.brief || "";
     const submission: string = body.submission || "";
+
+    // Curriculum reference block (filled below once we know the career).
+    let curriculumContext = "";
 
     // Server-side profile lookup so prompts use trusted data, not just
     // whatever the client sends.
@@ -272,6 +479,31 @@ Deno.serve(async (req) => {
             if (profile.education_level) mission.educationLevel = profile.education_level;
             if (profile.career_path && !mission.career) mission.career = profile.career_path;
           }
+
+          // Pull the curriculum reference for this career so Koko teaches from
+          // the real curriculum. RLS allows any authenticated user to read it.
+          // Isolated in its own try/catch: a curriculum lookup failure (missing
+          // table, RLS, network) must NEVER crash roadmap/lesson/assess — Koko
+          // simply falls back to general knowledge for that request.
+          const slug = normaliseCareerSlug(mission.career);
+          if (slug) {
+            try {
+              // curriculum_reference isn't in the generated types yet.
+              // deno-lint-ignore no-explicit-any
+              const { data: cur, error: curErr } = await (supabase as any)
+                .from("curriculum_reference")
+                .select("full_content, is_complete")
+                .eq("career_slug", slug)
+                .maybeSingle();
+              if (curErr) {
+                console.error("[koko-chat] curriculum lookup error:", curErr.message);
+              } else {
+                curriculumContext = buildCurriculumContext(mission.career, mission.userAge, cur);
+              }
+            } catch (e) {
+              console.error("[koko-chat] curriculum lookup threw:", e instanceof Error ? e.message : e);
+            }
+          }
         }
       } catch (_) { /* fall through with client-provided fields */ }
     }
@@ -280,7 +512,7 @@ Deno.serve(async (req) => {
     let userMessages: Msg[] = messages;
 
     if (intent === "lesson") {
-      systemContent = lessonPrompt(mission);
+      systemContent = lessonPrompt(mission) + curriculumContext;
       userMessages = [{
         role: "user",
         content:
@@ -294,9 +526,9 @@ The mission description is ${mission.description || "unspecified"}.
 Generate the lesson now in the exact required format.`,
       }];
     } else if (intent === "qa") {
-      systemContent = qaPrompt(mission);
+      systemContent = qaPrompt(mission) + curriculumContext;
     } else if (intent === "project") {
-      systemContent = projectPrompt(mission);
+      systemContent = projectPrompt(mission) + curriculumContext;
       userMessages = [{
         role: "user",
         content:
@@ -307,10 +539,55 @@ Learning signal: ${mission.learningSignal || "on track"}.
 Generate the project brief now.`,
       }];
     } else if (intent === "assess") {
-      systemContent = assessPrompt(mission, brief, submission);
-      userMessages = [{ role: "user", content: "Assess my submission now using the exact required format." }];
+      systemContent = assessPrompt() + curriculumContext;
+      userMessages = [{
+        role: "user",
+        content: `User's name: ${mission.userName || "the student"}
+Age: ${mission.userAge ?? "unspecified"}
+Education level: ${mission.educationLevel || "unspecified"}
+Chosen career path: ${mission.career || "unspecified"}
+Mission title: ${mission.title || "unspecified"}
+Mission description: ${mission.description || "unspecified"}
+Previous attempts on this project: ${mission.attempts ?? 0}
+
+Project brief given to the user:
+"""
+${brief}
+"""
+
+The user's submission:
+"""
+${submission}
+"""
+
+Return the JSON assessment now in the exact required structure.`,
+      }];
+    } else if (intent === "discover") {
+      systemContent = discoverPrompt(mission);
+    } else if (intent === "discover-extract") {
+      // Flattened into ONE user message (not the original multi-turn
+      // assistant/user structure) so the model reads it as a transcript to
+      // analyse rather than a conversation to continue — sending it as real
+      // chat turns made the model keep roleplaying as Koko instead of
+      // extracting, even with an explicit "stop" instruction.
+      systemContent = discoverExtractPrompt();
+      const transcript = messages
+        .map((m) => `${m.role === "user" ? "STUDENT" : "KOKO"}: ${m.content}`)
+        .join("\n\n");
+      userMessages = [{
+        role: "user",
+        content: `Here is the full transcript of a discovery conversation:\n\n${transcript}\n\nExtract the JSON now, exactly as instructed.`,
+      }];
+    } else if (intent === "career-followup") {
+      systemContent = careerFollowupPrompt(mission);
+      // Client sends the Q1 free-text answer as a single flattened user message.
+    } else if (intent === "career-predict") {
+      // Client (src/lib/careerIntelligence.ts describeProfile()) already sends
+      // the whole structured profile flattened into one user message — same
+      // flattening pattern as discover-extract, applied from the start here.
+      systemContent = careerPredictPrompt();
     } else if (intent === "roadmap") {
-      systemContent = roadmapPrompt(mission);
+      systemContent = roadmapPrompt(mission) + curriculumContext;
       userMessages = [{
         role: "user",
         content: `User: ${mission.userName || "student"}, age ${mission.userAge ?? "?"}, education ${mission.educationLevel || "?"}.

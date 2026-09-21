@@ -120,7 +120,7 @@ const CAREERS: CareerProfile[] = [
 type SigMap = Record<string, Partial<Record<string, number>>>;
 
 // Q1 — subjects / academic areas (signals)
-const Q1_SIGNALS: SigMap = {
+export const Q1_SIGNALS: SigMap = {
   "mathematics":          { SOFTDEV: 2, DATA: 2, MECHENG: 2, FINTECH: 2, CYBER: 1 },
   "further":              { SOFTDEV: 2, DATA: 3, FINTECH: 2, MECHENG: 1 },
   "physics":              { MECHENG: 3, CYBER: 1 },
@@ -195,7 +195,7 @@ const Q1_SIGNALS: SigMap = {
 };
 
 // Q3 — natural enjoyment (15%)
-const Q3_SIGNALS: SigMap = {
+export const Q3_SIGNALS: SigMap = {
   "creating or designing":  { UIUX: 3, GRAPHD: 3, CONTENT: 2 },
   "designing or creating":  { UIUX: 3, GRAPHD: 3, CONTENT: 2 },
   "visuals":                { GRAPHD: 3, UIUX: 2, CONTENT: 2 },
@@ -215,7 +215,7 @@ const Q3_SIGNALS: SigMap = {
 };
 
 // Q4 — work type (20%) — most powerful behavioural signal
-const Q4_SIGNALS: SigMap = {
+export const Q4_SIGNALS: SigMap = {
   "create digital products":   { SOFTDEV: 4, UIUX: 3 },
   "creating digital products": { SOFTDEV: 4, UIUX: 3, PM: 1 },
   "apps, websites":            { SOFTDEV: 4, UIUX: 3 },
@@ -264,7 +264,7 @@ const Q4_SIGNALS: SigMap = {
 };
 
 // Q5 — daily tasks (15%)
-const Q5_SIGNALS: SigMap = {
+export const Q5_SIGNALS: SigMap = {
   "designing interfaces":      { UIUX: 5, GRAPHD: 2 },
   "interfaces, screens":       { UIUX: 4, GRAPHD: 3 },
   "interfaces or visuals":     { UIUX: 4, GRAPHD: 3 },
@@ -297,7 +297,7 @@ const Q5_SIGNALS: SigMap = {
 };
 
 // Q6 — desired output (15%)
-const Q6_SIGNALS: SigMap = {
+export const Q6_SIGNALS: SigMap = {
   "beautiful":                 { GRAPHD: 5, UIUX: 2 },
   "beautiful, polished":       { GRAPHD: 5, UIUX: 2 },
   "visual design or brand":    { GRAPHD: 5, UIUX: 2 },
@@ -345,7 +345,7 @@ const Q6_SIGNALS: SigMap = {
 };
 
 // Q7 — personality (10%) — soft signals, tiebreakers only
-const Q7_SIGNALS: SigMap = {
+export const Q7_SIGNALS: SigMap = {
   "creative":               { UIUX: 2, GRAPHD: 2, CONTENT: 2, DIGIMKT: 1 },
   "expressive":             { CONTENT: 2, GRAPHD: 1, DIGIMKT: 1 },
   "logical":                { SOFTDEV: 2, DATA: 2, CYBER: 2, MECHENG: 2 },
@@ -384,7 +384,7 @@ const Q7_SIGNALS: SigMap = {
 };
 
 // Q8 — DIFFERENTIATOR (15% + override) — explicit conscious intent
-const Q8_SIGNALS: SigMap = {
+export const Q8_SIGNALS: SigMap = {
   "looks":                  { GRAPHD: 6, UIUX: 2 },
   "design how something looks": { GRAPHD: 6, UIUX: 2 },
   "works":                  { UIUX: 6, GRAPHD: 2, SOFTDEV: 1 },
@@ -575,7 +575,16 @@ function applyQ8Override(
 /* ============ MAIN ============ */
 const W = { q1: 0.15, q3: 0.15, q4: 0.20, q5: 0.15, q6: 0.15, q7: 0.10, q8: 0.15 };
 
-export function generateCareerResults(a: Answers): CareerResult[] {
+export type CareerScore = { title: string; description: string; category: CategoryKey; icon: string; market: MarketData; score: number };
+
+/** Raw engine scores for all careers (no banded/randomised percentages). */
+export function scoreAllCareers(a: Answers): { scores: CareerScore[]; lowConfidence: boolean } {
+  const out: { scores: CareerScore[]; lowConfidence: boolean } = { scores: [], lowConfidence: false };
+  generateCareerResults(a, out);
+  return out;
+}
+
+export function generateCareerResults(a: Answers, rawOut?: { scores: CareerScore[]; lowConfidence: boolean }): CareerResult[] {
   const total: Record<string, number> = {};
   for (const c of CAREERS) total[c.id] = 0;
 
@@ -641,6 +650,10 @@ export function generateCareerResults(a: Answers): CareerResult[] {
   const second = sortedScores[1] || 0;
   const focused = top > 0 && (top - second) / top > 0.2;
   const lowConfidence = nlp.confused || top < 6;
+  if (rawOut) {
+    rawOut.lowConfidence = lowConfidence;
+    rawOut.scores = ranked.map((c) => ({ title: c.title, description: c.description, category: c.category, icon: c.icon, market: c.market, score: total[c.id] || 0 }));
+  }
 
   // Spec confidence bands
   const bands: number[][] = focused

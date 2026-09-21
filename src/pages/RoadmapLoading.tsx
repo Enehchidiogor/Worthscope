@@ -3,26 +3,34 @@ import { useNavigate } from "react-router-dom";
 import { generateKokoRoadmap } from "@/lib/kokoRoadmap";
 import { getChosenCareer } from "@/lib/userState";
 import { notifyRoadmapReady } from "@/lib/notifications";
+import KokoFace from "@/components/experience/KokoFace";
+import { ExperienceProvider } from "@/components/experience/ExperienceContext";
+import { PAPER, PAPER_FAINT, LINE, BLUE_BRIGHT, FONT } from "@/components/experience/theme";
+import { CI_BG } from "@/components/discover/shared";
 import { SEO } from "@/components/SEO";
 
-const ACCENT = "#3498DB";
-const KOKO = "#895AF6";
+const MESSAGES = [
+  "Koko is getting things ready for you…",
+  "Hang tight, Koko is putting your journey together…",
+  "Almost there! Koko is preparing your next steps…",
+  "Just a moment while Koko sets things up…",
+];
 
 export default function RoadmapLoading() {
   const navigate = useNavigate();
   const career = getChosenCareer();
   const [err, setErr] = useState<string | null>(null);
-  const [streaming, setStreaming] = useState("");
   const [working, setWorking] = useState(true);
   const started = useRef(false);
+  // Pick one friendly message on mount so it varies between sessions.
+  const [message] = useState(() => MESSAGES[Math.floor(Math.random() * MESSAGES.length)]);
 
   const run = async () => {
     setErr(null);
-    setStreaming("");
     setWorking(true);
     try {
       await generateKokoRoadmap({
-        onDelta: (raw) => setStreaming(raw),
+        onDelta: () => {},
         resetProgress: true,
       });
       if (career?.title) notifyRoadmapReady(career.title).catch(() => {});
@@ -35,7 +43,7 @@ export default function RoadmapLoading() {
 
   useEffect(() => {
     if (!career?.title) {
-      navigate("/career-results", { replace: true });
+      navigate("/discover", { replace: true });
       return;
     }
     if (started.current) return;
@@ -45,133 +53,79 @@ export default function RoadmapLoading() {
   }, []);
 
   return (
-    <div
-      style={{
-        minHeight: "100vh",
-        background: "#F4F9FE",
-        fontFamily: "'Poppins', sans-serif",
-        display: "grid",
-        placeItems: "center",
-        padding: "32px 20px",
-      }}
-    >
-      <SEO
-        title="Building your roadmap — WorthScope"
-        description="Koko is generating your personalised 2026 career roadmap."
-        path="/roadmap-loading"
-      />
+    <ExperienceProvider>
       <div
         style={{
-          background: "#fff",
-          borderRadius: 24,
-          maxWidth: 520,
-          width: "100%",
-          padding: 36,
-          boxShadow: "0 16px 60px rgba(52,152,219,0.18)",
-          textAlign: "center",
-          border: "1px solid #E5E7EB",
+          minHeight: "100vh",
+          background: CI_BG,
+          fontFamily: FONT,
+          color: PAPER,
+          display: "grid",
+          placeItems: "center",
+          padding: "32px 20px",
         }}
       >
+        <SEO
+          title="Getting things ready — WorthScope"
+          description="Koko is preparing your next steps."
+          path="/roadmap-loading"
+        />
+
         {working && !err && (
-          <>
-            <div
-              style={{
-                width: 64,
-                height: 64,
-                margin: "0 auto",
-                borderRadius: "50%",
-                background: `linear-gradient(135deg, ${KOKO}, #a87bff)`,
-                color: "#fff",
-                display: "grid",
-                placeItems: "center",
-                fontWeight: 700,
-                fontSize: 24,
-                boxShadow: `0 12px 32px ${KOKO}55`,
-                animation: "ws-pulse 1.5s ease-in-out infinite",
-              }}
-            >
-              K
-            </div>
-            <h1
-              style={{
-                marginTop: 22,
-                fontSize: 22,
-                fontWeight: 700,
-                color: "#111",
-                letterSpacing: -0.3,
-              }}
-            >
-              Koko is building your personalised roadmap…
-            </h1>
-            <p style={{ marginTop: 10, fontSize: 14, color: "#6B7280", lineHeight: 1.6 }}>
-              Designing every phase, mission, and AI tool you'll need to become outstanding as a{" "}
-              <strong style={{ color: "#111" }}>{career?.title}</strong> in 2026.
+          <div style={{ textAlign: "center", display: "grid", placeItems: "center", gap: 22 }}>
+            <KokoFace expression="thinking" size={96} lookAtCursor={false} />
+            {career?.title && (
+              <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: 1.2, textTransform: "uppercase", color: BLUE_BRIGHT }}>
+                Building your {career.title} roadmap
+              </div>
+            )}
+            <p style={{ margin: 0, maxWidth: 420, fontSize: 17, fontWeight: 600, color: PAPER, lineHeight: 1.5 }}>
+              {message}
             </p>
-            <div
-              style={{
-                marginTop: 22,
-                background: "#F9FAFB",
-                border: "1px solid #E5E7EB",
-                borderRadius: 12,
-                padding: 12,
-                textAlign: "left",
-                maxHeight: 160,
-                overflow: "auto",
-              }}
-            >
-              <pre
-                style={{
-                  margin: 0,
-                  fontSize: 11,
-                  lineHeight: 1.55,
-                  color: "#6B7280",
-                  whiteSpace: "pre-wrap",
-                  fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace",
-                }}
-              >
-                {streaming.slice(-800) || "Connecting to Koko…"}
-              </pre>
-            </div>
-            <div style={{ marginTop: 18, fontSize: 12, color: "#9CA3AF" }}>
-              This usually takes 20–40 seconds.
-            </div>
-          </>
+            <p style={{ margin: 0, fontSize: 12.5, color: PAPER_FAINT }}>This can take up to a minute — please keep this page open.</p>
+          </div>
         )}
 
         {err && (
-          <>
-            <div style={{ fontSize: 40 }}>😅</div>
-            <h1 style={{ marginTop: 12, fontSize: 20, fontWeight: 700, color: "#111" }}>
-              Koko is having a moment — let's try that again.
+          <div
+            style={{
+              background: "rgba(255,255,255,.03)",
+              borderRadius: 20,
+              maxWidth: 420,
+              width: "100%",
+              padding: 34,
+              textAlign: "center",
+              border: `1px solid ${LINE}`,
+            }}
+          >
+            <div style={{ display: "grid", placeItems: "center", marginBottom: 16 }}>
+              <KokoFace expression="concerned" size={72} lookAtCursor={false} />
+            </div>
+            <h1 style={{ margin: 0, fontSize: 20, fontWeight: 700, color: PAPER }}>
+              Something didn't work — let's try again
             </h1>
-            <p style={{ marginTop: 8, fontSize: 13, color: "#6B7280", lineHeight: 1.6 }}>
+            <p style={{ marginTop: 10, fontSize: 12, color: PAPER_FAINT, lineHeight: 1.5, wordBreak: "break-word" }}>
               {err}
             </p>
             <button
               onClick={run}
               style={{
                 marginTop: 22,
-                background: ACCENT,
-                color: "#fff",
-                fontWeight: 600,
+                background: BLUE_BRIGHT,
+                color: "#04070D",
+                fontWeight: 700,
                 fontSize: 14,
                 border: "none",
                 borderRadius: 12,
-                padding: "12px 22px",
+                padding: "12px 26px",
                 cursor: "pointer",
               }}
             >
               Try again
             </button>
-          </>
+          </div>
         )}
       </div>
-      <style>{`
-        @keyframes ws-pulse {
-          0%, 100% { transform: scale(1); }
-          50% { transform: scale(1.06); }
-        }
-      `}</style>
-    </div>
+    </ExperienceProvider>
   );
 }

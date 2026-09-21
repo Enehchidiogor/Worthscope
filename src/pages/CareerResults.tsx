@@ -21,10 +21,17 @@ export default function CareerResults() {
   const navigate = useNavigate();
   const [results, setResults] = useState<CareerResult[]>([]);
   const [fills, setFills] = useState<number[]>([0, 0, 0, 0]);
+  const [emotionalNote, setEmotionalNote] = useState<string | null>(null);
 
   useEffect(() => {
     const r = loadResults();
     setResults(r);
+    try {
+      const note = localStorage.getItem("worthscope_emotional_notes");
+      if (note) setEmotionalNote(note);
+    } catch {
+      // No note available — banner just doesn't render.
+    }
     // Stagger match-bar fills aligned with card stagger
     r.forEach((res, i) => {
       const delay = 600 + i * 150 + 200;
@@ -125,6 +132,19 @@ export default function CareerResults() {
             interests, and personality.
           </p>
         </div>
+
+        {emotionalNote && (
+          <div
+            style={{
+              marginTop: 28, padding: "14px 20px", borderRadius: 14,
+              background: ACCENT_LIGHT, border: `1px solid rgba(52,152,219,0.25)`, color: ACCENT_DARK,
+              fontSize: 13.5, lineHeight: 1.55,
+              animation: "ws-fade-up 0.5s ease 0.35s both",
+            }}
+          >
+            <strong>Koko noticed:</strong> {emotionalNote}
+          </div>
+        )}
 
         {top?.lowConfidence && (
           <div

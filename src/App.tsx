@@ -1,5 +1,7 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { useEffect } from "react";
+import { ExperienceProvider } from "@/components/experience/ExperienceContext";
+import { BrowserRouter, Route, Routes, useLocation } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -8,12 +10,17 @@ import Landing from "./pages/Landing.tsx";
 import Onboarding from "./pages/Onboarding.tsx";
 import SignIn from "./pages/SignIn.tsx";
 import SignUp from "./pages/SignUp.tsx";
+import ForgotPassword from "./pages/ForgotPassword.tsx";
+import ResetPassword from "./pages/ResetPassword.tsx";
 import Roadmap from "./pages/Roadmap.tsx";
 import Mission from "./pages/Mission.tsx";
 import Skills from "./pages/Skills.tsx";
 import Career from "./pages/Career.tsx";
 import Assessment from "./pages/Assessment.tsx";
+import Discover from "./pages/Discover.tsx";
+import DiscoverVoice from "./pages/DiscoverVoice.tsx";
 import CareerResults from "./pages/CareerResults.tsx";
+import CareerProfileResults from "./pages/CareerProfileResults.tsx";
 import RoadmapLoading from "./pages/RoadmapLoading.tsx";
 import Settings from "./pages/Settings.tsx";
 import ParentView from "./pages/ParentView.tsx";
@@ -28,17 +35,33 @@ const queryClient = new QueryClient();
 
 const Gated = ({ children }: { children: React.ReactNode }) => <AuthGate>{children}</AuthGate>;
 
+// Dashboard-area pages use the brand dark theme (.dark tokens in index.css).
+const DARK_ROUTES = ["/dashboard", "/roadmap", "/mission", "/missions", "/skills", "/career", "/settings", "/profile", "/notifications", "/koko"];
+
+const RouteTheme = () => {
+  const { pathname } = useLocation();
+  useEffect(() => {
+    const dark = DARK_ROUTES.some((r) => pathname === r || pathname.startsWith(`${r}/`)) && !pathname.startsWith("/career-");
+    document.documentElement.classList.toggle("dark", dark);
+  }, [pathname]);
+  return null;
+};
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <Toaster />
       <Sonner />
       <BrowserRouter>
+        <ExperienceProvider>
+        <RouteTheme />
         <Routes>
           {/* Public */}
           <Route path="/" element={<Landing />} />
           <Route path="/signin" element={<SignIn />} />
           <Route path="/signup" element={<SignUp />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/parent/:token" element={<ParentAccess />} />
           <Route path="/parent-view/:token" element={<ParentView />} />
           <Route path="/parent-view" element={<ParentView />} />
@@ -53,7 +76,10 @@ const App = () => (
           <Route path="/skills" element={<Gated><Skills /></Gated>} />
           <Route path="/career" element={<Gated><Career /></Gated>} />
           <Route path="/assessment" element={<Gated><Assessment /></Gated>} />
+          <Route path="/discover" element={<Gated><Discover /></Gated>} />
+          <Route path="/discover/voice" element={<Gated><DiscoverVoice /></Gated>} />
           <Route path="/career-results" element={<Gated><CareerResults /></Gated>} />
+          <Route path="/career-profile" element={<Gated><CareerProfileResults /></Gated>} />
           <Route path="/roadmap-loading" element={<Gated><RoadmapLoading /></Gated>} />
           <Route path="/settings" element={<Gated><Settings /></Gated>} />
           <Route path="/profile" element={<Gated><Profile /></Gated>} />
@@ -65,6 +91,7 @@ const App = () => (
         </Routes>
         {/* Global floating Koko chat — visible on every route */}
         <KokoFloatingChat />
+        </ExperienceProvider>
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>

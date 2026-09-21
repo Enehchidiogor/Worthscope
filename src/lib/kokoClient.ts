@@ -67,7 +67,7 @@ export async function streamKokoChat({
   onError,
 }: {
   messages: KokoMsg[];
-  intent?: "chat" | "stuck" | "verify" | "lesson" | "qa" | "project" | "assess" | "roadmap";
+  intent?: "chat" | "stuck" | "verify" | "lesson" | "qa" | "project" | "assess" | "roadmap" | "discover" | "discover-extract" | "career-followup" | "career-predict";
   mission?: KokoMission;
   brief?: string;
   submission?: string;

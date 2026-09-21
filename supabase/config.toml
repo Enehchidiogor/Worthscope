@@ -8,3 +8,6 @@ verify_jwt = false
 
 [functions.jobs-fetch]
 verify_jwt = false
+
+[functions.koko-voice-session]
+verify_jwt = false

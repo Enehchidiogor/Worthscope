@@ -541,8 +541,12 @@ export default function Assessment() {
           </header>
         )}
 
+        {/* Centered max-width container — constrains all assessment content
+            (breadcrumb, step header, options grid, Continue/Back) to 1100px.
+            The navbar and page background above/around stay full width. */}
+        <div className="mx-auto w-full px-4 md:px-6" style={{ maxWidth: 1100 }}>
         {screen !== "analyzing" && (
-          <div className="w-full px-4 pt-4 md:px-8" style={{ display: "flex", justifyContent: "center", gap: 8, flexWrap: "wrap" }}>
+          <div className="w-full pt-4" style={{ display: "flex", justifyContent: "center", gap: 8, flexWrap: "wrap" }}>
             <Pill state="completed">Tell us about yourself</Pill>
             <Pill state="active">Answer 6 questions</Pill>
             <Pill state="upcoming">Get your career path</Pill>
@@ -552,7 +556,7 @@ export default function Assessment() {
         <div style={{ position: "relative" }}>
         <main
           key={screen}
-          className="ws-stage w-full px-4 pb-24 pt-8 md:px-8 md:pb-12"
+          className="ws-stage w-full pb-24 pt-8 md:pb-12"
           style={{
             animation: transitioning
               ? `${direction === "forward" ? "ws-out-left" : "ws-out-right"} 0.25s ease-in forwards`
@@ -581,6 +585,7 @@ export default function Assessment() {
             </button>
           )}
           </main>
+        </div>
         </div>
 
       {maxToast && (
@@ -921,7 +926,7 @@ function TagCloudQuestion({
   value: string; onChange: (v: string) => void;
   onContinue: () => void; onSkip: () => void;
 }) {
-  const PURPLE = "#895AF6";
+  const PURPLE = "#3498DB";
   const enabled = tags.length >= 1 || value.trim().length >= 10;
 
   function toggleTag(t: string) {
@@ -955,7 +960,7 @@ function TagCloudQuestion({
                   color: on ? "#FFFFFF" : TEXT2,
                   border: `1.5px solid ${on ? PURPLE : BORDER}`,
                   transition: "all 0.18s ease",
-                  boxShadow: on ? "0 2px 8px rgba(137,90,246,0.25)" : "none",
+                  boxShadow: on ? "0 2px 8px rgba(52,152,219,0.25)" : "none",
                 }}
                 onMouseEnter={(e) => {
                   if (on) return;
@@ -988,7 +993,7 @@ function TagCloudQuestion({
               onChange={(e) => onChange(e.target.value.slice(0, 400))}
               onFocus={(e) => {
                 e.currentTarget.style.borderColor = PURPLE;
-                e.currentTarget.style.boxShadow = "0 0 0 4px rgba(137,90,246,0.12)";
+                e.currentTarget.style.boxShadow = "0 0 0 4px rgba(52,152,219,0.12)";
               }}
               onBlur={(e) => {
                 e.currentTarget.style.borderColor = BORDER;
