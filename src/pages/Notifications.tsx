@@ -22,12 +22,12 @@ import {
    per-item mark-as-read, and bulk actions. Reads directly from Supabase. */
 
 const PAGE_SIZE = 20;
-const KOKO = "#895AF6";
+const KOKO = "#3498DB";
 const ACCENT = "#3498DB";
 
 const TYPE_META: Record<NotificationType, { label: string; bg: string; color: string }> = {
-  koko:      { label: "Koko",      bg: "rgba(137,90,246,0.12)", color: "#895AF6" },
-  milestone: { label: "Milestone", bg: "rgba(137,90,246,0.12)", color: "#895AF6" },
+  koko:      { label: "Koko",      bg: "rgba(52,152,219,0.12)", color: "#3498DB" },
+  milestone: { label: "Milestone", bg: "rgba(52,152,219,0.12)", color: "#3498DB" },
   mission:   { label: "Mission",   bg: "#EBF5FB",               color: "#3498DB" },
   reminder:  { label: "Reminder",  bg: "rgba(245,158,11,0.1)",  color: "#F59E0B" },
   streak:    { label: "Streak",    bg: "rgba(251,146,60,0.1)",  color: "#FB923C" },

@@ -49,7 +49,7 @@ export const WelcomeToast = () => {
     >
       <div
         className="grid h-8 w-8 flex-shrink-0 place-items-center rounded-full text-[12px] font-bold text-white"
-        style={{ background: "linear-gradient(135deg,#3498DB,#5DADE2)" }}
+        style={{ background: "linear-gradient(135deg,#3B82F6,#60A5FA)" }}
       >
         K
       </div>

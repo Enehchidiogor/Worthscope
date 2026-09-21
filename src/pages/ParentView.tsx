@@ -18,7 +18,7 @@ const PARENT = {
   text2: "#6B7280",
   text3: "#9CA3AF",
   border: "#E5E7EB",
-  brand: "#895AF6",
+  brand: "#3498DB",
   brandSoft: "#F1ECFE",
   accent: "#3498DB",
   accentL: "#EBF5FB",

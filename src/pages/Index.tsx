@@ -1,5 +1,6 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Navigate } from "react-router-dom";
+import { claimDailyWelcome } from "@/lib/authClient";
 import { Sidebar } from "@/components/dashboard/Sidebar";
 import { TopBar } from "@/components/dashboard/TopBar";
 import { Greeting } from "@/components/dashboard/Greeting";
@@ -21,23 +22,34 @@ const Index = () => {
   const profile = getProfile();
   const results = hasResults();
 
+  const [welcomeToday, setWelcomeToday] = useState(false);
+
   useEffect(() => {
     if (!profile || !results) return;
     // Real streak engine — increments per consecutive day, resets if missed
     tickStreak();
-    const first = isFirstLogin();
 
-    // Always: signal floating Koko to do its strong-pulse + tooltip
-    window.dispatchEvent(new CustomEvent("koko:login-pulse"));
+    let cancelled = false;
+    let introTimer: number | undefined;
+    (async () => {
+      // Welcome at most once per calendar day (gated by profiles.last_welcomed_at)
+      // so the greeting/pulse/intro don't fire on every visit or refresh.
+      const eligible = await claimDailyWelcome();
+      if (cancelled || !eligible) return;
+      setWelcomeToday(true);
+      window.dispatchEvent(new CustomEvent("koko:login-pulse"));
+      if (isFirstLogin()) {
+        markLoggedIn();
+        introTimer = window.setTimeout(() => {
+          window.dispatchEvent(new CustomEvent("koko:intro"));
+        }, 2000);
+      }
+    })();
 
-    if (first) {
-      const t = window.setTimeout(() => {
-        window.dispatchEvent(new CustomEvent("koko:intro"));
-      }, 2000);
-      // Mark logged in only after we've decided to play the intro
-      markLoggedIn();
-      return () => clearTimeout(t);
-    }
+    return () => {
+      cancelled = true;
+      if (introTimer) clearTimeout(introTimer);
+    };
   }, [profile, results]);
 
   if (!profile) return <Navigate to="/onboarding" replace />;
@@ -85,7 +97,7 @@ const Index = () => {
       </div>
 
       <MobileTabBar />
-      <WelcomeToast />
+      {welcomeToday && <WelcomeToast />}
       <OnboardingTour />
     </div>
   );

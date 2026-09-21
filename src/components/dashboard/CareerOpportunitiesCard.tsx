@@ -39,7 +39,7 @@ export const CareerOpportunitiesCard = () => {
         style={{
           background: "#FFFFFF",
           border: "1px solid #E5E7EB",
-          boxShadow: "0 1px 2px rgba(0,0,0,0.04), 0 8px 24px rgba(52,152,219,0.06)",
+          boxShadow: "0 1px 2px rgba(0,0,0,0.04), 0 8px 24px rgba(59,130,246,0.06)",
           animationDelay: "0.75s",
         }}
       >
@@ -47,7 +47,7 @@ export const CareerOpportunitiesCard = () => {
           <h3 style={{ fontWeight: 700, fontSize: 16, color: "#111111" }}>💼 Career Opportunities</h3>
           <Link
             to={hasAssessment ? "/career-results" : "/career"}
-            style={{ fontWeight: 600, fontSize: 13, color: "#3498DB" }}
+            style={{ fontWeight: 600, fontSize: 13, color: "#3B82F6" }}
           >
             {hasAssessment ? `${results.length} matches →` : `${JOBS.length} roles matched →`}
           </Link>
@@ -70,7 +70,7 @@ export const CareerOpportunitiesCard = () => {
                   }}
                   onMouseEnter={(e) => {
                     e.currentTarget.style.background = "#EBF5FB";
-                    e.currentTarget.style.borderColor = "rgba(52,152,219,0.3)";
+                    e.currentTarget.style.borderColor = "rgba(59,130,246,0.3)";
                   }}
                   onMouseLeave={(e) => {
                     e.currentTarget.style.background = "#F4F9FE";
@@ -80,15 +80,15 @@ export const CareerOpportunitiesCard = () => {
                   <div className="flex items-center gap-2.5">
                     <div
                       className="grid place-items-center rounded-md"
-                      style={{ width: 28, height: 28, background: "#EBF5FB", color: "#3498DB", fontWeight: 700, fontSize: 13 }}
+                      style={{ width: 28, height: 28, background: "#EBF5FB", color: "#3B82F6", fontWeight: 700, fontSize: 13 }}
                     >
                       #{r.rank}
                     </div>
                     <div style={{ fontWeight: 600, fontSize: 13, color: "#111111" }}>{r.title}</div>
                   </div>
                   <div className="flex items-center gap-3">
-                    <span style={{ fontWeight: 700, fontSize: 12, color: "#3498DB" }}>{r.percentage}%</span>
-                    <span style={{ fontWeight: 600, fontSize: 12, color: "#3498DB" }}>View →</span>
+                    <span style={{ fontWeight: 700, fontSize: 12, color: "#3B82F6" }}>{r.percentage}%</span>
+                    <span style={{ fontWeight: 600, fontSize: 12, color: "#3B82F6" }}>View →</span>
                   </div>
                 </Link>
               ))
@@ -105,15 +105,15 @@ export const CareerOpportunitiesCard = () => {
                   <div className="flex items-center gap-2.5">
                     <div
                       className="grid place-items-center rounded-md"
-                      style={{ width: 28, height: 28, background: "#EBF5FB", color: "#3498DB", fontWeight: 700, fontSize: 13 }}
+                      style={{ width: 28, height: 28, background: "#EBF5FB", color: "#3B82F6", fontWeight: 700, fontSize: 13 }}
                     >
                       {j.initial}
                     </div>
                     <div style={{ fontWeight: 600, fontSize: 13, color: "#111111" }}>{j.title}</div>
                   </div>
                   <div className="flex items-center gap-3">
-                    <span style={{ fontWeight: 700, fontSize: 12, color: "#3498DB" }}>{j.match}%</span>
-                    <span style={{ fontWeight: 600, fontSize: 12, color: "#3498DB" }}>Apply →</span>
+                    <span style={{ fontWeight: 700, fontSize: 12, color: "#3B82F6" }}>{j.match}%</span>
+                    <span style={{ fontWeight: 600, fontSize: 12, color: "#3B82F6" }}>Apply →</span>
                   </div>
                 </Link>
               ))}
@@ -122,7 +122,7 @@ export const CareerOpportunitiesCard = () => {
         <div className="mt-4 text-center">
           <Link
             to={hasAssessment ? "/career-results" : "/career"}
-            style={{ fontWeight: 600, fontSize: 13, color: "#3498DB" }}
+            style={{ fontWeight: 600, fontSize: 13, color: "#3B82F6" }}
             className="hover:underline"
           >
             {hasAssessment ? "View all career matches →" : "View all matched roles →"}
@@ -139,7 +139,7 @@ export const CareerOpportunitiesCard = () => {
       style={{
         background: "#FFFFFF",
         border: "1px solid #E5E7EB",
-        boxShadow: "0 1px 2px rgba(0,0,0,0.04), 0 8px 24px rgba(52,152,219,0.06)",
+        boxShadow: "0 1px 2px rgba(0,0,0,0.04), 0 8px 24px rgba(59,130,246,0.06)",
         animationDelay: "0.75s",
       }}
     >
@@ -183,7 +183,7 @@ export const CareerOpportunitiesCard = () => {
             style={{
               width: `${fill}%`,
               height: "100%",
-              background: "#3498DB",
+              background: "#3B82F6",
               borderRadius: 100,
               transition: "width 1s ease-out",
             }}
@@ -215,7 +215,7 @@ export const CareerOpportunitiesCard = () => {
           to="/assessment"
           style={{
             display: "inline-block",
-            background: "#3498DB",
+            background: "#3B82F6",
             color: "#FFFFFF",
             fontWeight: 600,
             fontSize: 13,

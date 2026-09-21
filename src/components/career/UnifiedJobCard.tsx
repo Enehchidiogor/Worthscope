@@ -7,7 +7,7 @@ type Props = {
   onView: (job: UnifiedJob) => void;
 };
 
-const ACCENT = "#895AF6";
+const ACCENT = "#3498DB";
 
 function timeAgo(iso: string): string {
   const d = new Date(iso).getTime();

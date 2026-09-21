@@ -8,15 +8,12 @@ import { InviteParentModal } from "@/components/parent/InviteParentModal";
 import { getProfile } from "@/lib/userState";
 import { SEO } from "@/components/SEO";
 import { UserAvatar, gradientFor } from "@/components/UserAvatar";
-import { KokoAvatar, KOKO_AVATARS } from "@/components/koko/KokoAvatar";
 import { supabase } from "@/integrations/supabase/client";
 import {
   useUserProfile,
-  updateKokoAvatar,
   setAvatarUrl,
   loadUserProfile,
   setOnboardingTourCompleted,
-  type KokoAvatarKey,
 } from "@/lib/profileStore";
 import {
   listParentInvites,
@@ -220,33 +217,7 @@ const Settings = () => {
   const [email, setEmail] = useState(profile?.email || "");
   const [edu, setEdu] = useState(initialEdu);
 
-  // Appearance — Dark mode is "coming soon": always off, shows toast
-  const [dark, setDark] = useState(false);
   const [compact, setCompact] = useState(false);
-
-  // Ensure light mode is always applied
-  useEffect(() => {
-    document.documentElement.classList.remove("dark");
-    localStorage.setItem("worthscope_theme", "light");
-  }, []);
-
-  const handleDarkToggle = () => {
-    // Briefly animate ON then snap back OFF
-    setDark(true);
-    toast("Dark mode is coming soon 🌙", {
-      style: {
-        background: "#1A1A2E",
-        color: "#FFFFFF",
-        fontWeight: 500,
-        fontSize: 13,
-        borderRadius: 10,
-        padding: "10px 20px",
-        border: "none",
-      },
-      duration: 3000,
-    });
-    window.setTimeout(() => setDark(false), 500);
-  };
 
   // Notifications
   const [missionRem, setMissionRem] = useState(true);
@@ -319,7 +290,7 @@ const Settings = () => {
       } catch {}
       await supabase.auth.signOut();
       setDeleteModal(false);
-      toast.success("Your account has been deleted. We're sorry to see you go.");
+      toast.success("Your account has been deleted.");
       navigate("/", { replace: true });
     } catch {
       toast.error("Couldn't delete your account right now. Please contact support.");
@@ -375,12 +346,6 @@ const Settings = () => {
     }
   };
 
-  const handleKokoSelect = async (key: KokoAvatarKey) => {
-    const ok = await updateKokoAvatar(key);
-    if (!ok) toast.error("Couldn't update Koko's look. Try again.");
-  };
-
-  const selectedKoko: KokoAvatarKey = userProfile?.koko_avatar || "robot";
   const displayName = userProfile?.name || initialName || "User";
 
 
@@ -458,56 +423,14 @@ const Settings = () => {
               onClick={handleAvatarClick}
               className="rounded-[10px] px-5 py-2.5 text-[13px] font-medium transition-colors"
               style={{
-                background: "rgba(137,90,246,0.1)",
-                border: "1px solid rgba(137,90,246,0.25)",
-                color: "#895AF6",
+                background: "rgba(52,152,219,0.1)",
+                border: "1px solid rgba(52,152,219,0.25)",
+                color: "#3498DB",
               }}
             >
               {uploading ? "Uploading…" : "Change Photo"}
             </button>
           </div>
-
-          {/* ───── Koko's Avatar (new) ───── */}
-          <section className="ws-fade-up mb-5" style={{ animationDelay: "0.05s" }}>
-            <GroupLabel>Koko's Avatar</GroupLabel>
-            <div
-              className="overflow-hidden rounded-[18px] border border-[#E5E7EB] p-5"
-              style={{ background: cardBg, boxShadow: "0 2px 12px rgba(0,0,0,0.04)" }}
-            >
-              <div className="text-[13px] text-[#6B7280]">
-                Choose how Koko looks across your dashboard
-              </div>
-              <div className="mt-4 flex flex-wrap gap-3">
-                {(Object.keys(KOKO_AVATARS) as KokoAvatarKey[]).map((key) => {
-                  const meta = KOKO_AVATARS[key];
-                  const active = selectedKoko === key;
-                  return (
-                    <button
-                      key={key}
-                      onClick={() => handleKokoSelect(key)}
-                      aria-pressed={active}
-                      title={meta.label}
-                      className="relative grid place-items-center rounded-full transition-all duration-150 hover:scale-[1.05]"
-                      style={{
-                        width: 72,
-                        height: 72,
-                        borderRadius: "50%",
-                        border: active ? "3px solid #895AF6" : "1px solid #E5E7EB",
-                        background: "white",
-                        boxShadow: active ? "0 0 0 6px rgba(137,90,246,0.18)" : "0 1px 4px rgba(0,0,0,0.04)",
-                        cursor: "pointer",
-                      }}
-                    >
-                      <KokoAvatar size={56} avatarKey={key} />
-                    </button>
-                  );
-                })}
-              </div>
-              <div className="mt-4 text-[12px] text-[#6B7280]">
-                Currently selected: <span style={{ color: "#895AF6", fontWeight: 600 }}>{KOKO_AVATARS[selectedKoko].label}</span>
-              </div>
-            </div>
-          </section>
 
           {/* ───── Group 1: Profile ───── */}
           <section className="ws-fade-up mb-5" style={{ animationDelay: "0.1s" }}>
@@ -555,18 +478,6 @@ const Settings = () => {
           <section className="ws-fade-up mb-5" style={{ animationDelay: "0.2s" }}>
             <GroupLabel>Appearance</GroupLabel>
             <div className="overflow-hidden rounded-[18px] border border-[#E5E7EB]" style={{ background: cardBg, boxShadow: "0 2px 12px rgba(0,0,0,0.04)" }}>
-              <Row
-                icon={
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#6B7280" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z" />
-                  </svg>
-                }
-                iconBg="#F3F4F6"
-                label="Dark Mode (Coming Soon)"
-                sub="Switch to a darker interface"
-                onClick={handleDarkToggle}
-                right={<Toggle on={dark} onChange={handleDarkToggle} />}
-              />
               <Row
                 icon={
                   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#6B7280" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -806,13 +717,13 @@ const Settings = () => {
             >
               <Row
                 icon={
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#895AF6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#3498DB" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <circle cx="12" cy="12" r="10" />
                     <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
                     <path d="M12 17h.01" />
                   </svg>
                 }
-                iconBg="rgba(137,90,246,0.12)"
+                iconBg="rgba(52,152,219,0.12)"
                 label="Replay onboarding tour"
                 sub="Take Koko's quick walkthrough of your dashboard again"
                 onClick={async () => {

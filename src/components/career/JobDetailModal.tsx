@@ -7,7 +7,7 @@ type Props = {
   onClose: () => void;
 };
 
-const ACCENT = "#895AF6";
+const ACCENT = "#3498DB";
 
 export const JobDetailModal = ({ job, userSkills, onClose }: Props) => {
   useEffect(() => {

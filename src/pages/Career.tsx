@@ -11,7 +11,7 @@ import { getActiveModule, loadModuleForCareer } from "@/lib/careerModules";
 import { SEO } from "@/components/SEO";
 
 const UNLOCK_THRESHOLD = 70;
-const ACCENT = "#895AF6";
+const ACCENT = "#3498DB";
 
 const FILTERS = [
   { key: "all", label: "All Roles" },

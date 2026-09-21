@@ -24,7 +24,7 @@ import {
 } from "@/lib/profileStore";
 import { getChosenCareer, getProfile } from "@/lib/userState";
 
-const KOKO = "#895AF6";
+const KOKO = "#3498DB";
 
 type StepData = { titleText?: string };
 
@@ -116,7 +116,7 @@ function KokoTooltip(props: TooltipRenderProps) {
         borderRadius: 16,
         border: `1px solid ${KOKO}33`,
         boxShadow:
-          "0 16px 48px rgba(137,90,246,0.25), 0 4px 16px rgba(0,0,0,0.08)",
+          "0 16px 48px rgba(52,152,219,0.25), 0 4px 16px rgba(0,0,0,0.08)",
         padding: 20,
         fontFamily: "'Poppins', sans-serif",
         position: "relative",
@@ -243,7 +243,7 @@ function KokoTooltip(props: TooltipRenderProps) {
             fontSize: 13,
             fontWeight: 600,
             cursor: "pointer",
-            boxShadow: "0 4px 12px rgba(137,90,246,0.35)",
+            boxShadow: "0 4px 12px rgba(52,152,219,0.35)",
           }}
         >
           {isFirst

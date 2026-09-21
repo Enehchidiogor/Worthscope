@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { streamKokoChat, type KokoMsg } from "@/lib/kokoClient";
 import { getChosenCareer, getProgress, getMissionsForCareer } from "@/lib/userState";
+import { loadChatHistory, saveChatMessages, clearChatHistory } from "@/lib/kokoChatHistory";
 import { KokoAvatar } from "@/components/koko/KokoAvatar";
 
 /* WorthScope — Global Floating Koko Chat
@@ -31,8 +32,11 @@ export const KokoFloatingChat = () => {
     pathname === "/" ||
     pathname.startsWith("/signin") ||
     pathname.startsWith("/signup") ||
+    pathname.startsWith("/forgot-password") ||
+    pathname.startsWith("/reset-password") ||
     pathname.startsWith("/onboarding") ||
     pathname.startsWith("/assessment") ||
+    pathname.startsWith("/discover") ||
     pathname.startsWith("/parent-view") ||
     pathname.startsWith("/parent-dashboard") ||
     pathname.startsWith("/parent/");
@@ -50,6 +54,7 @@ export const KokoFloatingChat = () => {
   // Login signals
   const [strongPulse, setStrongPulse] = useState(false);
   const [tooltipOpen, setTooltipOpen] = useState(false);
+  const [clearModal, setClearModal] = useState(false);
 
   const scrollRef = useRef<HTMLDivElement>(null);
   const introSentRef = useRef(false);
@@ -158,6 +163,18 @@ export const KokoFloatingChat = () => {
     if (el) el.scrollTo({ top: el.scrollHeight, behavior: "smooth" });
   }, [messages, typing]);
 
+  // Load persisted dashboard chat history once on mount (survives refresh / re-login).
+  useEffect(() => {
+    let cancelled = false;
+    loadChatHistory("dashboard")
+      .then((hist) => {
+        if (cancelled || hist.length === 0) return;
+        setMessages(hist.map((m, i) => ({ id: i + 1, role: m.role, text: m.content, time: "" })));
+      })
+      .catch(() => {});
+    return () => { cancelled = true; };
+  }, []);
+
   const sendMessage = async (raw: string) => {
     const text = raw.trim();
     if (!text) return;
@@ -202,9 +219,15 @@ export const KokoFloatingChat = () => {
       },
       onDone: () => {
         setTyping(false);
+        const reply = acc.trim() || "(no response)";
         if (!started) {
-          setMessages((m) => [...m, { id: assistantId, role: "koko", text: "(no response)", time: "just now" }]);
+          setMessages((m) => [...m, { id: assistantId, role: "koko", text: reply, time: "just now" }]);
         }
+        // Persist the exchange so it survives refresh / re-login.
+        saveChatMessages("dashboard", [
+          { role: "user", content: text },
+          { role: "koko", content: reply },
+        ]).catch(() => {});
       },
       onError: (err) => {
         setTyping(false);
@@ -290,18 +313,18 @@ export const KokoFloatingChat = () => {
         <button
           onClick={handleButtonClick}
           aria-label={open ? "Close Koko chat" : "Open Koko chat"}
-          className="relative grid h-14 w-14 place-items-center rounded-full bg-white transition-transform duration-200 active:scale-95"
+          className="relative grid h-14 w-14 place-items-center rounded-full bg-[#05070C] transition-transform duration-200 active:scale-95"
           style={{
             boxShadow: strongPulse
-              ? "0 8px 32px rgba(137,90,246,0.55)"
-              : "0 8px 24px rgba(137,90,246,0.4)",
+              ? "0 8px 32px rgba(59,130,246,0.55)"
+              : "0 8px 24px rgba(59,130,246,0.4)",
             animation: pulseAnim,
             transform: open ? "rotate(10deg)" : "rotate(0deg)",
-            border: "2px solid #895AF6",
+            border: "2px solid #3B82F6",
           }}
         >
           {open ? (
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#895AF6" strokeWidth="2.5" strokeLinecap="round">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#60A5FA" strokeWidth="2.5" strokeLinecap="round">
               <path d="M6 6l12 12M18 6 6 18" />
             </svg>
           ) : (
@@ -333,7 +356,7 @@ export const KokoFloatingChat = () => {
       {/* ───────── Slide-in Panel ───────── */}
       {open && (
         <aside
-          className="fixed right-0 top-0 z-[499] flex h-screen w-full flex-col bg-card sm:w-[380px]"
+          className="dark fixed right-0 top-0 z-[499] flex h-screen w-full flex-col bg-card text-foreground sm:w-[380px]"
           style={{
             boxShadow: "-8px 0 40px rgba(0,0,0,0.18)",
             animation: "ws-koko-slide-in 0.3s cubic-bezier(0.4,0,0.2,1) both",
@@ -345,7 +368,7 @@ export const KokoFloatingChat = () => {
               <div
                 style={{ animation: "ws-koko-pulse-soft 3s ease-in-out infinite" }}
               >
-                <KokoAvatar size={40} ring="#895AF6" />
+                <KokoAvatar size={40} ring="#3B82F6" />
               </div>
               <div className="ml-3">
                 <div className="text-[16px] font-bold leading-tight text-foreground">Koko AI</div>
@@ -355,20 +378,57 @@ export const KokoFloatingChat = () => {
                 </div>
               </div>
             </div>
-            <button
-              onClick={() => {
-                setOpen(false);
-                setIntroMode(false);
-                setIntroChips(false);
-              }}
-              aria-label="Close"
-              className="text-text2 transition-colors hover:text-foreground"
-            >
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-                <path d="M6 6l12 12M18 6 6 18" />
-              </svg>
-            </button>
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => setClearModal(true)}
+                aria-label="Clear chat"
+                className="text-[12px] font-medium text-text3 transition-colors hover:text-foreground"
+              >
+                Clear chat
+              </button>
+              <button
+                onClick={() => {
+                  setOpen(false);
+                  setIntroMode(false);
+                  setIntroChips(false);
+                }}
+                aria-label="Close"
+                className="text-text2 transition-colors hover:text-foreground"
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                  <path d="M6 6l12 12M18 6 6 18" />
+                </svg>
+              </button>
+            </div>
           </header>
+
+          {clearModal && (
+            <div className="fixed inset-0 z-[600] grid place-items-center bg-black/40 p-4">
+              <div className="w-full max-w-[400px] rounded-2xl bg-card p-6 shadow-[0_20px_60px_rgba(0,0,0,0.25)]">
+                <h3 className="text-[16px] font-bold text-foreground">Clear your conversation with Koko?</h3>
+                <p className="mt-2 text-[13px] leading-[1.6] text-text2">This can't be undone.</p>
+                <div className="mt-5 flex justify-end gap-2">
+                  <button
+                    onClick={() => setClearModal(false)}
+                    className="rounded-lg border border-border px-4 py-2 text-[13px] font-semibold text-foreground"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={async () => {
+                      await clearChatHistory("dashboard").catch(() => {});
+                      setMessages([{ id: 1, role: "koko", text: "Hey 👋 I'm Koko — your career guide.", time: "just now" }]);
+                      setClearModal(false);
+                    }}
+                    className="rounded-lg px-4 py-2 text-[13px] font-semibold text-white"
+                    style={{ background: "#EF4444" }}
+                  >
+                    Clear chat
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Quick action chips (general) */}
           {!introMode && (
@@ -405,7 +465,7 @@ export const KokoFloatingChat = () => {
                 <div key={m.id} className="mb-4 flex flex-col items-end">
                   <div
                     className="max-w-[80%] rounded-[14px_0_14px_14px] px-4 py-3 text-[14px] leading-[1.65] text-white"
-                    style={{ background: "#3498DB" }}
+                    style={{ background: "#3B82F6" }}
                   >
                     {m.text}
                   </div>
@@ -480,7 +540,7 @@ export const KokoFloatingChat = () => {
               aria-label="Send"
               className="grid h-11 w-11 place-items-center rounded-xl text-white transition-all disabled:cursor-not-allowed"
               style={{
-                background: input.trim() ? "#3498DB" : "hsl(var(--bg-elevated))",
+                background: input.trim() ? "#3B82F6" : "hsl(var(--bg-elevated))",
               }}
             >
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">

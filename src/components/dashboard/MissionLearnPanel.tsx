@@ -4,6 +4,7 @@ import { getProfile, getChosenCareer, markLessonComplete, completeMission } from
 import { markRoadmapMissionComplete } from "@/lib/kokoRoadmap";
 import { supabase } from "@/integrations/supabase/client";
 import { aggregateSignal, type LearningSignal } from "@/lib/learningSignal";
+import { loadChatHistory, saveChatMessages } from "@/lib/kokoChatHistory";
 import { KokoAvatar } from "@/components/koko/KokoAvatar";
 
 type Props = {
@@ -16,7 +17,35 @@ type Props = {
 type QA = { role: "koko" | "user"; text: string };
 
 const ERR = "Koko is having a moment — please try again shortly.";
-const KOKO_PURPLE = "#895AF6";
+const KOKO_PURPLE = "#3B82F6";
+
+type Assessment = {
+  passed: boolean;
+  relevance_score: number;
+  quality_score: number;
+  what_you_did_well: string;
+  what_needs_improvement: string;
+  one_focus_for_next_attempt: string;
+  encouragement: string;
+};
+
+// Koko returns the assessment as a JSON object. Parse defensively — strip any
+// stray code fences / preamble the model might add despite instructions.
+function parseAssessment(raw: string): Assessment | null {
+  let s = raw.trim();
+  const fence = s.match(/```(?:json)?\s*([\s\S]*?)```/i);
+  if (fence) s = fence[1].trim();
+  const start = s.indexOf("{");
+  const end = s.lastIndexOf("}");
+  if (start === -1 || end === -1) return null;
+  try {
+    const obj = JSON.parse(s.slice(start, end + 1));
+    if (typeof obj?.passed !== "boolean") return null;
+    return obj as Assessment;
+  } catch {
+    return null;
+  }
+}
 
 /* ---------- Lightweight markdown renderer ---------- */
 function renderMarkdown(raw: string) {
@@ -86,7 +115,7 @@ function renderMarkdown(raw: string) {
         <aside
           key={`ai-${i}`}
           className="my-4 rounded-r-lg p-3.5"
-          style={{ borderLeft: `3px solid ${KOKO_PURPLE}`, background: "rgba(137, 90, 246, 0.06)" }}
+          style={{ borderLeft: `3px solid ${KOKO_PURPLE}`, background: "rgba(59, 130, 246, 0.06)" }}
         >
           <div className="mb-2 text-[12px] font-bold tracking-wide" style={{ color: KOKO_PURPLE }}>
             ✦ {group[0].type === "h2" || group[0].type === "h3" ? group[0].text : "How AI helps"}
@@ -208,6 +237,18 @@ export const MissionLearnPanel = ({ missionId, missionTitle, missionDescription,
   const [qaThinking, setQaThinking] = useState(false);
   const learningSignal: LearningSignal = aggregateSignal(qaMessages);
 
+  // Load persisted Q&A thread for this mission (survives refresh / re-login).
+  useEffect(() => {
+    let cancelled = false;
+    loadChatHistory(`mission:${missionId}`)
+      .then((hist) => {
+        if (cancelled || hist.length === 0) return;
+        setQaMessages(hist.map((m) => ({ role: m.role, text: m.content })));
+      })
+      .catch(() => {});
+    return () => { cancelled = true; };
+  }, [missionId]);
+
   const askKoko = async () => {
     const q = qaInput.trim();
     if (!q || qaThinking) return;
@@ -240,7 +281,12 @@ export const MissionLearnPanel = ({ missionId, missionTitle, missionDescription,
       },
       onDone: () => {
         setQaThinking(false);
-        if (!started) setQaMessages((m) => [...m, { role: "koko", text: ERR }]);
+        if (!started) { setQaMessages((m) => [...m, { role: "koko", text: ERR }]); return; }
+        // Persist this exchange so the thread survives refresh.
+        saveChatMessages(`mission:${missionId}`, [
+          { role: "user", content: q },
+          { role: "koko", content: acc },
+        ]).catch(() => {});
       },
       onError: () => {
         setQaThinking(false);
@@ -289,7 +335,8 @@ export const MissionLearnPanel = ({ missionId, missionTitle, missionDescription,
   const [briefErr, setBriefErr] = useState<string | null>(null);
   const [submission, setSubmission] = useState("");
   const [submitting, setSubmitting] = useState(false);
-  const [assessment, setAssessment] = useState<string>("");
+  const [assessResult, setAssessResult] = useState<Assessment | null>(null);
+  const [attemptCount, setAttemptCount] = useState(0);
   const [assessmentErr, setAssessmentErr] = useState<string | null>(null);
   const projectHydrated = useRef(false);
 
@@ -299,15 +346,18 @@ export const MissionLearnPanel = ({ missionId, missionTitle, missionDescription,
     (async () => {
       const { data: u } = await supabase.auth.getUser();
       if (!u.user) return;
-      const { data: row } = await supabase
+      // attempt_count is added by the koko_quality_persistence migration; the
+      // generated types don't know it yet (Lovable regenerates on migration).
+      const { data: row } = await (supabase as any)
         .from("mission_projects")
-        .select("brief_md, submission, assessment_md")
+        .select("brief_md, submission, assessment_md, attempt_count")
         .eq("user_id", u.user.id)
         .eq("mission_id", missionId)
         .maybeSingle();
       if (row?.brief_md) setBrief(row.brief_md);
       if (row?.submission) setSubmission(row.submission);
-      if (row?.assessment_md) setAssessment(row.assessment_md);
+      if (row?.assessment_md) setAssessResult(parseAssessment(row.assessment_md));
+      if (typeof row?.attempt_count === "number") setAttemptCount(row.attempt_count);
     })();
   }, [completed, missionId]);
 
@@ -343,32 +393,53 @@ export const MissionLearnPanel = ({ missionId, missionTitle, missionDescription,
     if (!text || submitting) return;
     setSubmitting(true);
     setAssessmentErr(null);
-    setAssessment("");
+    setAssessResult(null);
+    const nextAttempt = attemptCount + 1;
     let acc = "";
     await streamKokoChat({
       messages: [],
       intent: "assess",
-      mission: { ...baseMission, learningSignal },
+      mission: { ...baseMission, learningSignal, attempts: attemptCount },
       brief,
       submission: text,
-      onDelta: (c) => { acc += c; setAssessment(acc); },
+      onDelta: (c) => { acc += c; },
       onDone: async () => {
         setSubmitting(false);
-        if (!acc.trim()) { setAssessmentErr(ERR); return; }
+        const parsed = parseAssessment(acc);
+        if (!parsed) { setAssessmentErr(ERR); return; }
+        setAssessResult(parsed);
+        setAttemptCount(nextAttempt);
         const { data: u } = await supabase.auth.getUser();
         if (u.user) {
-          await supabase.from("mission_projects").upsert({
+          // attempt_count / mission status added by migration (untyped here).
+          await (supabase as any).from("mission_projects").upsert({
             user_id: u.user.id,
             mission_id: missionId,
             brief_md: brief,
             submission: text,
             assessment_md: acc,
             submitted_at: new Date().toISOString(),
+            attempt_count: nextAttempt,
           }, { onConflict: "user_id,mission_id" });
+          await (supabase as any).from("mission_lessons")
+            .update({ status: "in_progress" })
+            .eq("user_id", u.user.id).eq("mission_id", missionId);
         }
       },
       onError: () => { setSubmitting(false); setAssessmentErr(ERR); },
     });
+  };
+
+  // User chose to skip after failing — mark the mission skipped (NOT completed)
+  // and advance. The roadmap reads mission_lessons.status to show its state.
+  const skipMission = async () => {
+    const { data: u } = await supabase.auth.getUser();
+    if (u.user) {
+      await (supabase as any).from("mission_lessons")
+        .update({ status: "skipped" })
+        .eq("user_id", u.user.id).eq("mission_id", missionId);
+    }
+    onMissionComplete?.();
   };
 
   return (
@@ -515,7 +586,7 @@ export const MissionLearnPanel = ({ missionId, missionTitle, missionDescription,
               </div>
             )}
 
-            <div className="mt-3 rounded-lg p-3" style={{ background: "rgba(137, 90, 246, 0.06)", borderLeft: `3px solid ${KOKO_PURPLE}` }}>
+            <div className="mt-3 rounded-lg p-3" style={{ background: "rgba(59, 130, 246, 0.06)", borderLeft: `3px solid ${KOKO_PURPLE}` }}>
               <div className="text-[11px] font-bold tracking-wide mb-1" style={{ color: KOKO_PURPLE }}>
                 ✦ LEARNING OBJECTIVE
               </div>
@@ -560,13 +631,22 @@ export const MissionLearnPanel = ({ missionId, missionTitle, missionDescription,
         submission={submission}
         setSubmission={setSubmission}
         submitting={submitting}
-        assessment={assessment}
+        assessResult={assessResult}
+        attemptCount={attemptCount}
         assessmentErr={assessmentErr}
         onSubmit={submitProject}
+        onTryAgain={() => setAssessResult(null)}
+        onSkip={skipMission}
         missionDone={missionDone}
         onFinalize={async () => {
           if (missionDone) return;
           setMissionDone(true);
+          const { data: u } = await supabase.auth.getUser();
+          if (u.user) {
+            await (supabase as any).from("mission_lessons")
+              .update({ status: "completed" })
+              .eq("user_id", u.user.id).eq("mission_id", missionId);
+          }
           markRoadmapMissionComplete(missionId);
           completeMission();
           onMissionComplete?.();
@@ -642,18 +722,25 @@ function AssignmentSection({
 
 /* ───── Stage 4 — Submission ───── */
 function SubmissionSection({
-  unlocked, submission, setSubmission, submitting, assessment, assessmentErr, onSubmit, missionDone, onFinalize,
+  unlocked, submission, setSubmission, submitting, assessResult, attemptCount,
+  assessmentErr, onSubmit, onTryAgain, onSkip, missionDone, onFinalize,
 }: {
   unlocked: boolean;
   submission: string;
   setSubmission: (s: string) => void;
   submitting: boolean;
-  assessment: string;
+  assessResult: Assessment | null;
+  attemptCount: number;
   assessmentErr: string | null;
   onSubmit: () => void;
+  onTryAgain: () => void;
+  onSkip: () => void;
   missionDone: boolean;
   onFinalize: () => void;
 }) {
+  const [skipModal, setSkipModal] = useState(false);
+  const passed = assessResult?.passed === true;
+
   return (
     <section className={["rounded-xl border p-4 transition-opacity",
       unlocked ? "border-border bg-bg-elevated/60" : "border-border bg-bg-elevated/30 opacity-60"].join(" ")}>
@@ -671,44 +758,115 @@ function SubmissionSection({
         </div>
       ) : (
         <>
-          <label className="mb-2 block text-[12px] font-semibold text-foreground">
-            Paste a link or describe what you built
-          </label>
-          <textarea
-            value={submission}
-            onChange={(e) => setSubmission(e.target.value)}
-            placeholder="Share a link to your work, or describe what you did and what you learned…"
-            rows={5}
-            className="w-full rounded-lg border border-border bg-card px-3 py-2 text-[13px] text-foreground placeholder:text-text3 focus:outline-none"
-          />
-          <div className="mt-3 flex justify-end">
-            <button type="button" onClick={onSubmit} disabled={submitting || !submission.trim()}
-              className="rounded-lg px-4 py-2 text-[13px] font-semibold text-white transition-opacity disabled:opacity-50"
-              style={{ background: KOKO_PURPLE }}>
-              {submitting ? "Reviewing…" : assessment ? "Resubmit" : "Submit for Koko's review"}
-            </button>
-          </div>
-
-          {assessmentErr && !assessment && (
-            <div className="mt-3 rounded-lg border border-border bg-card px-3 py-2 text-[13px] text-text2">{assessmentErr}</div>
-          )}
-          {assessment && (
-            <div className="mt-4 border-t border-border pt-4">
-              <div className="mb-2 text-[12px] font-bold tracking-wide" style={{ color: KOKO_PURPLE }}>
-                ✦ KOKO'S FEEDBACK
-              </div>
-              {renderMarkdown(assessment)}
-              <div className="mt-4 flex justify-end">
-                <button type="button" onClick={onFinalize} disabled={missionDone}
-                  className="rounded-lg px-4 py-2 text-[13px] font-semibold text-white transition-opacity disabled:opacity-60"
-                  style={{ background: missionDone ? "#16a34a" : KOKO_PURPLE }}>
-                  {missionDone ? "🎉 Mission Completed" : "Complete Mission →"}
+          {/* Submission form — hidden while a result is being shown */}
+          {!assessResult && (
+            <>
+              <label className="mb-2 block text-[12px] font-semibold text-foreground">
+                Paste a link or describe what you built
+              </label>
+              <textarea
+                value={submission}
+                onChange={(e) => setSubmission(e.target.value)}
+                placeholder="Share a link to your work, or describe what you did and what you learned…"
+                rows={5}
+                className="w-full rounded-lg border border-border bg-card px-3 py-2 text-[13px] text-foreground placeholder:text-text3 focus:outline-none"
+              />
+              <div className="mt-3 flex justify-end">
+                <button type="button" onClick={onSubmit} disabled={submitting || !submission.trim()}
+                  className="rounded-lg px-4 py-2 text-[13px] font-semibold text-white transition-opacity disabled:opacity-50"
+                  style={{ background: KOKO_PURPLE }}>
+                  {submitting ? "Koko is reviewing…" : attemptCount > 0 ? "Resubmit for review" : "Submit for Koko's review"}
                 </button>
+              </div>
+              {assessmentErr && (
+                <div className="mt-3 rounded-lg border border-border bg-card px-3 py-2 text-[13px] text-text2">{assessmentErr}</div>
+              )}
+            </>
+          )}
+
+          {/* Structured assessment result */}
+          {assessResult && (
+            <div className="mt-1">
+              <AssessmentFeedback a={assessResult} />
+              {passed ? (
+                <div className="mt-4 flex justify-end">
+                  <button type="button" onClick={onFinalize} disabled={missionDone}
+                    className="rounded-lg px-4 py-2 text-[13px] font-semibold text-white transition-opacity disabled:opacity-60"
+                    style={{ background: missionDone ? "#16a34a" : KOKO_PURPLE }}>
+                    {missionDone ? "🎉 Mission Completed" : "Continue to next mission →"}
+                  </button>
+                </div>
+              ) : (
+                <div className="mt-4 flex items-center justify-end gap-2">
+                  <button type="button" onClick={() => setSkipModal(true)}
+                    className="rounded-lg border border-border px-3.5 py-2 text-[13px] font-medium text-text2 transition-colors hover:text-foreground">
+                    Skip this for now
+                  </button>
+                  <button type="button" onClick={onTryAgain}
+                    className="rounded-lg px-4 py-2 text-[13px] font-semibold text-white"
+                    style={{ background: KOKO_PURPLE }}>
+                    Try again
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
+
+          {skipModal && (
+            <div className="fixed inset-0 z-[700] grid place-items-center bg-black/40 p-4">
+              <div className="w-full max-w-[440px] rounded-2xl bg-card p-6 shadow-[0_20px_60px_rgba(0,0,0,0.25)]">
+                <h3 className="text-[16px] font-bold text-foreground">Are you sure?</h3>
+                <p className="mt-2 text-[13px] leading-[1.6] text-text2">
+                  Skipping means this project won't appear in your portfolio, and it'll be flagged as
+                  "not properly attempted" in your skill progress. Future employers reviewing your
+                  WorthScope profile will see incomplete missions.
+                </p>
+                <div className="mt-5 flex justify-end gap-2">
+                  <button type="button" onClick={() => setSkipModal(false)}
+                    className="rounded-lg border border-border px-4 py-2 text-[13px] font-semibold text-foreground">
+                    Keep trying
+                  </button>
+                  <button type="button" onClick={() => { setSkipModal(false); onSkip(); }}
+                    className="rounded-lg px-4 py-2 text-[13px] font-semibold text-white" style={{ background: "#6B7280" }}>
+                    Skip anyway
+                  </button>
+                </div>
               </div>
             </div>
           )}
         </>
       )}
     </section>
+  );
+}
+
+/* Structured feedback card — green when passed, neutral (never alarming red) when not. */
+function AssessmentFeedback({ a }: { a: Assessment }) {
+  const ok = a.passed;
+  const accent = ok ? "#16a34a" : "#6B7280";
+  return (
+    <div className="rounded-xl border p-4" style={{ borderColor: ok ? "#16a34a" : "#D1D5DB", background: ok ? "rgba(22,163,74,0.06)" : "rgba(107,114,128,0.06)" }}>
+      <div className="mb-3 flex items-center gap-2">
+        <span className="text-[12px] font-bold tracking-wide" style={{ color: accent }}>
+          {ok ? "✓ PASSED" : "NOT PASSED YET"}
+        </span>
+        <span className="ml-auto text-[11px] text-text3">
+          Relevance {a.relevance_score} · Quality {a.quality_score}
+        </span>
+      </div>
+      {a.what_you_did_well && <FeedbackBlock label="What you did well" text={a.what_you_did_well} />}
+      {a.what_needs_improvement && <FeedbackBlock label="What needs improvement" text={a.what_needs_improvement} />}
+      {a.one_focus_for_next_attempt && <FeedbackBlock label="Focus on this next" text={a.one_focus_for_next_attempt} />}
+      {a.encouragement && <p className="mt-2 text-[13px] italic text-text2">{a.encouragement}</p>}
+    </div>
+  );
+}
+
+function FeedbackBlock({ label, text }: { label: string; text: string }) {
+  return (
+    <div className="mb-2.5">
+      <div className="text-[12px] font-semibold text-foreground">{label}</div>
+      <p className="mt-0.5 whitespace-pre-wrap text-[13px] leading-[1.6] text-text2">{text}</p>
+    </div>
   );
 }

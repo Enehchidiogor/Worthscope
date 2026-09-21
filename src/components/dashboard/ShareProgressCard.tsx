@@ -9,8 +9,8 @@ export const ShareProgressCard = () => {
       <div
         className="ws-fade-up mt-6 flex items-center justify-between font-poppins"
         style={{
-          background: "linear-gradient(135deg, #EBF5FB, #F0FFF4)",
-          border: "1px solid rgba(52,152,219,0.15)",
+          background: "linear-gradient(135deg, rgba(59,130,246,0.14), rgba(255,255,255,0.03))",
+          border: "1px solid rgba(96,165,250,0.35)",
           borderRadius: 18,
           padding: "22px 26px",
           gap: 20,
@@ -23,7 +23,7 @@ export const ShareProgressCard = () => {
             height="28"
             viewBox="0 0 24 24"
             fill="none"
-            stroke="#3498DB"
+            stroke="#3B82F6"
             strokeWidth="2"
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -35,10 +35,10 @@ export const ShareProgressCard = () => {
             <path d="M16 3.13a4 4 0 0 1 0 7.75" />
           </svg>
           <div style={{ marginLeft: 14 }} className="min-w-0">
-            <div className="font-bold text-[#111]" style={{ fontSize: 16 }}>
+            <div className="font-bold text-foreground" style={{ fontSize: 16 }}>
               Share Your Progress
             </div>
-            <div className="text-[#6B7280]" style={{ fontSize: 13, marginTop: 4 }}>
+            <div className="text-text2" style={{ fontSize: 13, marginTop: 4 }}>
               Let a parent or guardian track your career journey.
             </div>
           </div>
@@ -48,17 +48,17 @@ export const ShareProgressCard = () => {
           onClick={() => setOpen(true)}
           className="flex-shrink-0 font-semibold text-white transition-all"
           style={{
-            background: "#3498DB",
+            background: "#3B82F6",
             fontSize: 13,
             borderRadius: 10,
             padding: "10px 20px",
           }}
           onMouseEnter={(e) => {
-            e.currentTarget.style.background = "#217BBB";
-            e.currentTarget.style.boxShadow = "0 4px 14px rgba(52,152,219,0.3)";
+            e.currentTarget.style.background = "#1D4ED8";
+            e.currentTarget.style.boxShadow = "0 4px 14px rgba(59,130,246,0.3)";
           }}
           onMouseLeave={(e) => {
-            e.currentTarget.style.background = "#3498DB";
+            e.currentTarget.style.background = "#3B82F6";
             e.currentTarget.style.boxShadow = "none";
           }}
         >

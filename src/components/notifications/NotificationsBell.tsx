@@ -18,10 +18,10 @@ import {
 const TYPE_STYLES: Record<NotificationType, { bg: string; color: string }> = {
   mission: { bg: "#EBF5FB", color: "#3498DB" },
   streak: { bg: "rgba(251,146,60,0.1)", color: "#FB923C" },
-  koko: { bg: "rgba(137,90,246,0.12)", color: "#895AF6" },
+  koko: { bg: "rgba(52,152,219,0.12)", color: "#3498DB" },
   progress: { bg: "rgba(34,197,94,0.1)", color: "#22C55E" },
   reminder: { bg: "rgba(245,158,11,0.1)", color: "#F59E0B" },
-  milestone: { bg: "rgba(137,90,246,0.12)", color: "#895AF6" },
+  milestone: { bg: "rgba(52,152,219,0.12)", color: "#3498DB" },
   system: { bg: "#F3F4F6", color: "#6B7280" },
 };
 

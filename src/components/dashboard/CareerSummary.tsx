@@ -50,7 +50,7 @@ export const CareerSummary = () => {
         <Link
           to={hasAssessment ? "/career-results" : "/assessment"}
           className="shrink-0 rounded-[10px] bg-accent px-3.5 py-2 text-[12px] font-semibold text-white hover:bg-accent-dark"
-          style={{ background: "#3498DB" }}
+          style={{ background: "#3B82F6" }}
         >
           {hasAssessment ? "View Results" : "Take Assessment"}
         </Link>
