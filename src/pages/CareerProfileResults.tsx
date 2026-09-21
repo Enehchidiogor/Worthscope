@@ -7,6 +7,8 @@ import { PAPER, PAPER_DIM, PAPER_FAINT, LINE, BLUE_BRIGHT, BLUE, FONT, EASE } fr
 import AmbientBackground from "@/components/landing/AmbientBackground";
 import MagneticButton from "@/components/landing/MagneticButton";
 import { loadCachedPrediction, type CareerPrediction, type CareerDirection } from "@/lib/careerIntelligence";
+import { getCareerMarket } from "@/lib/recommendationEngine";
+import { opportunityLinks } from "@/lib/opportunityLinks";
 import { submitFeedback, feedbackAlreadySent, loadCachedProfile, type Verdict } from "@/lib/feedback";
 import { setChosenCareer } from "@/lib/userState";
 import { persistCareerPath } from "@/lib/authClient";
@@ -441,6 +443,9 @@ function DirectionCard({ d, rank, active, onSelect, onStart, launching }: { d: C
               <Detail label="What you'd need" text={d.whatYoullNeed} />
               <Detail label="Worth knowing" text={d.potentialChallenge} />
             </div>
+            <div onClick={(e) => e.stopPropagation()}>
+              <Opportunities title={d.title} />
+            </div>
             <button
               onClick={(e) => {
                 e.stopPropagation();
@@ -454,6 +459,60 @@ function DirectionCard({ d, rank, active, onSelect, onStart, launching }: { d: C
         )}
       </AnimatePresence>
     </motion.div>
+  );
+}
+
+function Opportunities({ title }: { title: string }) {
+  const market = getCareerMarket(title);
+  const links = opportunityLinks(title);
+  const groups: { heading: string; kind: "job" | "freelance" }[] = [
+    { heading: "Jobs & internships", kind: "job" },
+    { heading: "Earn while you learn", kind: "freelance" },
+  ];
+  return (
+    <div style={{ marginTop: 18 }}>
+      {market && (
+        <div style={{ padding: "12px 14px", borderRadius: 12, background: "rgba(255,255,255,.04)", border: `1px solid ${LINE}` }}>
+          <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: 0.8, textTransform: "uppercase", color: PAPER_FAINT }}>Typical pay in Nigeria (rough estimate)</div>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: "6px 18px", marginTop: 8, fontSize: 13, color: PAPER_DIM }}>
+            <span><strong style={{ color: PAPER }}>{market.salaryEntryNGN}</strong> starting</span>
+            <span><strong style={{ color: PAPER }}>{market.salarySeniorNGN}</strong> experienced</span>
+            <span>{market.heatLabel} demand</span>
+            <span>+{market.growthPct}% growth / yr</span>
+          </div>
+        </div>
+      )}
+
+      <div style={{ marginTop: 14, fontSize: 11, fontWeight: 700, letterSpacing: 0.8, textTransform: "uppercase", color: BLUE_BRIGHT }}>See real opportunities</div>
+      {groups.map((g) => (
+        <div key={g.kind} style={{ marginTop: 10 }}>
+          <div style={{ fontSize: 12, color: PAPER_FAINT, marginBottom: 6 }}>{g.heading}</div>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(170px, 1fr))", gap: 8 }}>
+            {links
+              .filter((l) => l.kind === g.kind)
+              .map((l) => (
+                <a
+                  key={l.label}
+                  href={l.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="ci-opp-link"
+                  style={{ display: "block", padding: "10px 12px", borderRadius: 12, textDecoration: "none", background: "rgba(96,165,250,.07)", border: `1px solid ${BLUE_BRIGHT}55`, color: PAPER }}
+                >
+                  <div style={{ fontWeight: 700, fontSize: 13.5 }}>
+                    {l.label} <span style={{ color: BLUE_BRIGHT }}>↗</span>
+                  </div>
+                  <div style={{ fontSize: 11.5, color: PAPER_FAINT, marginTop: 2 }}>{l.blurb}</div>
+                </a>
+              ))}
+          </div>
+        </div>
+      ))}
+      <div style={{ marginTop: 10, fontSize: 11.5, color: PAPER_FAINT, lineHeight: 1.5 }}>
+        These open a search on each site in a new tab. Pay figures are rough estimates, not guarantees — check real listings for current numbers.
+      </div>
+      <style>{`.ci-opp-link{transition:transform .15s ease,background .15s ease,border-color .15s ease}.ci-opp-link:hover{transform:translateY(-2px);background:rgba(96,165,250,.14)!important;border-color:#60A5FA!important}`}</style>
+    </div>
   );
 }
 

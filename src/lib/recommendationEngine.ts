@@ -575,6 +575,11 @@ function applyQ8Override(
 /* ============ MAIN ============ */
 const W = { q1: 0.15, q3: 0.15, q4: 0.20, q5: 0.15, q6: 0.15, q7: 0.10, q8: 0.15 };
 
+/** Rough market estimates for a career title (or undefined for unknown titles). */
+export function getCareerMarket(title: string): MarketData | undefined {
+  return CAREERS.find((c) => c.title.toLowerCase() === title.trim().toLowerCase())?.market;
+}
+
 export type CareerScore = { title: string; description: string; category: CategoryKey; icon: string; market: MarketData; score: number };
 
 /** Raw engine scores for all careers (no banded/randomised percentages). */
