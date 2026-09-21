@@ -7,6 +7,7 @@ import { PAPER, PAPER_DIM, PAPER_FAINT, LINE, BLUE_BRIGHT, BLUE, FONT, EASE } fr
 import AmbientBackground from "@/components/landing/AmbientBackground";
 import MagneticButton from "@/components/landing/MagneticButton";
 import { loadCachedPrediction, type CareerPrediction, type CareerDirection } from "@/lib/careerIntelligence";
+import { submitFeedback, feedbackAlreadySent, loadCachedProfile, type Verdict } from "@/lib/feedback";
 import { setChosenCareer } from "@/lib/userState";
 import { persistCareerPath } from "@/lib/authClient";
 import { notifyAssessmentComplete } from "@/lib/notifications";
@@ -187,6 +188,11 @@ function CareerProfileResultsInner() {
           </div>
         </Reveal>
 
+        {/* Tester feedback */}
+        <Reveal>
+          <FeedbackCard prediction={prediction} />
+        </Reveal>
+
         {/* Next step */}
         <Reveal>
           <div style={{ marginTop: 56, textAlign: "center", padding: "40px 24px", borderRadius: 24, border: `1px solid ${BLUE_BRIGHT}55`, background: "rgba(59,130,246,.07)", boxShadow: `0 0 60px ${BLUE}22` }}>
@@ -226,6 +232,120 @@ function CareerProfileResultsInner() {
           </motion.div>
         )}
       </AnimatePresence>
+    </div>
+  );
+}
+
+const VERDICTS: { id: Verdict; emoji: string; label: string; hint: string }[] = [
+  { id: "spot-on", emoji: "🎯", label: "Spot on", hint: "This feels like me" },
+  { id: "partly", emoji: "🤔", label: "Partly", hint: "Some of it fits" },
+  { id: "not-really", emoji: "🙅", label: "Not really", hint: "This isn't me" },
+];
+
+function FeedbackCard({ prediction }: { prediction: CareerPrediction }) {
+  const [verdict, setVerdict] = useState<Verdict | null>(null);
+  const [expected, setExpected] = useState("");
+  const [comment, setComment] = useState("");
+  const [sending, setSending] = useState(false);
+  const [sent, setSent] = useState(() => feedbackAlreadySent(prediction));
+
+  async function send() {
+    if (!verdict || sending) return;
+    setSending(true);
+    await submitFeedback({ verdict, expectedCareer: expected.trim(), comment: comment.trim(), prediction, profile: loadCachedProfile() });
+    setSending(false);
+    setSent(true);
+  }
+
+  const fieldStyle: React.CSSProperties = {
+    width: "100%",
+    background: "rgba(255,255,255,.03)",
+    border: `1.5px solid ${LINE}`,
+    borderRadius: 12,
+    padding: "12px 14px",
+    color: PAPER,
+    fontFamily: FONT,
+    fontSize: 13.5,
+    outline: "none",
+  };
+
+  return (
+    <div style={{ marginTop: 52, padding: "26px 24px", borderRadius: 20, background: "rgba(255,255,255,.03)", border: `1px solid ${LINE}` }}>
+      {sent ? (
+        <div style={{ textAlign: "center", padding: "6px 0" }}>
+          <div style={{ fontSize: 26 }}>💙</div>
+          <div style={{ marginTop: 6, fontWeight: 700, fontSize: 16 }}>Thank you — that really helps.</div>
+          <p style={{ margin: "6px auto 0", maxWidth: 420, fontSize: 13, color: PAPER_DIM, lineHeight: 1.6 }}>
+            Your feedback helps Koko get better at reading people's strengths.
+          </p>
+        </div>
+      ) : (
+        <>
+          <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: 1.2, textTransform: "uppercase", color: BLUE_BRIGHT }}>Help us improve</div>
+          <div style={{ marginTop: 6, fontWeight: 700, fontSize: 18 }}>Was Koko's read right?</div>
+          <p style={{ margin: "6px 0 0", fontSize: 13, color: PAPER_DIM, lineHeight: 1.6 }}>
+            Be honest — a "not really" is just as useful. It takes 10 seconds.
+          </p>
+
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))", gap: 10, marginTop: 16 }}>
+            {VERDICTS.map((v) => (
+              <button
+                key={v.id}
+                type="button"
+                onClick={() => setVerdict(v.id)}
+                aria-pressed={verdict === v.id}
+                style={{
+                  padding: "14px 12px",
+                  borderRadius: 14,
+                  cursor: "pointer",
+                  fontFamily: FONT,
+                  textAlign: "center",
+                  color: PAPER,
+                  background: verdict === v.id ? "rgba(96,165,250,.14)" : "rgba(255,255,255,.03)",
+                  border: `1.5px solid ${verdict === v.id ? BLUE_BRIGHT : LINE}`,
+                }}
+              >
+                <div style={{ fontSize: 22 }}>{v.emoji}</div>
+                <div style={{ fontWeight: 700, fontSize: 14, marginTop: 4 }}>{v.label}</div>
+                <div style={{ fontSize: 11.5, color: PAPER_FAINT, marginTop: 2 }}>{v.hint}</div>
+              </button>
+            ))}
+          </div>
+
+          <AnimatePresence initial={false}>
+            {verdict && (
+              <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} style={{ overflow: "hidden" }}>
+                <div style={{ display: "grid", gap: 10, marginTop: 16 }}>
+                  <input
+                    value={expected}
+                    onChange={(e) => setExpected(e.target.value)}
+                    placeholder={verdict === "spot-on" ? "Any career you're also curious about? (optional)" : "What career did you expect or want? (optional)"}
+                    style={fieldStyle}
+                  />
+                  <textarea
+                    value={comment}
+                    onChange={(e) => setComment(e.target.value)}
+                    placeholder="Anything that felt off, or that Koko got right? (optional)"
+                    rows={3}
+                    style={{ ...fieldStyle, resize: "vertical" }}
+                  />
+                  <div style={{ fontSize: 11.5, color: PAPER_FAINT }}>Your answers to the questions are shared with the WorthScope team to improve recommendations.</div>
+                  <div style={{ display: "flex", justifyContent: "flex-end" }}>
+                    <button
+                      type="button"
+                      onClick={send}
+                      disabled={sending}
+                      style={{ background: BLUE_BRIGHT, color: "#04070D", border: "none", borderRadius: 10, padding: "11px 24px", fontFamily: FONT, fontWeight: 700, fontSize: 13.5, cursor: sending ? "wait" : "pointer" }}
+                    >
+                      {sending ? "Sending…" : "Send feedback"}
+                    </button>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </>
+      )}
     </div>
   );
 }

@@ -420,6 +420,7 @@ export async function submitForPrediction(profile: CareerIntelligenceProfile): P
 
   try {
     localStorage.setItem("worthscope_ci_prediction", JSON.stringify(prediction));
+    localStorage.setItem("worthscope_ci_profile", JSON.stringify(profile));
   } catch {
     // Best-effort cache only — Supabase write below is the real persistence.
   }
