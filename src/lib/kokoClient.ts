@@ -18,6 +18,7 @@ export type KokoMission = {
   userAge?: number;
   educationLevel?: string;
   learningSignal?: "needs support" | "on track" | "ready to level up";
+  attempts?: number;
 };
 
 export type KokoMsg = { role: "user" | "assistant"; content: string };

@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
-import { streamKokoChat, fetchKokoVideos, type KokoMsg, type KokoVideo } from "@/lib/kokoClient";
+import { streamKokoChat, type KokoMsg } from "@/lib/kokoClient";
+import { LessonVideo } from "@/components/dashboard/LessonVideo";
 import { getProfile, getChosenCareer, markLessonComplete, completeMission } from "@/lib/userState";
 import { markRoadmapMissionComplete } from "@/lib/kokoRoadmap";
 import { supabase } from "@/integrations/supabase/client";
@@ -312,22 +313,9 @@ export const MissionLearnPanel = ({ missionId, missionTitle, missionDescription,
   };
 
   /* ---------- Subsection 02: Watch & Apply ---------- */
-  const [video, setVideo] = useState<KokoVideo | null>(null);
-  const [videoLoading, setVideoLoading] = useState(false);
   const [videoCompleted, setVideoCompleted] = useState(false);
   const [assignmentCompleted, setAssignmentCompleted] = useState(false);
   const [missionDone, setMissionDone] = useState(false);
-  const videoFetchedRef = useRef(false);
-
-  useEffect(() => {
-    if (!completed || videoFetchedRef.current) return;
-    videoFetchedRef.current = true;
-    setVideoLoading(true);
-    fetchKokoVideos(`${missionTitle} ${career?.title || ""} tutorial`, 1)
-      .then((vs) => setVideo(vs[0] || null))
-      .catch(() => setVideo(null))
-      .finally(() => setVideoLoading(false));
-  }, [completed, missionTitle, career?.title]);
 
   /* ---------- Subsection 03: Real-world project ---------- */
   const [brief, setBrief] = useState<string>("");
@@ -336,6 +324,7 @@ export const MissionLearnPanel = ({ missionId, missionTitle, missionDescription,
   const [submission, setSubmission] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [assessResult, setAssessResult] = useState<Assessment | null>(null);
+  const [lastFocus, setLastFocus] = useState("");
   const [attemptCount, setAttemptCount] = useState(0);
   const [assessmentErr, setAssessmentErr] = useState<string | null>(null);
   const projectHydrated = useRef(false);
@@ -356,7 +345,11 @@ export const MissionLearnPanel = ({ missionId, missionTitle, missionDescription,
         .maybeSingle();
       if (row?.brief_md) setBrief(row.brief_md);
       if (row?.submission) setSubmission(row.submission);
-      if (row?.assessment_md) setAssessResult(parseAssessment(row.assessment_md));
+      if (row?.assessment_md) {
+        const prev = parseAssessment(row.assessment_md);
+        setAssessResult(prev);
+        if (prev && !prev.passed) setLastFocus(prev.one_focus_for_next_attempt || "");
+      }
       if (typeof row?.attempt_count === "number") setAttemptCount(row.attempt_count);
     })();
   }, [completed, missionId]);
@@ -408,6 +401,7 @@ export const MissionLearnPanel = ({ missionId, missionTitle, missionDescription,
         const parsed = parseAssessment(acc);
         if (!parsed) { setAssessmentErr(ERR); return; }
         setAssessResult(parsed);
+        setLastFocus(parsed.passed ? "" : parsed.one_focus_for_next_attempt || "");
         setAttemptCount(nextAttempt);
         const { data: u } = await supabase.auth.getUser();
         if (u.user) {
@@ -428,18 +422,6 @@ export const MissionLearnPanel = ({ missionId, missionTitle, missionDescription,
       },
       onError: () => { setSubmitting(false); setAssessmentErr(ERR); },
     });
-  };
-
-  // User chose to skip after failing — mark the mission skipped (NOT completed)
-  // and advance. The roadmap reads mission_lessons.status to show its state.
-  const skipMission = async () => {
-    const { data: u } = await supabase.auth.getUser();
-    if (u.user) {
-      await (supabase as any).from("mission_lessons")
-        .update({ status: "skipped" })
-        .eq("user_id", u.user.id).eq("mission_id", missionId);
-    }
-    onMissionComplete?.();
   };
 
   return (
@@ -478,7 +460,7 @@ export const MissionLearnPanel = ({ missionId, missionTitle, missionDescription,
         {lesson && !loadingLesson && (
           <div className="mt-5 border-t border-border pt-4">
             <label className="mb-2 block text-[12px] font-semibold text-foreground">
-              Ask Koko anything about this topic
+              Answer the Quick Check here, or ask your coach anything
             </label>
 
             {qaMessages.length > 0 && (
@@ -559,53 +541,21 @@ export const MissionLearnPanel = ({ missionId, missionTitle, missionDescription,
 
         {completed ? (
           <>
-            <div className="relative overflow-hidden rounded-lg border border-border bg-black aspect-video">
-              {videoLoading && (
-                <div className="absolute inset-0 grid place-items-center text-[12px] text-white/70">Loading video...</div>
-              )}
-              {!videoLoading && video && (
-                <iframe src={`https://www.youtube.com/embed/${video.videoId}`} title={video.title}
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  allowFullScreen className="absolute inset-0 h-full w-full" />
-              )}
-              {!videoLoading && !video && (
-                <div className="absolute inset-0 grid place-items-center text-[12px] text-white/70">
-                  No video available right now.
-                </div>
-              )}
-            </div>
-
-            {video && (
-              <div className="mt-3 flex flex-col gap-1">
-                <div className="text-[13px] font-semibold text-foreground line-clamp-2">{video.title}</div>
-                <div className="flex items-center gap-2 text-[12px] text-text2">
-                  <span>{video.channel}</span>
-                  <span aria-hidden>·</span>
-                  <span>{video.duration}</span>
-                </div>
-              </div>
-            )}
-
-            <div className="mt-3 rounded-lg p-3" style={{ background: "rgba(59, 130, 246, 0.06)", borderLeft: `3px solid ${KOKO_PURPLE}` }}>
+            <div className="mb-3 rounded-lg p-3" style={{ background: "rgba(59, 130, 246, 0.06)", borderLeft: `3px solid ${KOKO_PURPLE}` }}>
               <div className="text-[11px] font-bold tracking-wide mb-1" style={{ color: KOKO_PURPLE }}>
-                ✦ LEARNING OBJECTIVE
+                ✦ COACH'S NOTE
               </div>
               <p className="text-[12px] text-foreground leading-snug">
-                See {missionTitle.toLowerCase()} in action and connect it to your {career?.title || "career"} path.
+                Watch with a purpose: see {missionTitle.toLowerCase()} in action, pause when something clicks, and note one thing you could try yourself. Your assignment unlocks once you've watched most of it.
               </p>
             </div>
 
-            <div className="mt-4 flex justify-end">
-              <button
-                type="button"
-                onClick={() => setVideoCompleted(true)}
-                disabled={videoCompleted}
-                className="rounded-lg px-4 py-2 text-[13px] font-semibold text-white transition-opacity disabled:opacity-60"
-                style={{ background: KOKO_PURPLE }}
-              >
-                {videoCompleted ? "✓ Video Completed" : "Mark Video Complete →"}
-              </button>
-            </div>
+            <LessonVideo
+              missionTitle={missionTitle}
+              careerTitle={career?.title}
+              watched={videoCompleted}
+              onWatched={() => setVideoCompleted(true)}
+            />
           </>
         ) : (
           <div className="rounded-lg border border-dashed border-border bg-card/40 py-8 text-center text-[12px] text-text3">
@@ -633,13 +583,14 @@ export const MissionLearnPanel = ({ missionId, missionTitle, missionDescription,
         submitting={submitting}
         assessResult={assessResult}
         attemptCount={attemptCount}
+        lastFocus={lastFocus}
         assessmentErr={assessmentErr}
         onSubmit={submitProject}
         onTryAgain={() => setAssessResult(null)}
-        onSkip={skipMission}
         missionDone={missionDone}
         onFinalize={async () => {
-          if (missionDone) return;
+          // A mission can only be completed with a passing review — never otherwise.
+          if (missionDone || assessResult?.passed !== true) return;
           setMissionDone(true);
           const { data: u } = await supabase.auth.getUser();
           if (u.user) {
@@ -722,8 +673,8 @@ function AssignmentSection({
 
 /* ───── Stage 4 — Submission ───── */
 function SubmissionSection({
-  unlocked, submission, setSubmission, submitting, assessResult, attemptCount,
-  assessmentErr, onSubmit, onTryAgain, onSkip, missionDone, onFinalize,
+  unlocked, submission, setSubmission, submitting, assessResult, attemptCount, lastFocus,
+  assessmentErr, onSubmit, onTryAgain, missionDone, onFinalize,
 }: {
   unlocked: boolean;
   submission: string;
@@ -731,14 +682,13 @@ function SubmissionSection({
   submitting: boolean;
   assessResult: Assessment | null;
   attemptCount: number;
+  lastFocus: string;
   assessmentErr: string | null;
   onSubmit: () => void;
   onTryAgain: () => void;
-  onSkip: () => void;
   missionDone: boolean;
   onFinalize: () => void;
 }) {
-  const [skipModal, setSkipModal] = useState(false);
   const passed = assessResult?.passed === true;
 
   return (
@@ -797,43 +747,23 @@ function SubmissionSection({
                   </button>
                 </div>
               ) : (
-                <div className="mt-4 flex items-center justify-end gap-2">
-                  <button type="button" onClick={() => setSkipModal(true)}
-                    className="rounded-lg border border-border px-3.5 py-2 text-[13px] font-medium text-text2 transition-colors hover:text-foreground">
-                    Skip this for now
-                  </button>
-                  <button type="button" onClick={onTryAgain}
-                    className="rounded-lg px-4 py-2 text-[13px] font-semibold text-white"
-                    style={{ background: KOKO_PURPLE }}>
-                    Try again
-                  </button>
+                <div className="mt-4 rounded-xl border p-4" style={{ borderColor: "rgba(59,130,246,0.45)", background: "rgba(59,130,246,0.07)" }}>
+                  <div className="text-[12px] font-bold tracking-wide" style={{ color: KOKO_PURPLE }}>✦ YOUR COACH SAYS</div>
+                  <p className="mt-1.5 text-[13px] leading-[1.6] text-foreground">
+                    This one needs a redo before you can move on — that's how real skills get built, and every attempt gets you closer. Read the feedback above, fix the one thing I flagged, and send it again. If you're stuck, ask me in the lesson chat above.
+                  </p>
+                  <div className="mt-3 flex justify-end">
+                    <button type="button" onClick={onTryAgain}
+                      className="rounded-lg px-4 py-2 text-[13px] font-semibold text-white"
+                      style={{ background: KOKO_PURPLE }}>
+                      Redo the project →
+                    </button>
+                  </div>
                 </div>
               )}
             </div>
           )}
 
-          {skipModal && (
-            <div className="fixed inset-0 z-[700] grid place-items-center bg-black/40 p-4">
-              <div className="w-full max-w-[440px] rounded-2xl bg-card p-6 shadow-[0_20px_60px_rgba(0,0,0,0.25)]">
-                <h3 className="text-[16px] font-bold text-foreground">Are you sure?</h3>
-                <p className="mt-2 text-[13px] leading-[1.6] text-text2">
-                  Skipping means this project won't appear in your portfolio, and it'll be flagged as
-                  "not properly attempted" in your skill progress. Future employers reviewing your
-                  WorthScope profile will see incomplete missions.
-                </p>
-                <div className="mt-5 flex justify-end gap-2">
-                  <button type="button" onClick={() => setSkipModal(false)}
-                    className="rounded-lg border border-border px-4 py-2 text-[13px] font-semibold text-foreground">
-                    Keep trying
-                  </button>
-                  <button type="button" onClick={() => { setSkipModal(false); onSkip(); }}
-                    className="rounded-lg px-4 py-2 text-[13px] font-semibold text-white" style={{ background: "#6B7280" }}>
-                    Skip anyway
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
         </>
       )}
     </section>
