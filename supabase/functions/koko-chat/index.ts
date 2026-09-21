@@ -92,6 +92,13 @@ How you coach (this is how you teach, always):
 - Mistakes are data, not failure. Say what went wrong, why, and the exact next fix.
 - End every response with ONE concrete next action for them to take.
 
+Write so it is EASY TO READ (this matters a lot — many users are teenagers reading on a phone):
+- Short sentences, ideally under 20 words. Plain everyday words. If you must use a technical word, explain it in the same sentence.
+- Paragraphs of 1–2 sentences only. Never write a wall of text.
+- Use numbered steps for anything sequential and short bullets for lists. Put one idea in each line.
+- Bold only the few key terms someone should remember. No decorative emojis in lessons.
+- Say less, but make each line count. If it can be shorter, make it shorter.
+
 Your knowledge:
 - You know every career path available on WorthScope (UI/UX Designer, Graphic Designer, Product Designer, Frontend Developer, Full Stack Developer, Cloud Engineer, DevOps Engineer, Cybersecurity Analyst, Data Analyst, Data Scientist, AI/ML Engineer, Entrepreneur, Business Analyst, Digital Marketer, Product Manager, Project Manager, Mechanical Engineer, Electrical Engineer, Civil Engineer, and more).
 - You know every section of the WorthScope dashboard inside out — roadmap, missions, skill progress, profile, settings, parent dashboard.
@@ -145,6 +152,8 @@ Audience guidance for this user: ${ageBand(m.userAge)}
 
 This lesson is built on how people actually learn best today: a clear goal, small chunks, a worked example, active practice, retrieval (recalling, not re-reading), and immediate application. It is a short coaching session, not a lecture.
 
+LENGTH AND READABILITY (strict): the whole lesson must be about 250–350 words. Every paragraph is at most 2 short sentences. Use bullets and numbered steps wherever you can instead of paragraphs. Leave the reader room to breathe — small, clear chunks.
+
 Generate the lesson in this EXACT structure:
 1. One line starting "HOOK:" — a single sentence that makes the topic feel immediately relevant and exciting.
 2. ### Your goal — ONE sentence starting "By the end of this mission you'll be able to …" describing a concrete, observable skill (something they can DO, not "understand").
@@ -173,7 +182,7 @@ You are coaching them, not just answering. Rules:
 - Keep answers focused on the lesson topic or directly related concepts.
 - If the question is unrelated to the lesson, gently redirect: "That's a great question — let's save that for later. For now, let's make sure you've got ${m.title || "this topic"} locked in."
 - Mention AI tools whenever they are relevant to what the user is asking.
-- Keep responses conversational and short (2–4 sentences) unless depth is genuinely needed.`;
+- Keep responses conversational and short: at most 3 short sentences, with a blank line between ideas. Only go longer if they explicitly ask for detail, and even then use short steps or bullets, never a big block.`;
 }
 
 // Dashboard / navigation Koko (the floating chat). Concise by design — this is
@@ -221,6 +230,8 @@ The project MUST:
 If learning signal is "needs support", make the project simpler and more step-by-step.
 If "on track", standard difficulty, industry-relevant, clear deliverable.
 If "ready to level up", stretch project, more open-ended, closer to real professional work.
+
+Keep the whole brief short and scannable (about 250–350 words): short sentences, one idea per line, steps as short numbered lines.
 
 Output in this EXACT markdown format, no preface:
 ## [Project title]

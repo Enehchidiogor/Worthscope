@@ -124,13 +124,28 @@ function renderMarkdown(raw: string) {
           {group.slice(1).map((g, j) => renderBlock(g, j, inline))}
         </aside>
       );
+    } else if (b.type === "h2" || b.type === "h3") {
+      // Each lesson part becomes its own small card so it is easy to scan.
+      const group: Block[] = [];
+      i++;
+      while (i < blocks.length && blocks[i].type !== "h2" && blocks[i].type !== "h3" && blocks[i].type !== "hook") {
+        group.push(blocks[i]); i++;
+      }
+      out.push(
+        <section key={`sec-${i}`} className="my-3 rounded-xl border border-border bg-card/50 p-4">
+          <div className="mb-2.5 text-[11.5px] font-bold uppercase tracking-[1.2px]" style={{ color: KOKO_PURPLE }}>
+            {inline(b.text)}
+          </div>
+          {group.map((g, j) => renderBlock(g, j, inline))}
+        </section>
+      );
     } else {
       out.push(renderBlock(b, i, inline));
       i++;
     }
   }
 
-  return <div className="text-[14px] leading-[1.7] text-foreground">{out}</div>;
+  return <div className="text-[14.5px] leading-[1.8] text-foreground">{out}</div>;
 }
 
 function renderBlock(
@@ -138,11 +153,11 @@ function renderBlock(
   key: number,
   inline: (s: string) => React.ReactNode,
 ): React.ReactNode {
-  if (b.type === "p")  return <p key={key} className="mb-2.5 text-text2">{inline(b.text)}</p>;
+  if (b.type === "p")  return <p key={key} className="mb-3 last:mb-0 leading-[1.8]" style={{ color: "hsl(var(--foreground) / 0.9)" }}>{inline(b.text)}</p>;
   if (b.type === "h2") return <h3 key={key} className="mt-3 mb-2 text-[15px] font-semibold text-foreground">{inline(b.text)}</h3>;
   if (b.type === "h3") return <h4 key={key} className="mt-3 mb-1.5 text-[13px] font-semibold text-foreground">{inline(b.text)}</h4>;
   if (b.type === "ul") return (
-    <ul key={key} className="my-2 flex flex-col gap-1.5 pl-1">
+    <ul key={key} className="my-2 flex flex-col gap-2.5 pl-1">
       {b.items.map((li: string, j: number) => (
         <li key={j} className="flex gap-2 text-foreground">
           <span aria-hidden className="mt-[7px] h-1.5 w-1.5 shrink-0 rounded-full" style={{ background: KOKO_PURPLE }} />
@@ -152,7 +167,7 @@ function renderBlock(
     </ul>
   );
   if (b.type === "ol") return (
-    <ol key={key} className="my-2 flex flex-col gap-1.5 pl-5 list-decimal">
+    <ol key={key} className="my-2 flex flex-col gap-2.5 pl-5 list-decimal marker:font-semibold marker:text-[#3B82F6]">
       {b.items.map((li: string, j: number) => (
         <li key={j} className="text-foreground"><span className="font-medium">{inline(li)}</span></li>
       ))}

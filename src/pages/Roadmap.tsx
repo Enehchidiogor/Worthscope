@@ -10,7 +10,6 @@ import { MissionDrawer } from "@/components/roadmap/MissionDrawer";
 import { KokoSidePanel } from "@/components/roadmap/KokoSidePanel";
 import { buildRoadmapForUser, type RoadmapNode } from "@/components/roadmap/nodesData";
 import { getChosenCareer } from "@/lib/userState";
-import { markRoadmapMissionComplete } from "@/lib/kokoRoadmap";
 import { toast } from "@/hooks/use-toast";
 import { SEO } from "@/components/SEO";
 
@@ -61,14 +60,11 @@ const Roadmap = () => {
     setOpenNode(node);
   };
 
-  const handleComplete = (id: string) => {
-    const target = nodes.find((n) => n.id === id);
-    if (!target || target.status !== "current") {
-      setOpenNode(null);
-      return;
-    }
-    markRoadmapMissionComplete(id);
+  // The mission is already marked complete inside the training panel (only after a
+  // passing review); here we just close the drawer and let the roadmap refresh.
+  const handleMissionDone = () => {
     setOpenNode(null);
+    toast({ description: "🎉 Mission complete — the next one is unlocked!" });
   };
 
   const grouped = useMemo(() => {
@@ -159,22 +155,22 @@ const Roadmap = () => {
                   <div
                     className="ws-fade-up mx-auto mt-10 max-w-md rounded-[16px] p-6 text-center"
                     style={{
-                      background: "linear-gradient(135deg, #EBF5FB, #F0FFF4)",
-                      border: "1px solid rgba(52,152,219,0.2)",
+                      background: "linear-gradient(135deg, rgba(59,130,246,0.14), rgba(255,255,255,0.03))",
+                      border: "1px solid rgba(96,165,250,0.35)",
                     }}
                   >
                     <div className="text-3xl">🎉</div>
-                    <div style={{ fontWeight: 700, fontSize: 16, color: "#111111", marginTop: 10 }}>
+                    <div className="text-foreground" style={{ fontWeight: 700, fontSize: 16, marginTop: 10 }}>
                       You've completed your roadmap!
                     </div>
-                    <div style={{ fontWeight: 400, fontSize: 13, color: "#6B7280", marginTop: 6 }}>
+                    <div className="text-text2" style={{ fontWeight: 400, fontSize: 13, marginTop: 6 }}>
                       Your matched job opportunities are now available.
                     </div>
                     <Link
                       to="/career"
                       className="inline-block"
                       style={{
-                        background: "#3498DB",
+                        background: "#3B82F6",
                         color: "#FFFFFF",
                         fontWeight: 600,
                         fontSize: 14,
@@ -191,7 +187,7 @@ const Roadmap = () => {
               </section>
 
               {/* RIGHT: Koko */}
-              <KokoSidePanel />
+              <KokoSidePanel nodes={nodes} phases={phasesMeta} onOpenMission={setOpenNode} onGoTo={(path) => navigate(path)} />
             </div>
           )}
         </main>
@@ -203,7 +199,7 @@ const Roadmap = () => {
         <MissionDrawer
           node={openNode}
           onClose={() => setOpenNode(null)}
-          onComplete={handleComplete}
+          onComplete={handleMissionDone}
         />
       )}
     </div>
