@@ -6,19 +6,14 @@ import { SEO } from "@/components/SEO";
 import { signUpWithEmail } from "@/lib/authClient";
 import { toast } from "sonner";
 import { notifyWelcome } from "@/lib/notifications";
-
-
-const ACCENT = "#3498DB";
-const TEXT = "#111111";
-const TEXT3 = "#9CA3AF";
-const BORDER = "#E5E7EB";
-const FONT = "'DM Sans', sans-serif";
-
+import OAuthButtons from "@/components/auth/OAuthButtons";
+import AmbientBackground from "@/components/landing/AmbientBackground";
+import { PAPER, PAPER_DIM, BLUE_BRIGHT, LINE, FONT } from "@/components/experience/theme";
 
 type Strength = { level: 0 | 1 | 2 | 3; label: "" | "Weak" | "Medium" | "Strong"; color: string };
 
 function evalPwd(pw: string): Strength {
-  if (!pw) return { level: 0, label: "", color: BORDER };
+  if (!pw) return { level: 0, label: "", color: LINE };
   const hasNum = /\d/.test(pw);
   const hasSym = /[^A-Za-z0-9]/.test(pw);
   const hasUpper = /[A-Z]/.test(pw);
@@ -67,46 +62,70 @@ export default function SignUp() {
     }
   };
 
-  const barColor = (idx: number) => (strength.level > idx ? strength.color : BORDER);
+  const barColor = (idx: number) => (strength.level > idx ? strength.color : LINE);
 
   return (
-    <div style={{ minHeight: "100vh", background: "#fff", fontFamily: FONT, color: TEXT, position: "relative" }}>
+    <div style={{ minHeight: "100vh", position: "relative", fontFamily: FONT, color: PAPER, overflowX: "clip" as "hidden" }}>
+      <AmbientBackground />
       <SEO
         title="Create Account — WorthScope"
         description="Create your free WorthScope account to start the career assessment and build a personalized roadmap."
         path="/signup"
       />
-      <div style={{ position: "absolute", top: 0, left: 0, padding: "20px 28px", opacity: 0, animation: "ws-logo 0.3s ease forwards" }}>
+      <div style={{ position: "absolute", top: 0, left: 0, padding: "24px 28px", zIndex: 2 }}>
         <Link to="/" style={{ display: "flex", alignItems: "center", textDecoration: "none" }}>
-          <img src={logo} alt="WorthScope" style={{ height: 72, width: "auto", objectFit: "contain", display: "block" }} />
+          <img src={logo} alt="WorthScope" style={{ height: 60, width: "auto", objectFit: "contain", display: "block" }} />
         </Link>
       </div>
 
-      <div style={{ minHeight: "100vh", display: "grid", placeItems: "center", padding: "100px 20px 40px" }}>
+      <div style={{ position: "relative", zIndex: 1, minHeight: "100vh", display: "grid", placeItems: "center", padding: "110px 20px 40px" }}>
         <form
           onSubmit={onSubmit}
           style={{
-            width: "100%", maxWidth: 480, padding: "48px 32px",
-            opacity: 0, animation: "ws-form-in 0.5s ease 0.1s forwards",
+            width: "100%",
+            maxWidth: 440,
+            padding: "40px 34px",
+            borderRadius: 24,
+            background: "rgba(255,255,255,.03)",
+            border: `1px solid ${LINE}`,
+            backdropFilter: "blur(18px)",
+            WebkitBackdropFilter: "blur(18px)",
+            boxShadow: "0 40px 90px -40px rgba(0,0,0,.8)",
+            opacity: 0,
+            animation: "ws-form-in 0.5s ease 0.1s forwards",
           }}
         >
-          <h1 style={{ fontSize: 48, fontWeight: 700, letterSpacing: "-1.5px", textAlign: "center", margin: 0, color: TEXT }}>
-            Welcome
-          </h1>
-          <p style={{ marginTop: 12, fontSize: 16, color: TEXT, textAlign: "center", marginBottom: 36 }}>
-            Discover your <span style={{ color: ACCENT }}>career path</span>
+          <h1 style={{ fontSize: 32, fontWeight: 700, letterSpacing: -0.8, textAlign: "center", margin: 0, color: PAPER }}>Get Started</h1>
+          <p style={{ marginTop: 10, fontSize: 14.5, color: PAPER_DIM, textAlign: "center", marginBottom: 30 }}>
+            Discover your <span style={{ color: BLUE_BRIGHT }}>career path</span>
           </p>
 
+          <OAuthButtons redirectPath="/signup" />
+
           <Field label="First Name">
-            <input type="text" required value={name} onChange={(e) => setName(e.target.value)}
-              placeholder="Enter your first name" className="ws-input" style={inputStyle()} />
+            <input
+              type="text"
+              required
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="Enter your first name"
+              className="ws-input"
+              style={inputStyle()}
+            />
           </Field>
 
           <div style={{ height: 16 }} />
 
           <Field label="Email Address">
-            <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)}
-              placeholder="Enter your email address" className="ws-input" style={inputStyle()} />
+            <input
+              type="email"
+              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="Enter your email address"
+              className="ws-input"
+              style={inputStyle()}
+            />
           </Field>
 
           <div style={{ height: 16 }} />
@@ -114,8 +133,12 @@ export default function SignUp() {
           <Field label="Password">
             <div style={{ position: "relative" }}>
               <input
-                type={showPwd ? "text" : "password"} required placeholder="Create a password" className="ws-input"
-                value={pwd} onChange={(e) => setPwd(e.target.value)}
+                type={showPwd ? "text" : "password"}
+                required
+                placeholder="Create a password"
+                className="ws-input"
+                value={pwd}
+                onChange={(e) => setPwd(e.target.value)}
                 style={{ ...inputStyle(), paddingRight: 48 }}
               />
               <button type="button" aria-label="Toggle password" onClick={() => setShowPwd((v) => !v)} style={eyeBtn()}>
@@ -140,18 +163,28 @@ export default function SignUp() {
             disabled={submitting}
             className="ws-submit"
             style={{
-              marginTop: 28, width: "100%", height: 56, background: ACCENT, color: "#fff",
-              border: "none", borderRadius: 14, fontFamily: FONT, fontWeight: 700, fontSize: 17,
-              cursor: submitting ? "wait" : "pointer", transition: "all 0.2s ease",
+              marginTop: 24,
+              width: "100%",
+              height: 52,
+              background: BLUE_BRIGHT,
+              color: "#04070D",
+              border: "none",
+              borderRadius: 14,
+              fontFamily: FONT,
+              fontWeight: 700,
+              fontSize: 15,
+              cursor: submitting ? "wait" : "pointer",
+              transition: "all 0.2s ease",
               opacity: submitting ? 0.7 : 1,
+              boxShadow: `0 0 24px ${BLUE_BRIGHT}55`,
             }}
           >
             {submitting ? "Creating account…" : "Begin Journey"}
           </button>
 
-          <p style={{ marginTop: 20, textAlign: "center", fontSize: 14, color: TEXT }}>
+          <p style={{ marginTop: 20, textAlign: "center", fontSize: 13.5, color: PAPER_DIM }}>
             Already have an account?{" "}
-            <Link to="/signin" style={{ color: ACCENT, fontWeight: 600, textDecoration: "none" }}>
+            <Link to="/signin" style={{ color: BLUE_BRIGHT, fontWeight: 600, textDecoration: "none" }}>
               Sign in
             </Link>
           </p>

@@ -108,3 +108,25 @@ export async function persistProfile(patch: Partial<Omit<DbProfile, "id">>) {
 export async function persistCareerPath(career: string) {
   return persistProfile({ career_path: career });
 }
+
+/* Once-per-day welcome gate. Returns true at most once per calendar day per
+   user, and stamps profiles.last_welcomed_at — so dashboard greetings don't
+   fire on every visit/refresh. NOTE: last_welcomed_at is added by the
+   koko_quality_persistence migration; the generated Supabase types don't know
+   it yet (Lovable regenerates them on migration), so this uses an untyped query. */
+export async function claimDailyWelcome(): Promise<boolean> {
+  const { data: u } = await supabase.auth.getUser();
+  if (!u.user) return false;
+  const db = supabase as unknown as {
+    from: (t: string) => {
+      select: (c: string) => { eq: (k: string, v: string) => { maybeSingle: () => Promise<{ data: { last_welcomed_at: string | null } | null }> } };
+      update: (v: Record<string, unknown>) => { eq: (k: string, v: string) => Promise<unknown> };
+    };
+  };
+  const { data: row } = await db.from("profiles").select("last_welcomed_at").eq("id", u.user.id).maybeSingle();
+  const today = new Date().toISOString().slice(0, 10);
+  const last = row?.last_welcomed_at ? new Date(row.last_welcomed_at).toISOString().slice(0, 10) : null;
+  if (last === today) return false;
+  await db.from("profiles").update({ last_welcomed_at: new Date().toISOString() }).eq("id", u.user.id);
+  return true;
+}

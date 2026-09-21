@@ -2,21 +2,14 @@ import { useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import logo from "@/assets/worthscope-logo.png";
 import { SEO } from "@/components/SEO";
+import AmbientBackground from "@/components/landing/AmbientBackground";
+import { PAPER, PAPER_DIM, BLUE_BRIGHT, LINE, FONT } from "@/components/experience/theme";
 
 /* WorthScope — Stage 1: User Setup Screen
    Collects identity context: name, age range, education level, and class/level.
-   Saves to localStorage as worthscope_user_profile. */
-
-const ACCENT = "#3498DB";
-const ACCENT_DARK = "#217BBB";
-const ACCENT_LIGHT = "#EBF5FB";
-const BG = "#F4F9FE";
-const BORDER = "#E5E7EB";
-const TEXT = "#111111";
-const TEXT2 = "#6B7280";
-const TEXT3 = "#9CA3AF";
-const SUCCESS = "#22C55E";
-const FONT = "'Poppins', sans-serif";
+   Saves to localStorage as worthscope_user_profile, then hands off to
+   /discover (Koko chat/voice discovery), with the static assessment kept as
+   a fallback link from there. */
 
 const STORAGE_KEY = "worthscope_user_profile";
 
@@ -46,7 +39,9 @@ function loadProfile(): Profile {
         classOrLevel: p.classOrLevel || "",
       };
     }
-  } catch {}
+  } catch {
+    // Corrupt/missing localStorage — fall through to a blank profile.
+  }
   return { fullName: "", firstName: "", ageRange: "", educationLevel: "", classOrLevel: "" };
 }
 
@@ -82,29 +77,35 @@ export default function Onboarding() {
       educationLevel: p.educationLevel,
       classOrLevel: p.classOrLevel,
     };
-    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(profile)); } catch {}
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(profile));
+    } catch {
+      // Non-critical — worst case the next page re-asks for these details.
+    }
     window.setTimeout(() => {
       setShowGreeting(true);
-      window.setTimeout(() => navigate("/assessment"), 1800);
+      window.setTimeout(() => navigate("/discover"), 1800);
     }, 800);
   }
 
   if (showGreeting) {
     const firstName = p.fullName.trim().split(/\s+/)[0] || "there";
     return (
-      <div style={{ minHeight: "100vh", background: BG, fontFamily: FONT, display: "grid", placeItems: "center", padding: 24 }}>
-        <div style={{ textAlign: "center", animation: "ws-fade-up 0.5s ease both" }}>
+      <div style={{ minHeight: "100vh", position: "relative", fontFamily: FONT, display: "grid", placeItems: "center", padding: 24, overflowX: "clip" as "hidden" }}>
+        <AmbientBackground />
+        <div style={{ position: "relative", zIndex: 1, textAlign: "center", animation: "ws-fade-up 0.5s ease both" }}>
           <div style={{ fontSize: 56, animation: "ws-wave 1.6s ease-in-out infinite", display: "inline-block", transformOrigin: "70% 70%" }}>
             👋
           </div>
-          <h1 style={{ marginTop: 14, fontWeight: 700, fontSize: 28, color: TEXT, letterSpacing: -0.6 }}>
+          <h1 style={{ marginTop: 14, fontWeight: 700, fontSize: 28, color: PAPER, letterSpacing: -0.6 }}>
             Nice to meet you, {firstName}
           </h1>
-          <p style={{ marginTop: 10, fontWeight: 400, fontSize: 16, color: TEXT2 }}>
-            Let's find your perfect career path.
+          <p style={{ marginTop: 10, fontWeight: 400, fontSize: 16, color: PAPER_DIM }}>
+            Let&rsquo;s find your perfect career path.
           </p>
         </div>
         <style>{`
+          body { background: #000; }
           @keyframes ws-fade-up { from {opacity:0; transform:translateY(12px)} to {opacity:1; transform:translateY(0)} }
           @keyframes ws-wave { 0%,60%,100%{transform:rotate(0)} 20%{transform:rotate(18deg)} 40%{transform:rotate(-12deg)} }
         `}</style>
@@ -113,40 +114,40 @@ export default function Onboarding() {
   }
 
   return (
-    <div style={{ minHeight: "100vh", background: BG, fontFamily: FONT, color: TEXT, display: "flex", flexDirection: "column" }}>
+    <div style={{ minHeight: "100vh", position: "relative", fontFamily: FONT, color: PAPER, display: "flex", flexDirection: "column", overflowX: "clip" as "hidden" }}>
+      <AmbientBackground />
       <SEO
         title="Get Started — WorthScope"
-        description="Tell us a little about you so WorthScope can personalize your career assessment and roadmap."
+        description="Tell us a little about you so WorthScope can personalize your career discovery and roadmap."
         path="/onboarding"
       />
       <header
         style={{
           height: 80, padding: "0 24px",
-          background: "transparent",
           display: "flex", alignItems: "center", justifyContent: "space-between",
           position: "absolute", top: 0, left: 0, right: 0, zIndex: 10,
         }}
       >
         <Link to="/" style={{ textDecoration: "none", display: "flex", alignItems: "center" }}>
-          <img src={logo} alt="WorthScope" style={{ height: 72, width: "auto", objectFit: "contain", display: "block" }} />
+          <img src={logo} alt="WorthScope" style={{ height: 60, width: "auto", objectFit: "contain", display: "block" }} />
         </Link>
       </header>
 
-      <main style={{ flex: 1, width: "100%", maxWidth: 560, margin: "0 auto", padding: "48px 32px" }} className="ws-setup-main">
+      <main style={{ position: "relative", zIndex: 1, flex: 1, width: "100%", maxWidth: 560, margin: "0 auto", padding: "48px 32px" }} className="ws-setup-main">
         <div style={{ display: "flex", justifyContent: "center", gap: 8, marginBottom: 14, flexWrap: "wrap" }}>
           <Pill state="active">1 — Tell us about yourself</Pill>
-          <Pill state="upcoming">2 — Answer 10 questions</Pill>
+          <Pill state="upcoming">2 — Talk to Koko</Pill>
           <Pill state="upcoming">3 — Get your career path</Pill>
         </div>
-        <p style={{ textAlign: "center", fontWeight: 400, fontSize: 13, color: TEXT3, marginBottom: 36 }}>
-          3 simple steps to your personalised career blueprint
+        <p style={{ textAlign: "center", fontWeight: 400, fontSize: 13, color: "rgba(255,255,255,.4)", marginBottom: 36 }}>
+          A few quick details, then a real conversation with Koko
         </p>
 
-        <h1 style={{ textAlign: "center", fontWeight: 700, fontSize: 30, letterSpacing: -0.8, color: TEXT, margin: 0 }}>
-          Let's Get You Started
+        <h1 style={{ textAlign: "center", fontWeight: 700, fontSize: 30, letterSpacing: -0.8, color: PAPER, margin: 0 }}>
+          Let&rsquo;s Get You Started
         </h1>
-        <p style={{ textAlign: "center", fontWeight: 400, fontSize: 15, color: TEXT2, maxWidth: 400, margin: "8px auto 36px" }}>
-          We'll personalize your career path in just a few steps.
+        <p style={{ textAlign: "center", fontWeight: 400, fontSize: 15, color: PAPER_DIM, maxWidth: 400, margin: "8px auto 36px" }}>
+          We&rsquo;ll personalize your career path in just a few steps.
         </p>
 
         <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
@@ -174,9 +175,9 @@ export default function Onboarding() {
                     onClick={() => setP({ ...p, ageRange: opt })}
                     style={{
                       padding: "10px 16px", borderRadius: 12,
-                      border: `1.5px solid ${active ? ACCENT : BORDER}`,
-                      background: active ? ACCENT_LIGHT : "#fff",
-                      color: active ? ACCENT_DARK : TEXT,
+                      border: `1.5px solid ${active ? BLUE_BRIGHT : LINE}`,
+                      background: active ? "rgba(59,130,246,.12)" : "rgba(255,255,255,.03)",
+                      color: active ? BLUE_BRIGHT : PAPER,
                       fontFamily: FONT, fontWeight: 600, fontSize: 14,
                       cursor: "pointer", transition: "all 0.15s ease",
                     }}
@@ -203,9 +204,9 @@ export default function Onboarding() {
                     onClick={() => handleSelectLevel(opt.id)}
                     style={{
                       height: 52, borderRadius: 12,
-                      border: `1.5px solid ${active ? ACCENT : BORDER}`,
-                      background: active ? ACCENT_LIGHT : "#fff",
-                      color: active ? ACCENT_DARK : TEXT,
+                      border: `1.5px solid ${active ? BLUE_BRIGHT : LINE}`,
+                      background: active ? "rgba(59,130,246,.12)" : "rgba(255,255,255,.03)",
+                      color: active ? BLUE_BRIGHT : PAPER,
                       fontFamily: FONT, fontWeight: 600, fontSize: 14,
                       cursor: "pointer", transition: "all 0.15s ease",
                     }}
@@ -224,11 +225,11 @@ export default function Onboarding() {
                 value={p.classOrLevel}
                 onChange={(e) => setP({ ...p, classOrLevel: e.target.value })}
                 className="ws-input"
-                style={{ ...inputStyle(), appearance: "none", cursor: "pointer" }}
+                style={{ ...inputStyle(), appearance: "none", cursor: "pointer", colorScheme: "dark" }}
               >
-                <option value="">Select…</option>
+                <option value="" style={{ background: "#0A0D14", color: PAPER }}>Select…</option>
                 {classOptions.map((opt) => (
-                  <option key={opt} value={opt}>{opt}</option>
+                  <option key={opt} value={opt} style={{ background: "#0A0D14", color: PAPER }}>{opt}</option>
                 ))}
               </select>
             </Field>
@@ -240,45 +241,36 @@ export default function Onboarding() {
             style={{
               marginTop: 12,
               width: "100%", height: 54, borderRadius: 14, border: "none",
-              background: canContinue ? ACCENT : BORDER,
-              color: canContinue ? "#fff" : TEXT3,
-              fontFamily: FONT, fontWeight: 600, fontSize: 16,
+              background: canContinue ? BLUE_BRIGHT : LINE,
+              color: canContinue ? "#04070D" : "rgba(255,255,255,.4)",
+              fontFamily: FONT, fontWeight: 700, fontSize: 16,
               cursor: canContinue ? "pointer" : "not-allowed",
-              transition: "background 0.3s, box-shadow 0.2s, transform 0.18s",
-            }}
-            onMouseEnter={(e) => {
-              if (!canContinue) return;
-              e.currentTarget.style.background = ACCENT_DARK;
-              e.currentTarget.style.boxShadow = "0 8px 24px rgba(52,152,219,0.35)";
-              e.currentTarget.style.transform = "translateY(-1px)";
-            }}
-            onMouseLeave={(e) => {
-              if (!canContinue) return;
-              e.currentTarget.style.background = ACCENT;
-              e.currentTarget.style.boxShadow = "none";
-              e.currentTarget.style.transform = "translateY(0)";
+              transition: "all 0.2s ease",
+              boxShadow: canContinue ? `0 0 24px ${BLUE_BRIGHT}55` : "none",
             }}
           >
             {submitting ? (
               <span style={{ display: "inline-flex", alignItems: "center", gap: 10 }}>
                 <span style={{
                   width: 16, height: 16, borderRadius: "50%",
-                  border: "2px solid rgba(255,255,255,0.4)", borderTopColor: "#fff",
+                  border: "2px solid rgba(0,0,0,0.25)", borderTopColor: "#04070D",
                   display: "inline-block", animation: "ws-spin 0.8s linear infinite",
                 }} />
                 Setting up...
               </span>
-            ) : "Start Assessment →"}
+            ) : "Continue →"}
           </button>
         </div>
       </main>
 
       <style>{`
+        body { background: #000; }
         @keyframes ws-spin { to { transform: rotate(360deg) } }
+        .ws-input::placeholder { color: rgba(255,255,255,.3); }
         .ws-input:focus {
           outline: none;
-          border-color: ${ACCENT} !important;
-          box-shadow: 0 0 0 4px rgba(52,152,219,0.1) !important;
+          border-color: ${BLUE_BRIGHT} !important;
+          box-shadow: 0 0 0 4px rgba(59,130,246,0.12) !important;
         }
         @media (max-width: 640px) {
           .ws-setup-main { padding: 28px 20px !important; }
@@ -290,9 +282,9 @@ export default function Onboarding() {
 
 function Pill({ state, children }: { state: "active" | "upcoming" | "completed"; children: React.ReactNode }) {
   const styles: Record<string, React.CSSProperties> = {
-    active: { background: ACCENT, color: "#fff", border: "1px solid transparent" },
-    upcoming: { background: BG, color: TEXT3, border: `1px solid ${BORDER}` },
-    completed: { background: "rgba(34,197,94,0.1)", color: SUCCESS, border: "1px solid rgba(34,197,94,0.2)" },
+    active: { background: BLUE_BRIGHT, color: "#04070D", border: "1px solid transparent" },
+    upcoming: { background: "rgba(255,255,255,.03)", color: "rgba(255,255,255,.4)", border: `1px solid ${LINE}` },
+    completed: { background: "rgba(34,197,94,0.1)", color: "#22C55E", border: "1px solid rgba(34,197,94,0.2)" },
   };
   return (
     <span
@@ -314,7 +306,7 @@ function Field({ label, highlight, children }: { label: string; highlight?: bool
     <label style={{ display: "block" }}>
       <span style={{
         display: "block", fontFamily: FONT, fontWeight: 600, fontSize: 13,
-        color: highlight ? ACCENT : TEXT, marginBottom: 8, transition: "color 0.2s ease",
+        color: highlight ? BLUE_BRIGHT : PAPER, marginBottom: 8, transition: "color 0.2s ease",
       }}>
         {label}
       </span>
@@ -326,8 +318,8 @@ function Field({ label, highlight, children }: { label: string; highlight?: bool
 function inputStyle(): React.CSSProperties {
   return {
     width: "100%", height: 52, padding: "0 18px", borderRadius: 12,
-    border: `1.5px solid ${BORDER}`, background: "#fff",
-    fontFamily: FONT, fontSize: 15, fontWeight: 400, color: TEXT,
+    border: `1.5px solid ${LINE}`, background: "rgba(255,255,255,.03)",
+    fontFamily: FONT, fontSize: 15, fontWeight: 400, color: PAPER,
     transition: "border-color 0.2s ease, box-shadow 0.2s ease",
     boxSizing: "border-box",
   };
