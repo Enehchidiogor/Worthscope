@@ -17,6 +17,12 @@ import Mission from "./pages/Mission.tsx";
 import Skills from "./pages/Skills.tsx";
 import Career from "./pages/Career.tsx";
 import LiveClasses from "./pages/LiveClasses.tsx";
+import AdminOverview from "./pages/admin/AdminOverview.tsx";
+import AdminUsers from "./pages/admin/AdminUsers.tsx";
+import AdminClasses from "./pages/admin/AdminClasses.tsx";
+import AdminApplications from "./pages/admin/AdminApplications.tsx";
+import AdminFeedback from "./pages/admin/AdminFeedback.tsx";
+import { AdminGate } from "@/components/admin/AdminGate";
 import Assessment from "./pages/Assessment.tsx";
 import Discover from "./pages/Discover.tsx";
 import DiscoverVoice from "./pages/DiscoverVoice.tsx";
@@ -37,7 +43,7 @@ const queryClient = new QueryClient();
 const Gated = ({ children }: { children: React.ReactNode }) => <AuthGate>{children}</AuthGate>;
 
 // Dashboard-area pages use the brand dark theme (.dark tokens in index.css).
-const DARK_ROUTES = ["/dashboard", "/roadmap", "/mission", "/missions", "/skills", "/career", "/classes", "/settings", "/profile", "/notifications", "/koko"];
+const DARK_ROUTES = ["/dashboard", "/roadmap", "/mission", "/missions", "/skills", "/career", "/classes", "/settings", "/profile", "/notifications", "/koko", "/admin"];
 
 const RouteTheme = () => {
   const { pathname } = useLocation();
@@ -77,6 +83,11 @@ const App = () => (
           <Route path="/skills" element={<Gated><Skills /></Gated>} />
           <Route path="/career" element={<Gated><Career /></Gated>} />
           <Route path="/classes" element={<Gated><LiveClasses /></Gated>} />
+          <Route path="/admin" element={<Gated><AdminGate><AdminOverview /></AdminGate></Gated>} />
+          <Route path="/admin/users" element={<Gated><AdminGate><AdminUsers /></AdminGate></Gated>} />
+          <Route path="/admin/classes" element={<Gated><AdminGate><AdminClasses /></AdminGate></Gated>} />
+          <Route path="/admin/applications" element={<Gated><AdminGate><AdminApplications /></AdminGate></Gated>} />
+          <Route path="/admin/feedback" element={<Gated><AdminGate><AdminFeedback /></AdminGate></Gated>} />
           <Route path="/assessment" element={<Gated><Assessment /></Gated>} />
           <Route path="/discover" element={<Gated><Discover /></Gated>} />
           <Route path="/discover/voice" element={<Gated><DiscoverVoice /></Gated>} />

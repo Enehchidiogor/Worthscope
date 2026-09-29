@@ -1,9 +1,9 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Sidebar } from "@/components/dashboard/Sidebar";
 import { TopBar } from "@/components/dashboard/TopBar";
 import { MobileTabBar } from "@/components/dashboard/MobileTabBar";
 import { IconCalendar } from "@/components/dashboard/icons";
-import { getVisibleClasses, classStatus, applyMailto, type LiveClass } from "@/lib/liveClasses";
+import { fetchVisibleClasses, classStatus, applyMailto, recordApplication, type LiveClass } from "@/lib/liveClasses";
 import { getProfile } from "@/lib/userState";
 import { SEO } from "@/components/SEO";
 
@@ -17,9 +17,24 @@ function fmtRange(startsAt: string, endsAt: string): string {
 }
 
 const LiveClasses = () => {
-  const classes = getVisibleClasses();
+  const [classes, setClasses] = useState<LiveClass[] | null>(null);
   const profile = getProfile();
   const [applying, setApplying] = useState<LiveClass | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetchVisibleClasses().then((c) => !cancelled && setClasses(c));
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  function onApplyContinue() {
+    if (applying) {
+      recordApplication(applying.id, profile?.fullName || profile?.firstName || "A WorthScope learner", profile?.email).catch(() => {});
+    }
+    setApplying(null);
+  }
 
   return (
     <div className="min-h-screen bg-background font-poppins text-foreground">
@@ -40,7 +55,9 @@ const LiveClasses = () => {
             Real-time sessions — online and in person — run by WorthScope or a partner training facility. Every application goes out clearly as coming from WorthScope.
           </p>
 
-          {classes.length === 0 ? (
+          {classes === null ? (
+            <p className="mt-8 text-[13px] text-text2">Loading…</p>
+          ) : classes.length === 0 ? (
             <div className="mt-8 rounded-[18px] border border-dashed border-border bg-card p-10 text-center">
               <div className="mx-auto grid h-14 w-14 place-items-center rounded-full bg-accent/10">
                 <IconCalendar className="h-6 w-6 text-accent" />
@@ -136,7 +153,7 @@ const LiveClasses = () => {
                 href={applying.applyUrl || applyMailto(applying, profile?.fullName || profile?.firstName || "A WorthScope learner")}
                 target={applying.applyUrl ? "_blank" : undefined}
                 rel="noopener noreferrer"
-                onClick={() => setApplying(null)}
+                onClick={onApplyContinue}
                 className="rounded-lg bg-accent px-4 py-2 text-[13px] font-semibold text-white hover:bg-accent-dark"
               >
                 Continue →

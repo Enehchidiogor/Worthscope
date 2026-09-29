@@ -4,6 +4,7 @@ import type { ComponentType } from "react";
 import { Link } from "react-router-dom";
 import logo from "@/assets/worthscope-logo.png";
 import { getProfile } from "@/lib/userState";
+import { useIsAdmin } from "@/lib/adminAuth";
 import { UserAvatar } from "@/components/UserAvatar";
 
 type Item = { label: string; Icon: ComponentType<{ className?: string }>; to: string };
@@ -21,6 +22,7 @@ const items: Item[] = [
 export const Sidebar = ({ activePath = "/" }: { activePath?: string }) => {
   const [name, setName] = useState("Welcome");
   const [initial, setInitial] = useState("U");
+  const { isAdmin } = useIsAdmin();
   useEffect(() => {
     const p = getProfile();
     if (p?.firstName) {
@@ -55,6 +57,18 @@ export const Sidebar = ({ activePath = "/" }: { activePath?: string }) => {
           );
         })}
       </nav>
+
+      {isAdmin && (
+        <Link
+          to="/admin"
+          className={[
+            "mt-3 flex items-center gap-2 rounded-[10px] border border-accent/20 bg-accent/5 px-4 py-[10px] text-[13px] font-semibold transition-colors",
+            activePath.startsWith("/admin") ? "text-accent" : "text-accent/80 hover:text-accent",
+          ].join(" ")}
+        >
+          🛠 Admin dashboard
+        </Link>
+      )}
 
       <Link to="/profile" className="mt-auto flex items-center gap-3 rounded-xl border border-border p-3 transition-colors hover:bg-bg-elevated">
         <UserAvatar size={36} fallbackInitial={initial} fallbackName={name} />
