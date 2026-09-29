@@ -7,7 +7,7 @@ type Props = {
   onView: (job: UnifiedJob) => void;
 };
 
-const ACCENT = "#3498DB";
+const ACCENT = "#3B82F6";
 
 function timeAgo(iso: string): string {
   const d = new Date(iso).getTime();
@@ -36,7 +36,7 @@ export const UnifiedJobCard = ({ job, index, onView }: Props) => {
     <article
       className="rounded-[18px] border bg-white p-6 md:p-7"
       style={{
-        borderColor: "#E5E7EB",
+        borderColor: "#1E2430",
         boxShadow: "0 2px 12px rgba(0,0,0,0.05)",
         transition: "all 0.2s ease",
         opacity: 0,
@@ -49,21 +49,21 @@ export const UnifiedJobCard = ({ job, index, onView }: Props) => {
             <img
               src={job.company_logo_url}
               alt={job.company}
-              style={{ width: 40, height: 40, borderRadius: 10, objectFit: "cover", background: "#F3EEFF" }}
+              style={{ width: 40, height: 40, borderRadius: 10, objectFit: "cover", background: "rgba(59,130,246,0.14)" }}
             />
           ) : (
             <div
               className="grid h-10 w-10 shrink-0 place-items-center rounded-[10px]"
-              style={{ background: "#F3EEFF", color: ACCENT, fontWeight: 700, fontSize: 18 }}
+              style={{ background: "rgba(59,130,246,0.14)", color: ACCENT, fontWeight: 700, fontSize: 18 }}
             >
               {initial}
             </div>
           )}
           <div>
-            <div style={{ fontWeight: 700, fontSize: 17, color: "#111111", lineHeight: 1.3 }}>
+            <div style={{ fontWeight: 700, fontSize: 17, color: "#FFFFFF", lineHeight: 1.3 }}>
               {job.title}
             </div>
-            <div style={{ fontWeight: 400, fontSize: 13, color: "#6B7280", marginTop: 2 }}>
+            <div style={{ fontWeight: 400, fontSize: 13, color: "rgba(255,255,255,0.7)", marginTop: 2 }}>
               {job.company}
             </div>
           </div>
@@ -72,7 +72,7 @@ export const UnifiedJobCard = ({ job, index, onView }: Props) => {
         <div
           className="self-start"
           style={{
-            background: "#F3EEFF",
+            background: "rgba(59,130,246,0.14)",
             border: `1px solid ${ACCENT}33`,
             borderRadius: 100,
             padding: "5px 14px",
@@ -92,7 +92,7 @@ export const UnifiedJobCard = ({ job, index, onView }: Props) => {
       </div>
 
       <div className="mt-3.5 flex items-center gap-2.5">
-        <div style={{ width: 160, height: 5, background: "#E5E7EB", borderRadius: 100, overflow: "hidden" }}>
+        <div style={{ width: 160, height: 5, background: "#1E2430", borderRadius: 100, overflow: "hidden" }}>
           <div
             style={{
               width: `${barFill}%`,
@@ -110,9 +110,9 @@ export const UnifiedJobCard = ({ job, index, onView }: Props) => {
 
       <div
         className="mt-4 flex flex-col gap-3 pt-4 sm:flex-row sm:items-center sm:justify-between"
-        style={{ borderTop: "1px solid #E5E7EB" }}
+        style={{ borderTop: "1px solid #1E2430" }}
       >
-        <span style={{ fontWeight: 400, fontSize: 12, color: "#9CA3AF" }}>
+        <span style={{ fontWeight: 400, fontSize: 12, color: "rgba(255,255,255,0.5)" }}>
           Posted {timeAgo(job.posted_at)}{job.source === "jsearch" ? " · via JSearch" : ""}
         </span>
         <div className="flex flex-col gap-2.5 sm:flex-row">
@@ -120,12 +120,12 @@ export const UnifiedJobCard = ({ job, index, onView }: Props) => {
             onClick={() => onView(job)}
             style={{
               background: "transparent",
-              border: "1.5px solid #E5E7EB",
+              border: "1.5px solid #1E2430",
               borderRadius: 10,
               padding: "9px 18px",
               fontWeight: 600,
               fontSize: 13,
-              color: "#6B7280",
+              color: "rgba(255,255,255,0.7)",
               cursor: "pointer",
               fontFamily: "inherit",
             }}
@@ -160,13 +160,13 @@ export const UnifiedJobCard = ({ job, index, onView }: Props) => {
 const Tag = ({ children }: { children: React.ReactNode }) => (
   <span
     style={{
-      background: "#F4F9FE",
-      border: "1px solid #E5E7EB",
+      background: "#10141D",
+      border: "1px solid #1E2430",
       borderRadius: 100,
       padding: "4px 12px",
       fontWeight: 400,
       fontSize: 12,
-      color: "#6B7280",
+      color: "rgba(255,255,255,0.7)",
     }}
   >
     {children}

@@ -11,7 +11,7 @@ import { getActiveModule, loadModuleForCareer } from "@/lib/careerModules";
 import { SEO } from "@/components/SEO";
 
 const UNLOCK_THRESHOLD = 70;
-const ACCENT = "#3498DB";
+const ACCENT = "#3B82F6";
 
 const FILTERS = [
   { key: "all", label: "All Roles" },
@@ -125,7 +125,7 @@ const Career = () => {
 
   // ===================================================
   return (
-    <div className="min-h-screen" style={{ background: "#F4F9FE", fontFamily: "'Poppins', sans-serif" }}>
+    <div className="min-h-screen" style={{ background: "#10141D", fontFamily: "'Poppins', sans-serif" }}>
       <SEO
         title="Career Opportunities — WorthScope"
         description="Browse curated job and opportunity listings aligned with your chosen career path."
@@ -136,15 +136,15 @@ const Career = () => {
       {/* Top bar */}
       <header
         className="sticky top-0 z-30 flex h-16 items-center justify-between border-b px-4 backdrop-blur-xl md:ml-[220px] md:px-8"
-        style={{ background: "rgba(255,255,255,0.88)", borderColor: "#E5E7EB" }}
+        style={{ background: "rgba(5,7,12,0.88)", borderColor: "#1E2430" }}
       >
-        <h1 style={{ fontWeight: 600, fontSize: 18, color: "#111111" }}>Career Opportunities</h1>
+        <h1 style={{ fontWeight: 600, fontSize: 18, color: "#FFFFFF" }}>Career Opportunities</h1>
 
         <div className="flex items-center gap-3">
           {unlocked ? (
             <span
               style={{
-                background: "#F3EEFF",
+                background: "rgba(59,130,246,0.14)",
                 border: `1px solid ${ACCENT}33`,
                 borderRadius: 100,
                 padding: "6px 14px",
@@ -156,13 +156,13 @@ const Career = () => {
               {filteredJobs.length} roles matched
             </span>
           ) : (
-            <span className="flex items-center gap-1.5" style={{ fontWeight: 500, fontSize: 13, color: "#9CA3AF" }}>
+            <span className="flex items-center gap-1.5" style={{ fontWeight: 500, fontSize: 13, color: "rgba(255,255,255,0.5)" }}>
               <IconLock className="h-4 w-4" />
               Locked
             </span>
           )}
 
-          <button className="relative" aria-label="Notifications" style={{ color: "#6B7280" }}>
+          <button className="relative" aria-label="Notifications" style={{ color: "rgba(255,255,255,0.7)" }}>
             <IconBell className="h-5 w-5" />
             <span className="absolute -right-0.5 -top-0.5 h-2 w-2 rounded-full" style={{ background: "#EF4444" }} />
           </button>
@@ -180,7 +180,7 @@ const Career = () => {
               <div
                 className="ws-fade-up mb-6 flex items-start gap-3 rounded-[14px] p-4 md:p-5"
                 style={{
-                  background: "#F3EEFF",
+                  background: "rgba(59,130,246,0.14)",
                   borderLeft: `4px solid ${ACCENT}`,
                 }}
               >
@@ -190,7 +190,7 @@ const Career = () => {
                 >
                   K
                 </div>
-                <p style={{ fontWeight: 400, fontSize: 14, color: "#111111", lineHeight: 1.65, margin: 0 }}>
+                <p style={{ fontWeight: 400, fontSize: 14, color: "#FFFFFF", lineHeight: 1.65, margin: 0 }}>
                   You're ready. These roles align with your{" "}
                   <strong>
                     {topTwoSkillNames.length >= 2
@@ -206,7 +206,7 @@ const Career = () => {
                 className="ws-fade-up mb-5 flex items-center gap-2.5 overflow-x-auto md:flex-wrap"
                 style={{ animationDelay: "0.1s" }}
               >
-                <span style={{ fontWeight: 500, fontSize: 13, color: "#6B7280", whiteSpace: "nowrap" }}>
+                <span style={{ fontWeight: 500, fontSize: 13, color: "rgba(255,255,255,0.7)", whiteSpace: "nowrap" }}>
                   Filter by:
                 </span>
                 {FILTERS.map((f) => {
@@ -216,9 +216,9 @@ const Career = () => {
                       key={f.key}
                       onClick={() => setActiveFilter(f.key)}
                       style={{
-                        background: active ? "#F3EEFF" : "#F4F9FE",
-                        border: `1px solid ${active ? ACCENT : "#E5E7EB"}`,
-                        color: active ? ACCENT : "#6B7280",
+                        background: active ? "rgba(59,130,246,0.14)" : "#10141D",
+                        border: `1px solid ${active ? ACCENT : "#1E2430"}`,
+                        color: active ? ACCENT : "rgba(255,255,255,0.7)",
                         borderRadius: 100,
                         padding: "7px 16px",
                         fontWeight: 500,
@@ -239,7 +239,7 @@ const Career = () => {
               {jobsPartial && (
                 <div
                   className="mb-3 rounded-[12px] p-3 text-center"
-                  style={{ background: "#FFF8E1", border: "1px solid #FCD34D44", color: "#92400E", fontSize: 12 }}
+                  style={{ background: "rgba(251,191,36,0.12)", border: "1px solid rgba(251,191,36,0.4)", color: "#FCD34D", fontSize: 12 }}
                 >
                   Some additional listings couldn't be loaded right now.
                 </div>
@@ -250,14 +250,14 @@ const Career = () => {
                 {loadingJobs ? (
                   <div
                     className="rounded-[16px] p-8 text-center"
-                    style={{ background: "#FFFFFF", border: "1px solid #E5E7EB", color: "#6B7280" }}
+                    style={{ background: "#0A0D14", border: "1px solid #1E2430", color: "rgba(255,255,255,0.7)" }}
                   >
                     Loading roles tailored to you…
                   </div>
                 ) : showFullError ? (
                   <div
                     className="rounded-[16px] p-8 text-center"
-                    style={{ background: "#FFFFFF", border: "1px solid #E5E7EB", color: "#6B7280" }}
+                    style={{ background: "#0A0D14", border: "1px solid #1E2430", color: "rgba(255,255,255,0.7)" }}
                   >
                     <p style={{ marginBottom: 12 }}>
                       We're having trouble loading jobs right now. Please try again in a moment.
@@ -282,7 +282,7 @@ const Career = () => {
                 ) : filteredJobs.length === 0 ? (
                   <div
                     className="rounded-[16px] p-8 text-center"
-                    style={{ background: "#FFFFFF", border: "1px solid #E5E7EB", color: "#6B7280" }}
+                    style={{ background: "#0A0D14", border: "1px solid #1E2430", color: "rgba(255,255,255,0.7)" }}
                   >
                     No roles match this filter yet.
                   </div>
@@ -300,14 +300,14 @@ const Career = () => {
             <>
               <div className="ws-fade-up mb-8 text-center" style={{ padding: "40px 0" }}>
                 <div style={{ display: "inline-block", animation: "ws-float 3s ease-in-out infinite" }}>
-                  <svg width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                  <svg width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.5)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
                     <rect x="4" y="11" width="16" height="10" rx="2" />
                     <path d="M8 11V8a4 4 0 0 1 8 0v3" />
                   </svg>
                 </div>
                 <h2
                   style={{
-                    fontWeight: 700, fontSize: 28, color: "#111111",
+                    fontWeight: 700, fontSize: 28, color: "#FFFFFF",
                     letterSpacing: -0.5, marginTop: 16,
                   }}
                 >
@@ -315,7 +315,7 @@ const Career = () => {
                 </h2>
                 <p
                   style={{
-                    fontWeight: 400, fontSize: 15, color: "#6B7280",
+                    fontWeight: 400, fontSize: 15, color: "rgba(255,255,255,0.7)",
                     maxWidth: 440, margin: "10px auto 0", lineHeight: 1.7,
                   }}
                 >
@@ -328,20 +328,20 @@ const Career = () => {
                 className="ws-fade-up mx-auto mb-8 rounded-[20px] p-7 md:p-8"
                 style={{
                   maxWidth: 560,
-                  background: "#FFFFFF",
-                  border: "1px solid #E5E7EB",
+                  background: "#0A0D14",
+                  border: "1px solid #1E2430",
                   boxShadow: "0 4px 20px rgba(0,0,0,0.05)",
                   animationDelay: "0.15s",
                 }}
               >
-                <h3 style={{ fontWeight: 700, fontSize: 16, color: "#111111" }}>Your Progress to Unlock</h3>
+                <h3 style={{ fontWeight: 700, fontSize: 16, color: "#FFFFFF" }}>Your Progress to Unlock</h3>
 
                 <div className="mt-5">
-                  <div className="flex items-center justify-between" style={{ fontWeight: 500, fontSize: 13, color: "#111111" }}>
+                  <div className="flex items-center justify-between" style={{ fontWeight: 500, fontSize: 13, color: "#FFFFFF" }}>
                     <span>Roadmap Progress</span>
                     <span>{overallPct}% / {UNLOCK_THRESHOLD}%</span>
                   </div>
-                  <div className="mt-2" style={{ height: 8, background: "#E5E7EB", borderRadius: 100, overflow: "hidden" }}>
+                  <div className="mt-2" style={{ height: 8, background: "#1E2430", borderRadius: 100, overflow: "hidden" }}>
                     <div
                       style={{
                         width: `${Math.min(100, overallFill)}%`,
@@ -356,7 +356,7 @@ const Career = () => {
 
                 <div
                   className="mt-4 flex items-start gap-3 rounded-[10px] p-3 md:p-4"
-                  style={{ background: "#F3EEFF" }}
+                  style={{ background: "rgba(59,130,246,0.14)" }}
                 >
                   <div
                     className="grid shrink-0 place-items-center rounded-full"
@@ -364,7 +364,7 @@ const Career = () => {
                   >
                     K
                   </div>
-                  <p style={{ fontWeight: 400, fontSize: 13, color: "#111111", margin: 0, lineHeight: 1.55 }}>
+                  <p style={{ fontWeight: 400, fontSize: 13, color: "#FFFFFF", margin: 0, lineHeight: 1.55 }}>
                     Complete your next phase to unlock job opportunities. You're closer than you think.
                   </p>
                 </div>

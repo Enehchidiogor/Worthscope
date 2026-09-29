@@ -89,7 +89,7 @@ export const WeeklyChart = () => {
                     maxWidth: 32,
                     background: d.active
                       ? "linear-gradient(to top, hsl(var(--accent)), hsl(204 90% 70%))"
-                      : "#E5E7EB",
+                      : "hsl(var(--locked))",
                     boxShadow: d.today && d.active ? "0 0 12px hsl(var(--accent) / 0.4)" : "none",
                     transition: `height 0.6s ease ${i * 0.1}s, transform 0.18s ease`,
                     transform: isHover ? "scaleY(1.04)" : "scaleY(1)",
@@ -99,7 +99,7 @@ export const WeeklyChart = () => {
               </div>
               <span
                 className={`text-[11px] ${d.today ? "font-semibold text-accent" : "text-text3"}`}
-                style={!d.today ? { color: "#9CA3AF" } : undefined}
+                style={!d.today ? { color: "hsl(var(--text3))" } : undefined}
               >
                 {d.day}
               </span>

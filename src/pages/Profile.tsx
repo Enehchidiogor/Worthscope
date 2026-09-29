@@ -73,7 +73,7 @@ const Profile = () => {
           <div className="mb-8 flex items-center gap-5">
             <div
               className="grid h-16 w-16 place-items-center rounded-full text-[22px] font-bold text-white"
-              style={{ background: "linear-gradient(135deg,#3498DB,#5DADE2)" }}
+              style={{ background: "linear-gradient(135deg,#3B82F6,#60A5FA)" }}
             >
               {initials}
             </div>
@@ -152,7 +152,6 @@ const Profile = () => {
             <button
               onClick={onSave}
               className="mt-7 w-full rounded-xl bg-accent px-5 py-3 text-[15px] font-semibold text-white transition-colors hover:bg-accent-dark"
-              style={{ background: "#3498DB" }}
             >
               Save Changes
             </button>

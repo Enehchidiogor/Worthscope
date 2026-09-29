@@ -7,7 +7,7 @@ type Props = {
   onClose: () => void;
 };
 
-const ACCENT = "#3498DB";
+const ACCENT = "#3B82F6";
 
 export const JobDetailModal = ({ job, userSkills, onClose }: Props) => {
   useEffect(() => {
@@ -50,7 +50,7 @@ export const JobDetailModal = ({ job, userSkills, onClose }: Props) => {
       <div
         onClick={(e) => e.stopPropagation()}
         style={{
-          background: "#FFFFFF",
+          background: "#0A0D14",
           borderRadius: 20,
           maxWidth: 640,
           width: "100%",
@@ -72,17 +72,17 @@ export const JobDetailModal = ({ job, userSkills, onClose }: Props) => {
             border: "none",
             cursor: "pointer",
             fontSize: 22,
-            color: "#9CA3AF",
+            color: "rgba(255,255,255,0.5)",
             lineHeight: 1,
           }}
         >
           ×
         </button>
 
-        <div style={{ fontWeight: 700, fontSize: 22, color: "#111111", letterSpacing: -0.3, paddingRight: 28 }}>
+        <div style={{ fontWeight: 700, fontSize: 22, color: "#FFFFFF", letterSpacing: -0.3, paddingRight: 28 }}>
           {job.title}
         </div>
-        <div style={{ fontWeight: 500, fontSize: 14, color: "#6B7280", marginTop: 4 }}>
+        <div style={{ fontWeight: 500, fontSize: 14, color: "rgba(255,255,255,0.7)", marginTop: 4 }}>
           {job.company}
         </div>
 
@@ -96,14 +96,14 @@ export const JobDetailModal = ({ job, userSkills, onClose }: Props) => {
         </div>
 
         <Section title="About the role">
-          <p style={{ fontWeight: 400, fontSize: 14, color: "#374151", lineHeight: 1.65, margin: 0, whiteSpace: "pre-wrap" }}>
+          <p style={{ fontWeight: 400, fontSize: 14, color: "rgba(255,255,255,0.85)", lineHeight: 1.65, margin: 0, whiteSpace: "pre-wrap" }}>
             {job.description || "No description provided."}
           </p>
         </Section>
 
         {job.requirements.length > 0 && (
           <Section title="Requirements">
-            <ul style={{ margin: 0, paddingLeft: 18, color: "#374151", fontSize: 14, lineHeight: 1.65 }}>
+            <ul style={{ margin: 0, paddingLeft: 18, color: "rgba(255,255,255,0.85)", fontSize: 14, lineHeight: 1.65 }}>
               {job.requirements.map((r, i) => (
                 <li key={i} style={{ marginBottom: 4 }}>{r}</li>
               ))}
@@ -114,7 +114,7 @@ export const JobDetailModal = ({ job, userSkills, onClose }: Props) => {
         <Section title="Why this matches you">
           <div
             className="flex items-start gap-3 rounded-[12px] p-3"
-            style={{ background: "#F3EEFF", borderLeft: `3px solid ${ACCENT}` }}
+            style={{ background: "rgba(59,130,246,0.14)", borderLeft: `3px solid ${ACCENT}` }}
           >
             <div
               className="grid place-items-center rounded-full shrink-0"
@@ -122,7 +122,7 @@ export const JobDetailModal = ({ job, userSkills, onClose }: Props) => {
             >
               K
             </div>
-            <p style={{ margin: 0, fontSize: 13, color: "#111111", lineHeight: 1.6 }}>
+            <p style={{ margin: 0, fontSize: 13, color: "#FFFFFF", lineHeight: 1.6 }}>
               {matchedSkills.length > 0
                 ? `This role lines up with your ${matchedSkills.slice(0, 3).join(", ")} ${matchedSkills.length === 1 ? "strength" : "strengths"}. Strong fit based on what you've been building.`
                 : "Based on your career path and progress, this role is a solid early-stage opportunity to apply what you're learning."}
@@ -137,7 +137,7 @@ export const JobDetailModal = ({ job, userSkills, onClose }: Props) => {
                 <span
                   key={s}
                   style={{
-                    background: "#F3EEFF",
+                    background: "rgba(59,130,246,0.14)",
                     border: `1px solid ${ACCENT}40`,
                     borderRadius: 100,
                     padding: "4px 12px",
@@ -179,13 +179,13 @@ export const JobDetailModal = ({ job, userSkills, onClose }: Props) => {
 const Tag = ({ children }: { children: React.ReactNode }) => (
   <span
     style={{
-      background: "#F4F9FE",
-      border: "1px solid #E5E7EB",
+      background: "#10141D",
+      border: "1px solid #1E2430",
       borderRadius: 100,
       padding: "4px 12px",
       fontWeight: 500,
       fontSize: 12,
-      color: "#6B7280",
+      color: "rgba(255,255,255,0.7)",
     }}
   >
     {children}

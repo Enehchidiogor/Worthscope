@@ -37,14 +37,14 @@ export const CareerOpportunitiesCard = () => {
       <section
         className="ws-fade-up rounded-[20px] p-6 md:p-7"
         style={{
-          background: "#FFFFFF",
-          border: "1px solid #E5E7EB",
+          background: "#0A0D14",
+          border: "1px solid #1E2430",
           boxShadow: "0 1px 2px rgba(0,0,0,0.04), 0 8px 24px rgba(59,130,246,0.06)",
           animationDelay: "0.75s",
         }}
       >
         <div className="mb-4 flex items-center justify-between">
-          <h3 style={{ fontWeight: 700, fontSize: 16, color: "#111111" }}>💼 Career Opportunities</h3>
+          <h3 style={{ fontWeight: 700, fontSize: 16, color: "#FFFFFF" }}>💼 Career Opportunities</h3>
           <Link
             to={hasAssessment ? "/career-results" : "/career"}
             style={{ fontWeight: 600, fontSize: 13, color: "#3B82F6" }}
@@ -61,30 +61,30 @@ export const CareerOpportunitiesCard = () => {
                   to="/career-results"
                   className="flex items-center justify-between"
                   style={{
-                    background: "#F4F9FE",
-                    border: "1px solid #E5E7EB",
+                    background: "#10141D",
+                    border: "1px solid #1E2430",
                     borderRadius: 12,
                     padding: "12px 16px",
                     textDecoration: "none",
                     transition: "all 0.18s ease",
                   }}
                   onMouseEnter={(e) => {
-                    e.currentTarget.style.background = "#EBF5FB";
+                    e.currentTarget.style.background = "rgba(59,130,246,0.18)";
                     e.currentTarget.style.borderColor = "rgba(59,130,246,0.3)";
                   }}
                   onMouseLeave={(e) => {
-                    e.currentTarget.style.background = "#F4F9FE";
-                    e.currentTarget.style.borderColor = "#E5E7EB";
+                    e.currentTarget.style.background = "#10141D";
+                    e.currentTarget.style.borderColor = "#1E2430";
                   }}
                 >
                   <div className="flex items-center gap-2.5">
                     <div
                       className="grid place-items-center rounded-md"
-                      style={{ width: 28, height: 28, background: "#EBF5FB", color: "#3B82F6", fontWeight: 700, fontSize: 13 }}
+                      style={{ width: 28, height: 28, background: "rgba(59,130,246,0.14)", color: "#3B82F6", fontWeight: 700, fontSize: 13 }}
                     >
                       #{r.rank}
                     </div>
-                    <div style={{ fontWeight: 600, fontSize: 13, color: "#111111" }}>{r.title}</div>
+                    <div style={{ fontWeight: 600, fontSize: 13, color: "#FFFFFF" }}>{r.title}</div>
                   </div>
                   <div className="flex items-center gap-3">
                     <span style={{ fontWeight: 700, fontSize: 12, color: "#3B82F6" }}>{r.percentage}%</span>
@@ -98,18 +98,18 @@ export const CareerOpportunitiesCard = () => {
                   to="/career"
                   className="flex items-center justify-between"
                   style={{
-                    background: "#F4F9FE", border: "1px solid #E5E7EB", borderRadius: 12,
+                    background: "#10141D", border: "1px solid #1E2430", borderRadius: 12,
                     padding: "12px 16px", textDecoration: "none", transition: "all 0.18s ease",
                   }}
                 >
                   <div className="flex items-center gap-2.5">
                     <div
                       className="grid place-items-center rounded-md"
-                      style={{ width: 28, height: 28, background: "#EBF5FB", color: "#3B82F6", fontWeight: 700, fontSize: 13 }}
+                      style={{ width: 28, height: 28, background: "rgba(59,130,246,0.14)", color: "#3B82F6", fontWeight: 700, fontSize: 13 }}
                     >
                       {j.initial}
                     </div>
-                    <div style={{ fontWeight: 600, fontSize: 13, color: "#111111" }}>{j.title}</div>
+                    <div style={{ fontWeight: 600, fontSize: 13, color: "#FFFFFF" }}>{j.title}</div>
                   </div>
                   <div className="flex items-center gap-3">
                     <span style={{ fontWeight: 700, fontSize: 12, color: "#3B82F6" }}>{j.match}%</span>
@@ -137,15 +137,15 @@ export const CareerOpportunitiesCard = () => {
     <section
       className="ws-fade-up rounded-[20px] p-6 md:p-7"
       style={{
-        background: "#FFFFFF",
-        border: "1px solid #E5E7EB",
+        background: "#0A0D14",
+        border: "1px solid #1E2430",
         boxShadow: "0 1px 2px rgba(0,0,0,0.04), 0 8px 24px rgba(59,130,246,0.06)",
         animationDelay: "0.75s",
       }}
     >
       <div className="mb-4 flex items-center justify-between">
-        <h3 style={{ fontWeight: 700, fontSize: 16, color: "#111111" }}>💼 Career Opportunities</h3>
-        <span className="flex items-center gap-1.5" style={{ fontWeight: 500, fontSize: 12, color: "#9CA3AF" }}>
+        <h3 style={{ fontWeight: 700, fontSize: 16, color: "#FFFFFF" }}>💼 Career Opportunities</h3>
+        <span className="flex items-center gap-1.5" style={{ fontWeight: 500, fontSize: 12, color: "rgba(255,255,255,0.5)" }}>
           <IconLock className="h-3.5 w-3.5" />
           Locked
         </span>
@@ -159,7 +159,7 @@ export const CareerOpportunitiesCard = () => {
           padding: "20px 0",
         }}
       >
-        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.5)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
           <rect x="4" y="11" width="16" height="10" rx="2" />
           <path d="M8 11V8a4 4 0 0 1 8 0v3" />
         </svg>
@@ -167,18 +167,18 @@ export const CareerOpportunitiesCard = () => {
 
       <p
         className="text-center"
-        style={{ fontWeight: 400, fontSize: 14, color: "#6B7280", marginTop: 12 }}
+        style={{ fontWeight: 400, fontSize: 14, color: "rgba(255,255,255,0.7)", marginTop: 12 }}
       >
         Complete 70% of your roadmap to unlock job opportunities.
       </p>
 
       {/* Progress toward unlock */}
       <div className="mt-5">
-        <div className="flex items-center justify-between" style={{ fontWeight: 500, fontSize: 12, color: "#6B7280" }}>
+        <div className="flex items-center justify-between" style={{ fontWeight: 500, fontSize: 12, color: "rgba(255,255,255,0.7)" }}>
           <span>Roadmap Progress</span>
           <span>{fill}% / 70%</span>
         </div>
-        <div className="mt-1.5" style={{ height: 6, background: "#E5E7EB", borderRadius: 100, overflow: "hidden" }}>
+        <div className="mt-1.5" style={{ height: 6, background: "#1E2430", borderRadius: 100, overflow: "hidden" }}>
           <div
             style={{
               width: `${fill}%`,
@@ -197,7 +197,7 @@ export const CareerOpportunitiesCard = () => {
           <span
             key={t}
             style={{
-              background: "#F3F4F6",
+              background: "#10141D",
               color: "transparent",
               borderRadius: 100,
               padding: "5px 14px",
@@ -226,7 +226,7 @@ export const CareerOpportunitiesCard = () => {
         >
           {hasAssessment ? "Retake Assessment →" : "Take Assessment →"}
         </Link>
-        <div className="mt-2" style={{ fontWeight: 500, fontSize: 12, color: "#9CA3AF" }}>
+        <div className="mt-2" style={{ fontWeight: 500, fontSize: 12, color: "rgba(255,255,255,0.5)" }}>
           Unlock your real career matches in ~3 minutes
         </div>
       </div>
