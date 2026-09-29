@@ -1,9 +1,11 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Sidebar } from "@/components/dashboard/Sidebar";
 import { TopBar } from "@/components/dashboard/TopBar";
 import { MobileTabBar } from "@/components/dashboard/MobileTabBar";
 import { getProfile, saveProfile } from "@/lib/userState";
+import { getCertificates, type Certificate as CertData } from "@/lib/certificates";
+import { CertificateModal } from "@/components/certificates/CertificateModal";
 import { toast } from "sonner";
 import { SEO } from "@/components/SEO";
 
@@ -33,6 +35,15 @@ const Profile = () => {
 
   const initials = (firstName?.[0] || "U").toUpperCase() + (lastName?.[0] || "").toUpperCase();
   const yearOptions = edu === "secondary" ? SECONDARY_OPTS : edu === "university" ? UNI_OPTS : [];
+
+  const [certs, setCerts] = useState<CertData[]>([]);
+  const [viewingCert, setViewingCert] = useState<CertData | null>(null);
+  useEffect(() => {
+    const refresh = () => setCerts(getCertificates());
+    refresh();
+    window.addEventListener("worthscope:certificates", refresh);
+    return () => window.removeEventListener("worthscope:certificates", refresh);
+  }, []);
 
   const onSave = () => {
     if (!firstName.trim()) {
@@ -156,9 +167,37 @@ const Profile = () => {
               Save Changes
             </button>
           </div>
+
+          <div className="mt-8 rounded-[18px] border border-border bg-card p-6 shadow-card">
+            <div className="text-[15px] font-bold text-foreground">My Certificates</div>
+            {certs.length === 0 ? (
+              <p className="mt-2 text-[13px] leading-relaxed text-text2">
+                Complete a course, or your whole roadmap, to earn a certificate here.
+              </p>
+            ) : (
+              <div className="mt-4 grid grid-cols-1 gap-2.5 sm:grid-cols-2">
+                {certs.map((c) => (
+                  <button
+                    key={c.id}
+                    onClick={() => setViewingCert(c)}
+                    className="flex items-center gap-3 rounded-xl border border-border bg-bg-elevated p-3.5 text-left transition-colors hover:border-accent/40"
+                  >
+                    <div className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-accent/10 text-lg">🏆</div>
+                    <div className="min-w-0">
+                      <div className="truncate text-[13px] font-semibold text-foreground">
+                        {c.kind === "career" ? c.careerPath : c.phaseTitle}
+                      </div>
+                      <div className="text-[11px] text-text3">{c.kind === "career" ? "Career certificate" : "Course certificate"}</div>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
         </main>
       </div>
       <MobileTabBar />
+      <CertificateModal cert={viewingCert} onClose={() => setViewingCert(null)} />
     </div>
   );
 };

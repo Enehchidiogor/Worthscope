@@ -16,6 +16,7 @@ import Roadmap from "./pages/Roadmap.tsx";
 import Mission from "./pages/Mission.tsx";
 import Skills from "./pages/Skills.tsx";
 import Career from "./pages/Career.tsx";
+import LiveClasses from "./pages/LiveClasses.tsx";
 import Assessment from "./pages/Assessment.tsx";
 import Discover from "./pages/Discover.tsx";
 import DiscoverVoice from "./pages/DiscoverVoice.tsx";
@@ -36,7 +37,7 @@ const queryClient = new QueryClient();
 const Gated = ({ children }: { children: React.ReactNode }) => <AuthGate>{children}</AuthGate>;
 
 // Dashboard-area pages use the brand dark theme (.dark tokens in index.css).
-const DARK_ROUTES = ["/dashboard", "/roadmap", "/mission", "/missions", "/skills", "/career", "/settings", "/profile", "/notifications", "/koko"];
+const DARK_ROUTES = ["/dashboard", "/roadmap", "/mission", "/missions", "/skills", "/career", "/classes", "/settings", "/profile", "/notifications", "/koko"];
 
 const RouteTheme = () => {
   const { pathname } = useLocation();
@@ -75,6 +76,7 @@ const App = () => (
           <Route path="/missions" element={<Gated><Mission /></Gated>} />
           <Route path="/skills" element={<Gated><Skills /></Gated>} />
           <Route path="/career" element={<Gated><Career /></Gated>} />
+          <Route path="/classes" element={<Gated><LiveClasses /></Gated>} />
           <Route path="/assessment" element={<Gated><Assessment /></Gated>} />
           <Route path="/discover" element={<Gated><Discover /></Gated>} />
           <Route path="/discover/voice" element={<Gated><DiscoverVoice /></Gated>} />

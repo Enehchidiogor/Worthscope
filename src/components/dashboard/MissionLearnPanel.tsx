@@ -2,7 +2,9 @@ import { useEffect, useRef, useState } from "react";
 import { streamKokoChat, type KokoMsg } from "@/lib/kokoClient";
 import { LessonVideo } from "@/components/dashboard/LessonVideo";
 import { getProfile, getChosenCareer, markLessonComplete, completeMission } from "@/lib/userState";
-import { markRoadmapMissionComplete } from "@/lib/kokoRoadmap";
+import { markRoadmapMissionComplete, loadRoadmap, getOverallProgress, getPhaseProgress, parseMissionId } from "@/lib/kokoRoadmap";
+import { issuePhaseCertificate, issueCareerCertificateIfEligible, type Certificate as CertData } from "@/lib/certificates";
+import { CertificateModal } from "@/components/certificates/CertificateModal";
 import { supabase } from "@/integrations/supabase/client";
 import { aggregateSignal, type LearningSignal } from "@/lib/learningSignal";
 import { loadChatHistory, saveChatMessages } from "@/lib/kokoChatHistory";
@@ -331,6 +333,7 @@ export const MissionLearnPanel = ({ missionId, missionTitle, missionDescription,
   const [videoCompleted, setVideoCompleted] = useState(false);
   const [assignmentCompleted, setAssignmentCompleted] = useState(false);
   const [missionDone, setMissionDone] = useState(false);
+  const [earnedCert, setEarnedCert] = useState<CertData | null>(null);
 
   /* ---------- Subsection 03: Real-world project ---------- */
   const [brief, setBrief] = useState<string>("");
@@ -615,6 +618,36 @@ export const MissionLearnPanel = ({ missionId, missionTitle, missionDescription,
           }
           markRoadmapMissionComplete(missionId);
           completeMission();
+
+          // Award certificates: one per finished phase ("course"), plus one
+          // capstone certificate once the whole roadmap is essentially done.
+          // Both are idempotent — safe to call on every completion.
+          let cert: CertData | null = null;
+          const roadmap = loadRoadmap();
+          const parsed = parseMissionId(missionId);
+          if (roadmap && parsed) {
+            const phase = roadmap.phases.find((p) => p.phase_number === parsed.phase);
+            const phaseProgress = getPhaseProgress(roadmap, parsed.phase);
+            if (phase && phaseProgress.pct === 100) {
+              cert = issuePhaseCertificate(roadmap.career_path, phase.phase_number, phase.phase_title);
+            }
+            if (!cert) {
+              cert = issueCareerCertificateIfEligible(getOverallProgress(roadmap));
+            }
+          }
+
+          if (cert) {
+            setEarnedCert(cert);
+          } else {
+            onMissionComplete?.();
+          }
+        }}
+      />
+
+      <CertificateModal
+        cert={earnedCert}
+        onClose={() => {
+          setEarnedCert(null);
           onMissionComplete?.();
         }}
       />
